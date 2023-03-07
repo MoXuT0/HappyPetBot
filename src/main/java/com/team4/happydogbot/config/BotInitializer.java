@@ -1,6 +1,6 @@
 package com.team4.happydogbot.config;
 
-import com.team4.happydogbot.servise.Bot;
+import com.team4.happydogbot.service.Bot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -14,8 +14,6 @@ public class BotInitializer {
 
     @Autowired
     Bot bot;
-
-
 
     @EventListener({ContextRefreshedEvent.class})
     public void init() throws TelegramApiException {
