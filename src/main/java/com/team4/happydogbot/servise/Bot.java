@@ -31,7 +31,7 @@ public class Bot extends TelegramLongPollingBot {
         return config.getToken();
     }
 
-/*Метод ответа на команды*/
+/* Принимает коменду пользователя, отправляет ответ */
     @Override
     public void onUpdateReceived(Update update) {
         Message message = update.getMessage();
