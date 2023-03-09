@@ -1,9 +1,13 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.config.BotConfig;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
@@ -14,9 +18,11 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.team4.happydogbot.constants.Constants.*;
 
+@Slf4j
 @Service
 public class Bot extends TelegramLongPollingBot {
     final BotConfig config;
@@ -35,7 +41,8 @@ public class Bot extends TelegramLongPollingBot {
         return config.getToken();
     }
 
-    /* Принимает коменду пользователя, отправляет ответ */
+    /* Принимает команду пользователя, отправляет ответ */
+    @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
@@ -55,15 +62,38 @@ public class Bot extends TelegramLongPollingBot {
                     //Здесь будет метод для этапа 3
                     break;
                 case "Позвать волонтера":
-                    //Метод для вызова волонтера
+                    // Создаем мапу и кладем в нее сообщение в кач-ве ключа и chatId в кач-ве значения того кто позвал волонтера,
+                    // то есть пока в мапе лежит текст и chatId - это значит что юзер находится в состоянии разговора с волонтером,
+                    // отправляем сообщение пользователю
+                    REQUEST_FROM_USER.put(messageText, chatId);
+                    sendMessageWithInlineKeyboard(chatId,WRITE_VOLUNTEER, FINISH_VOLUNTEER);
                     break;
                 default:
-                    //Метод для вызова волонтера
+                    // Если в мапе уже есть chatId того кто написал боту, то есть продолжается общение с волонтером,
+                    // то удаляем предыдущее сообщение и записываем новое сообщение, отправляем сообщение волонтеру
+                    if (REQUEST_FROM_USER.containsValue(chatId)) {
+                        findAndRemoveRequestFromUser(chatId);
+                        REQUEST_FROM_USER.put(messageText, chatId);
+                        forwardMessageToVolunteer(chatId, update.getMessage().getMessageId());
+                    } else if (VOLUNTEER_ID == chatId
+                            // Если сообщение поступило от волонтера и содержит Reply на другое сообщение и текст в
+                            // Reply совпадает с тем что в мапе,
+                            // то это сообщение отправляем юзеру
+                            && update.getMessage().getReplyToMessage() != null
+                            && REQUEST_FROM_USER.containsKey(update.getMessage().getReplyToMessage().getText())) {
+                        String s = update.getMessage().getReplyToMessage().getText();
+                        sendMessageToUser(REQUEST_FROM_USER.get(s), update.getMessage().getChat().getFirstName(), messageText);
+                    } else {
+                        // Если сообщение не подходит не под одну команду и волонтер и юзер на неходятся в состоянии
+                        // разговора то выводим сообщение нет такой команды
+                        sendMessage(chatId, NO_SUCH_COMMAND, null);
+                    }
                     break;
             }
 
         } else if (update.hasCallbackQuery()) {
             String messageData = update.getCallbackQuery().getData();
+            long messageId = update.getCallbackQuery().getMessage().getMessageId();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
             switch (messageData) {
                 case INFO_ABOUT:
@@ -109,8 +139,12 @@ public class Bot extends TelegramLongPollingBot {
                 case REFUSAL:
 
                     break;
-                default:
-                    //Метод для вызова волонтера
+                case FINISH_VOLUNTEER:
+                    // Если юзер нажал кнопку Закончить разговор с волонтером, то удаляем последнее сообщение из мапы -
+                    // т е выходим из состояния разговора с волонтером, заменяем сообщение на сообщение что разговор с
+                    // волонтером закончен
+                    findAndRemoveRequestFromUser(chatId);
+                    executeEditMessageText(chatId, messageId);
                     break;
             }
         }
@@ -193,4 +227,62 @@ public class Bot extends TelegramLongPollingBot {
         return replyKeyboardMarkup;
     }
 
+    /**
+     * Находит и удаляет последний запрос волонтеру от пользователя по chatId пользователя
+     * @param chatId - идентификато чата пользователя, который позвал волонтера и написал сообщение волонтеру
+     */
+    private void findAndRemoveRequestFromUser(long chatId) {
+        for (Map.Entry<String, Long> stringLongEntry : REQUEST_FROM_USER.entrySet()) {
+            if (stringLongEntry.getValue() == chatId) {
+                REQUEST_FROM_USER.remove(stringLongEntry.getKey());
+                break;
+            }
+        }
+    }
+
+    /**
+     * Пересылает волонтеру сообщение с messageId от пользователя с chatId пользователя, позвавшего волонтера
+     * @param chatId - идентификато чата пользователя, который позвал волонтера и написал сообщение волонтеру
+     * @param messageId - идентефикатор пересылаемого волонтеру сообщения
+     */
+    private void forwardMessageToVolunteer(long chatId, int messageId) {
+        ForwardMessage forwardMessage = new ForwardMessage(String.valueOf(VOLUNTEER_ID), String.valueOf(chatId), messageId);
+        try {
+            execute(forwardMessage);
+        } catch (TelegramApiException e) {
+            log.error("Error occurred: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Отправляет сообщение messageText от волонтера с имененм name пользователю с chatId, позвавшему волонтера
+     * @param chatId - идентификато чата пользователя, который позвал волонтера, написал сообщение волонтеру и которому
+     *               отправляется ответ волонтера.<br>
+     * Используются методы:<br>
+     * {@link #sendMessage(long chatId, String textToSend, ReplyKeyboard keyboard)}
+     * {@link #sendMessageWithInlineKeyboard(long chatId, String textToSend, String... buttons)}
+     * @param messageText - текст сообщения (ответа), который отправляется пользователю от волонтера
+     * @param name - имя волонтера, который отправил сообщение (ответ) пользователю
+     */
+    private void sendMessageToUser(long chatId, String messageText, String name) {
+        sendMessage(chatId, "Сообщение от волонтера " + messageText + ":\n" + name, null);
+        sendMessageWithInlineKeyboard(chatId,WRITE_VOLUNTEER, FINISH_VOLUNTEER);
+    }
+
+    /**
+     * Изменяет текст существующего сообщения, обычно после нажатия пользователем кнопки InlineKeyboardMaker
+     * @param chatId - идентификато чата пользователя, в котором произошло действие и происходит изменение текста сообщения
+     * @param messageId - идентефикатор сообщения, которое изменяется
+     */
+    private void executeEditMessageText(long chatId, long messageId) {
+        EditMessageText message = new EditMessageText();
+        message.setChatId(String.valueOf(chatId));
+        message.setText(TALK_ENDED);
+        message.setMessageId((int) messageId);
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Error occurred: " + e.getMessage());
+        }
+    }
 }
