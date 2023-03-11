@@ -6,7 +6,7 @@
         <file>${HOME_LOG}</file>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>/var/log/proj3ct.io/tg-simple-bot/app.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>/var/log/teamwork.io/happyDogBot/app.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <!-- each archived file, size max 10MB -->
             <maxFileSize>10MB</maxFileSize>
             <!-- total size of all archive files, if total size > 20GB, it will delete old archived file -->
@@ -20,7 +20,7 @@
         </encoder>
     </appender>
 
-    <logger name="io.proj3ct.SpringDemoBot" level="debug" additivity="false">
+    <logger name="io.teamwork.happyDogBot" level="debug" additivity="false">
         <appender-ref ref="FILE-ROLLING"/>
     </logger>
 
