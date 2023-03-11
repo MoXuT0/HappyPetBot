@@ -1,7 +1,6 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.config.BotConfig;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -42,7 +41,6 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     /* Принимает команду пользователя, отправляет ответ */
-    @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
@@ -69,25 +67,7 @@ public class Bot extends TelegramLongPollingBot {
                     sendMessageWithInlineKeyboard(chatId,WRITE_VOLUNTEER, FINISH_VOLUNTEER);
                     break;
                 default:
-                    // Если в мапе уже есть chatId того кто написал боту, то есть продолжается общение с волонтером,
-                    // то удаляем предыдущее сообщение и записываем новое сообщение, отправляем сообщение волонтеру
-                    if (REQUEST_FROM_USER.containsValue(chatId)) {
-                        findAndRemoveRequestFromUser(chatId);
-                        REQUEST_FROM_USER.put(messageText, chatId);
-                        forwardMessageToVolunteer(chatId, update.getMessage().getMessageId());
-                    } else if (VOLUNTEER_ID == chatId
-                            // Если сообщение поступило от волонтера и содержит Reply на другое сообщение и текст в
-                            // Reply совпадает с тем что в мапе,
-                            // то это сообщение отправляем юзеру
-                            && update.getMessage().getReplyToMessage() != null
-                            && REQUEST_FROM_USER.containsKey(update.getMessage().getReplyToMessage().getText())) {
-                        String s = update.getMessage().getReplyToMessage().getText();
-                        sendMessageToUser(REQUEST_FROM_USER.get(s), update.getMessage().getChat().getFirstName(), messageText);
-                    } else {
-                        // Если сообщение не подходит не под одну команду и волонтер и юзер на неходятся в состоянии
-                        // разговора то выводим сообщение нет такой команды
-                        sendMessage(chatId, NO_SUCH_COMMAND, null);
-                    }
+                    talkWithVolunteerOrNoSuchCommand(chatId,update);
                     break;
             }
 
@@ -150,7 +130,7 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    /* Отправляет ответ c клавиатурой, может и без, если ReplyKeyboard поставить null*/
+    /* Отправляет ответ c клавиатурой*/
     private void sendMessage(long chatId, String textToSend, ReplyKeyboard keyboard) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(String.valueOf(chatId));
@@ -159,7 +139,19 @@ public class Bot extends TelegramLongPollingBot {
         try {
             execute(sendMessage);
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            log.error("Error occurred: " + e.getMessage());
+        }
+    }
+
+    /* Отправляет ответ без клавиатуры*/
+    private void sendMessage(long chatId, String textToSend) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(String.valueOf(chatId));
+        sendMessage.setText(textToSend);
+        try {
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+            log.error("Error occurred: " + e.getMessage());
         }
     }
 
@@ -254,20 +246,21 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    /**
-     * Отправляет сообщение messageText от волонтера с имененм name пользователю с chatId, позвавшему волонтера
-     * @param chatId - идентификато чата пользователя, который позвал волонтера, написал сообщение волонтеру и которому
-     *               отправляется ответ волонтера.<br>
-     * Используются методы:<br>
-     * {@link #sendMessage(long chatId, String textToSend, ReplyKeyboard keyboard)}
-     * {@link #sendMessageWithInlineKeyboard(long chatId, String textToSend, String... buttons)}
-     * @param messageText - текст сообщения (ответа), который отправляется пользователю от волонтера
-     * @param name - имя волонтера, который отправил сообщение (ответ) пользователю
-     */
-    private void sendMessageToUser(long chatId, String messageText, String name) {
-        sendMessage(chatId, "Сообщение от волонтера " + messageText + ":\n" + name, null);
-        sendMessageWithInlineKeyboard(chatId,WRITE_VOLUNTEER, FINISH_VOLUNTEER);
-    }
+//    /**
+//     * Отправляет сообщение messageText от волонтера с имененм name пользователю с chatId, позвавшему волонтера
+//     * @param chatId - идентификато чата пользователя, который позвал волонтера, написал сообщение волонтеру и которому
+//     *               отправляется ответ волонтера.<br>
+//     * Используются методы:<br>
+//     * {@link #sendMessage(long chatId, String textToSend, ReplyKeyboard keyboard)}
+//     * {@link #sendMessageWithInlineKeyboard(long chatId, String textToSend, String... buttons)}
+//     * @param messageText - текст сообщения (ответа), который отправляется пользователю от волонтера
+//     * @param name - имя волонтера, который отправил сообщение (ответ) пользователю
+//     */
+//    private void sendMessageToUser(long chatId, String messageText, String name) {
+//        sendMessage(chatId, "Сообщение от волонтера " + messageText + ":\n" + name );
+//        sendMessageWithInlineKeyboard(chatId,"Сообщение от волонтера " + messageText + ":\n" + name + "\n" +
+//                WRITE_VOLUNTEER, FINISH_VOLUNTEER);
+//    }
 
     /**
      * Изменяет текст существующего сообщения, обычно после нажатия пользователем кнопки InlineKeyboardMaker
@@ -283,6 +276,45 @@ public class Bot extends TelegramLongPollingBot {
             execute(message);
         } catch (TelegramApiException e) {
             log.error("Error occurred: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Метод описывает состояне разговора с волонтером или отправка дефолтной команды, а именно:<br>
+     * - либо пересылает собщение волонтера от пользователя,<br>
+     * - либо отправляет сообщение пользователю от волонтера,<br>
+     * - либо если пользователь не находится в состоянии разговора с волонтером, сообщает что такой команды нет<br>
+     * Используются методы:<br>
+     * {@link #findAndRemoveRequestFromUser(long chatId)}<br>
+     * {@link #forwardMessageToVolunteer(long chatId, int messageId)}<br>
+     * {@link #sendMessage(long chatId, String textToSend)}
+     * @param chatId идентификато чата пользователя, который позвал волонтера и написал сообщение волонтеру,
+     *               либо волонтера, которы ответил пользователю
+     * @param update принятое текстовое сообщение пользователя<br>
+     *
+     */
+    private void talkWithVolunteerOrNoSuchCommand (long chatId, Update update) {
+        if (REQUEST_FROM_USER.containsValue(chatId)) {
+            // Если в мапе уже есть chatId того кто написал боту, то есть продолжается общение с волонтером,
+            // то удаляем предыдущее сообщение и записываем новое сообщение, отправляем сообщение волонтеру
+            findAndRemoveRequestFromUser(chatId);
+            REQUEST_FROM_USER.put(update.getMessage().getText(), chatId);
+            forwardMessageToVolunteer(chatId, update.getMessage().getMessageId());
+        } else if (VOLUNTEER_ID == chatId
+                // Если сообщение поступило от волонтера и содержит Reply на другое сообщение и текст в
+                // Reply совпадает с тем что в мапе,то это сообщение отправляем юзеру
+                && update.getMessage().getReplyToMessage() != null
+                && REQUEST_FROM_USER.containsKey(update.getMessage().getReplyToMessage().getText())) {
+            String s = update.getMessage().getReplyToMessage().getText();
+            sendMessageWithInlineKeyboard(
+                    REQUEST_FROM_USER.get(s), // получаем chatId по сообщению на которое отвечаем
+                    "Сообщение от волонтера " + update.getMessage().getChat().getFirstName() + ":\n" +
+                            update.getMessage().getText() + "\n" + WRITE_VOLUNTEER,
+                    FINISH_VOLUNTEER);
+        } else {
+            // Если сообщение не подходит не под одну команду и волонтер и юзер не находятся в состоянии
+            // разговора то выводим сообщение нет такой команды
+            sendMessage(chatId, NO_SUCH_COMMAND);
         }
     }
 }
