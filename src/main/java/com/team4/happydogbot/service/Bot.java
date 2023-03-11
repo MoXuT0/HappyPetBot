@@ -42,23 +42,24 @@ public class Bot extends TelegramLongPollingBot {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
             switch (messageText) {
-                case "/start":
+                case START_CMD:
+                    sendMessage(chatId, MESSAGE_TEXT_GREETINGS, null);
                     sendStartMessageWithReplyKeyboard(chatId, update.getMessage().getChat().getFirstName());
                     break;
-                case "Узнать информацию о приюте":
-                    sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_ABOUT, KEYBOARD_ABOUT);
+                case SHELTER_INFO_CMD:
+                    sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_SHELTER_INFO, KEYBOARD_SHELTER_ABOUT);
                     break;
-                case "Узнать как взять собаку из приюта":
-                    sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_ADOPT, KEYBOARD_ADOPT);
+                case PET_INFO_CMD:
+                    sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_PET_INFO, KEYBOARD_PET_ADOPT);
                     break;
-                case "Прислать отчет о питомце":
+                case SEND_REPORT_CMD:
                     //Здесь будет метод для этапа 3
                     break;
-                case "Позвать волонтера":
+                case CALL_VOLUNTEER_CMD:
                     //Метод для вызова волонтера
                     break;
                 default:
-                    //Метод для вызова волонтера
+                    sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND , null);
                     break;
             }
 
@@ -66,51 +67,55 @@ public class Bot extends TelegramLongPollingBot {
             String messageData = update.getCallbackQuery().getData();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
             switch (messageData) {
-                case INFO_ABOUT:
-
+                case SHELTER_ABOUT_CMD:
+                    sendMessage(chatId, MESSAGE_TEXT_SHELTER_ABOUT, null);
                     break;
-                case SCHEDULE_ADDRESS:
-
+                case SHELTER_SCHEDULE_ADDRESS_CMD:
+                    sendMessage(chatId, MESSAGE_TEXT_SHELTER_SCHEDULE_ADDRESS, null);
                     break;
-                case SAFETY:
-
+                case SHELTER_SAFETY_CMD:
+                    sendMessage(chatId, MESSAGE_TEXT_SHELTER_SAFETY, null);
                     break;
-                case SEND_CONTACT:
-
+                case PET_RULES_CMD:
+                    sendMessage(chatId, MESSAGE_TEXT_PET_RULES, null);
                     break;
-                case RULES:
-
+                case PET_DOCS_CMD:
+                    sendMessage(chatId, MESSAGE_TEXT_PET_DOCS, null);
                     break;
-                case DOCS:
-
+                case PET_TRANSPORT_CMD:
+                    sendMessage(chatId, MESSAGE_TEXT_PET_TRANSPORT, null);
                     break;
-                case TRANSPORT:
-
+                case PET_HOUSE_CMD:
+                    sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_PET_HOUSE_CHOOSE, KEYBOARD_PET_HOUSE);
                     break;
-                case HOUSE:
-                    sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_HOUSE, KEYBOARD_HOUSE);
+                case PET_HOUSE_FOR_PUPPY_CMD:
+                    sendMessage(chatId, MESSAGE_TEXT_PET_HOUSE_PUPPY, null);
                     break;
-                case HOUSE_FOR_PUPPY:
-
+                case PET_HOUSE_FOR_ADULT_CMD:
+                    sendMessage(chatId, MESSAGE_TEXT_PET_HOUSE_ADULT, null);
                     break;
-                case HOUSE_FOR_ADULT:
-
+                case PET_HOUSE_FOR_SICK_CMD:
+                    sendMessage(chatId, MESSAGE_TEXT_PET_HOUSE_SICK, null);
                     break;
-                case HOUSE_FOR_SICK:
-
+                case PET_ADVICES_CMD:
+                    sendMessage(chatId, MESSAGE_TEXT_PET_ADVICES, null);
                     break;
-
-                case ADVICES:
-
+                case PET_CYNOLOGISTS_CMD:
+                    sendMessage(chatId, MESSAGE_TEXT_PET_CYNOLOGISTS, null);
                     break;
-                case CYNOLOG:
-
+                case PET_REFUSAL_CMD:
+                    sendMessage(chatId, MESSAGE_TEXT_PET_REFUSAL, null);
                     break;
-                case REFUSAL:
-
+                case SEND_CONTACT_CMD:
+                    sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT, null);
+                    // МЕТОД ОТПРАВКИ КОНТАКТНЫХ ДАННЫХ
+                    break;
+                case CALL_VOLUNTEER_CMD:
+                    sendMessage(chatId, MESSAGE_TEXT_CALL_VOLUNTEER, null);
+                    //Метод для вызова волонтера
                     break;
                 default:
-                    //Метод для вызова волонтера
+                    sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND , null);
                     break;
             }
         }
