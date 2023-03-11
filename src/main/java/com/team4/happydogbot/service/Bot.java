@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -63,10 +64,10 @@ public class Bot extends TelegramLongPollingBot {
                     // то есть пока в мапе лежит текст и chatId - это значит что юзер находится в состоянии разговора с волонтером,
                     // отправляем сообщение пользователю
                     REQUEST_FROM_USER.put(messageText, chatId);
-                    sendMessageWithInlineKeyboard(chatId,WRITE_VOLUNTEER, FINISH_VOLUNTEER);
+                    sendMessageWithInlineKeyboard(chatId, WRITE_VOLUNTEER, FINISH_VOLUNTEER);
                     break;
                 default:
-                    talkWithVolunteerOrNoSuchCommand(chatId,update);
+                    talkWithVolunteerOrNoSuchCommand(chatId, update);
                     break;
             }
 
@@ -133,6 +134,7 @@ public class Bot extends TelegramLongPollingBot {
         sendMessage.setChatId(String.valueOf(chatId));
         sendMessage.setText(textToSend);
         sendMessage.setReplyMarkup(keyboard);
+        sendMessage.setParseMode(ParseMode.HTML);
         try {
             execute(sendMessage);
         } catch (TelegramApiException e) {
@@ -218,6 +220,7 @@ public class Bot extends TelegramLongPollingBot {
 
     /**
      * Находит и удаляет последний запрос волонтеру от пользователя по chatId пользователя
+     *
      * @param chatId идентификатор чата пользователя, который позвал волонтера и написал сообщение волонтеру
      */
     private void findAndRemoveRequestFromUser(long chatId) {
@@ -231,7 +234,8 @@ public class Bot extends TelegramLongPollingBot {
 
     /**
      * Пересылает волонтеру сообщение с messageId от пользователя с chatId пользователя, позвавшего волонтера
-     * @param chatId идентификатор чата пользователя, который позвал волонтера и написал сообщение волонтеру
+     *
+     * @param chatId    идентификатор чата пользователя, который позвал волонтера и написал сообщение волонтеру
      * @param messageId идентификатор пересылаемого волонтеру сообщения
      */
     private void forwardMessageToVolunteer(long chatId, int messageId) {
@@ -269,12 +273,12 @@ public class Bot extends TelegramLongPollingBot {
      * {@link #findAndRemoveRequestFromUser(long chatId)}<br>
      * {@link #forwardMessageToVolunteer(long chatId, int messageId)}<br>
      * {@link #sendMessage(long chatId, String textToSend)}
+     *
      * @param chatId идентификатор чата пользователя, который позвал волонтера и написал сообщение волонтеру,
      *               либо волонтера, которы ответил пользователю
      * @param update принятое текстовое сообщение пользователя<br>
-     *
      */
-    private void talkWithVolunteerOrNoSuchCommand (long chatId, Update update) {
+    private void talkWithVolunteerOrNoSuchCommand(long chatId, Update update) {
         if (REQUEST_FROM_USER.containsValue(chatId)) {
             // Если в мапе уже есть chatId того кто написал боту, то есть продолжается общение с волонтером,
             // то удаляем предыдущее сообщение и записываем новое сообщение, отправляем сообщение волонтеру
@@ -290,8 +294,8 @@ public class Bot extends TelegramLongPollingBot {
             String s = update.getMessage().getReplyToMessage().getText();
             sendMessageWithInlineKeyboard(
                     REQUEST_FROM_USER.get(s), // получаем chatId по сообщению на которое отвечаем
-                    "Сообщение от волонтера " + update.getMessage().getChat().getFirstName() + ":\n" +
-                            update.getMessage().getText() + "\n" + WRITE_VOLUNTEER,
+                    "Сообщение от волонтера " + update.getMessage().getChat().getFirstName() + ":\n<i>" +
+                            update.getMessage().getText() + "</i>\n" + "\n" + WRITE_VOLUNTEER,
                     FINISH_VOLUNTEER);
         } else {
             // Если сообщение не подходит не под одну команду и волонтер и юзер не находятся в состоянии
