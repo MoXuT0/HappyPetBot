@@ -46,4 +46,6 @@ public class Constants {
     public static final String TALK_ENDED = "Разговор с волонтером завершен";
 
     public static final String NO_SUCH_COMMAND = "Нет такой команды";
+
+    public static final String MESSAGE_WAS_SENT = "Ваше сообщение отправлено, волонтер скоро ответит Вам";
 }

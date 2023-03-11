@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
@@ -60,7 +59,7 @@ public class Bot extends TelegramLongPollingBot {
                     //Здесь будет метод для этапа 3
                     break;
                 case "Позвать волонтера":
-                    // Создаем мапу и кладем в нее сообщение в кач-ве ключа и chatId в кач-ве значения того кто позвал волонтера,
+                    // Создаем мапу и кладем в нее сообщение в кач-ве ключа и chatId в кач-ве значения того, кто позвал волонтера,
                     // то есть пока в мапе лежит текст и chatId - это значит что юзер находится в состоянии разговора с волонтером,
                     // отправляем сообщение пользователю
                     REQUEST_FROM_USER.put(messageText, chatId);
@@ -73,7 +72,6 @@ public class Bot extends TelegramLongPollingBot {
 
         } else if (update.hasCallbackQuery()) {
             String messageData = update.getCallbackQuery().getData();
-            long messageId = update.getCallbackQuery().getMessage().getMessageId();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
             switch (messageData) {
                 case INFO_ABOUT:
@@ -121,10 +119,9 @@ public class Bot extends TelegramLongPollingBot {
                     break;
                 case FINISH_VOLUNTEER:
                     // Если юзер нажал кнопку Закончить разговор с волонтером, то удаляем последнее сообщение из мапы -
-                    // т е выходим из состояния разговора с волонтером, заменяем сообщение на сообщение что разговор с
-                    // волонтером закончен
+                    // т е выходим из состояния разговора с волонтером, выводим сообщение, что разговор с волонтером закончен
                     findAndRemoveRequestFromUser(chatId);
-                    executeEditMessageText(chatId, messageId);
+                    sendMessage(chatId, TALK_ENDED);
                     break;
             }
         }
@@ -221,7 +218,7 @@ public class Bot extends TelegramLongPollingBot {
 
     /**
      * Находит и удаляет последний запрос волонтеру от пользователя по chatId пользователя
-     * @param chatId - идентификато чата пользователя, который позвал волонтера и написал сообщение волонтеру
+     * @param chatId идентификатор чата пользователя, который позвал волонтера и написал сообщение волонтеру
      */
     private void findAndRemoveRequestFromUser(long chatId) {
         for (Map.Entry<String, Long> stringLongEntry : REQUEST_FROM_USER.entrySet()) {
@@ -234,8 +231,8 @@ public class Bot extends TelegramLongPollingBot {
 
     /**
      * Пересылает волонтеру сообщение с messageId от пользователя с chatId пользователя, позвавшего волонтера
-     * @param chatId - идентификато чата пользователя, который позвал волонтера и написал сообщение волонтеру
-     * @param messageId - идентефикатор пересылаемого волонтеру сообщения
+     * @param chatId идентификатор чата пользователя, который позвал волонтера и написал сообщение волонтеру
+     * @param messageId идентификатор пересылаемого волонтеру сообщения
      */
     private void forwardMessageToVolunteer(long chatId, int messageId) {
         ForwardMessage forwardMessage = new ForwardMessage(String.valueOf(VOLUNTEER_ID), String.valueOf(chatId), messageId);
@@ -246,33 +243,33 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    /**
-     * Изменяет текст существующего сообщения, обычно после нажатия пользователем кнопки InlineKeyboardMaker
-     * @param chatId - идентификато чата пользователя, в котором произошло действие и происходит изменение текста сообщения
-     * @param messageId - идентефикатор сообщения, которое изменяется
-     */
-    private void executeEditMessageText(long chatId, long messageId) {
-        EditMessageText message = new EditMessageText();
-        message.setChatId(String.valueOf(chatId));
-        message.setText(TALK_ENDED);
-        message.setMessageId((int) messageId);
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            log.error("Error occurred: " + e.getMessage());
-        }
-    }
+//    /**
+//     * Изменяет текст существующего сообщения, обычно после нажатия пользователем кнопки InlineKeyboardMaker
+//     * @param chatId идентификатор чата пользователя, в котором произошло действие и происходит изменение текста сообщения
+//     * @param messageId идентификатор сообщения, которое изменяется
+//     */
+//    private void executeEditMessageText(long chatId, long messageId) {
+//        EditMessageText message = new EditMessageText();
+//        message.setChatId(String.valueOf(chatId));
+//        message.setText(TALK_ENDED);
+//        message.setMessageId((int) messageId);
+//        try {
+//            execute(message);
+//        } catch (TelegramApiException e) {
+//            log.error("Error occurred: " + e.getMessage());
+//        }
+//    }
 
     /**
-     * Метод описывает состояне разговора с волонтером или отправка дефолтной команды, а именно:<br>
-     * - либо пересылает собщение волонтера от пользователя,<br>
+     * Метод описывает состояние разговора с волонтером или отправка дефолтной команды, а именно:<br>
+     * - либо пересылает сообщение волонтера от пользователя,<br>
      * - либо отправляет сообщение пользователю от волонтера,<br>
      * - либо если пользователь не находится в состоянии разговора с волонтером, сообщает что такой команды нет<br>
      * Используются методы:<br>
      * {@link #findAndRemoveRequestFromUser(long chatId)}<br>
      * {@link #forwardMessageToVolunteer(long chatId, int messageId)}<br>
      * {@link #sendMessage(long chatId, String textToSend)}
-     * @param chatId идентификато чата пользователя, который позвал волонтера и написал сообщение волонтеру,
+     * @param chatId идентификатор чата пользователя, который позвал волонтера и написал сообщение волонтеру,
      *               либо волонтера, которы ответил пользователю
      * @param update принятое текстовое сообщение пользователя<br>
      *
@@ -284,6 +281,7 @@ public class Bot extends TelegramLongPollingBot {
             findAndRemoveRequestFromUser(chatId);
             REQUEST_FROM_USER.put(update.getMessage().getText(), chatId);
             forwardMessageToVolunteer(chatId, update.getMessage().getMessageId());
+            sendMessage(chatId, MESSAGE_WAS_SENT);
         } else if (VOLUNTEER_ID == chatId
                 // Если сообщение поступило от волонтера и содержит Reply на другое сообщение и текст в
                 // Reply совпадает с тем что в мапе,то это сообщение отправляем юзеру
