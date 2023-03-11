@@ -246,22 +246,6 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-//    /**
-//     * Отправляет сообщение messageText от волонтера с имененм name пользователю с chatId, позвавшему волонтера
-//     * @param chatId - идентификато чата пользователя, который позвал волонтера, написал сообщение волонтеру и которому
-//     *               отправляется ответ волонтера.<br>
-//     * Используются методы:<br>
-//     * {@link #sendMessage(long chatId, String textToSend, ReplyKeyboard keyboard)}
-//     * {@link #sendMessageWithInlineKeyboard(long chatId, String textToSend, String... buttons)}
-//     * @param messageText - текст сообщения (ответа), который отправляется пользователю от волонтера
-//     * @param name - имя волонтера, который отправил сообщение (ответ) пользователю
-//     */
-//    private void sendMessageToUser(long chatId, String messageText, String name) {
-//        sendMessage(chatId, "Сообщение от волонтера " + messageText + ":\n" + name );
-//        sendMessageWithInlineKeyboard(chatId,"Сообщение от волонтера " + messageText + ":\n" + name + "\n" +
-//                WRITE_VOLUNTEER, FINISH_VOLUNTEER);
-//    }
-
     /**
      * Изменяет текст существующего сообщения, обычно после нажатия пользователем кнопки InlineKeyboardMaker
      * @param chatId - идентификато чата пользователя, в котором произошло действие и происходит изменение текста сообщения
