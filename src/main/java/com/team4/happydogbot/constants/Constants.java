@@ -23,8 +23,7 @@ public class Constants {
             SHELTER_ABOUT_CMD,
             SHELTER_SCHEDULE_ADDRESS_CMD,
             SHELTER_SAFETY_CMD,
-            SEND_CONTACT_CMD,
-            CALL_VOLUNTEER_CMD
+            SEND_CONTACT_CMD
     };
 
     //Команды этап 2
@@ -44,8 +43,7 @@ public class Constants {
             PET_ADVICES_CMD,
             PET_CYNOLOGISTS_CMD,
             PET_REFUSAL_CMD,
-            SEND_CONTACT_CMD,
-            CALL_VOLUNTEER_CMD
+            SEND_CONTACT_CMD
     };
 
     public static final String PET_HOUSE_FOR_PUPPY_CMD = "Для щенка";
@@ -86,6 +84,6 @@ public class Constants {
     public static final String MESSAGE_TEXT_PET_REFUSAL = "ПРИЧИНЫ ОТКАЗА";
 
     // Константы для вызова волонтера
-    public static final long VOLUNTEER_ID = 1607411391;
+    public static final long VOLUNTEER_ID = 359859422;
     public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
 }
