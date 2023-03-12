@@ -5,8 +5,11 @@ import java.util.HashMap;
 
 public class Constants {
 
+
+
     public static final String MESSAGE_TEXT_ABOUT = "Что именно вы хотите узнать о приюте?";
-    //Команды этап 1
+
+
     public static final String INFO_ABOUT = "Общая информация о приюте";
     public static final String SCHEDULE_ADDRESS = "Расписание, адрес";
     public static final String SAFETY = "Техника безопасности";
@@ -14,25 +17,31 @@ public class Constants {
 
     public static final String[] KEYBOARD_ABOUT = {INFO_ABOUT, SCHEDULE_ADDRESS, SAFETY, SEND_CONTACT};
 
+
+
     public static final String MESSAGE_TEXT_ADOPT = "Что вас интересует?";
 
-    //Команды этап 2
+
+
     public static final String RULES = "Правила знакомства с собакой";
     public static final String DOCS = "Необходимые документы";
     public static final String TRANSPORT = "Рекомендации по транспортировке";
     public static final String HOUSE = "Обустройство дома для собаки";
     public static final String ADVICES = "Первичное общение с собакой";
     public static final String CYNOLOG = "Проверенные кинологи";
-    public static final String REFUSAL = "Причины отказа";
+    public static final String REFUSAL = "Возможные причины отказа";
 
     public static final String[] KEYBOARD_ADOPT = {RULES, DOCS, TRANSPORT, HOUSE, ADVICES, CYNOLOG, REFUSAL};
 
+
+
     public static final String MESSAGE_TEXT_HOUSE = "О доме для какой собаки вы хотите узнать?";
+
+
 
     public static final String HOUSE_FOR_PUPPY = "Для щенка";
     public static final String HOUSE_FOR_ADULT = "Для взрослой собаки";
     public static final String HOUSE_FOR_SICK = "C ограниченными возможностями";
-
     public static final String[] KEYBOARD_HOUSE = {HOUSE_FOR_PUPPY, HOUSE_FOR_ADULT, HOUSE_FOR_SICK };
 
     public static final long VOLUNTEER_ID = 1607411391;
