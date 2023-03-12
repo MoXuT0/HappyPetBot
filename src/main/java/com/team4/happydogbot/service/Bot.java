@@ -75,47 +75,46 @@ public class Bot extends TelegramLongPollingBot {
             long chatId = update.getCallbackQuery().getMessage().getChatId();
             switch (messageData) {
                 case INFO_ABOUT:
-
+                    sendMessage(chatId, INFO_ABOUT_FULL);
                     break;
                 case SCHEDULE_ADDRESS:
-
+                    sendMessage(chatId, SCHEDULE_ADDRESS_FULL);
                     break;
                 case SAFETY:
-
+                    sendMessage(chatId, SAFETY_RULES);
                     break;
                 case SEND_CONTACT:
 
                     break;
-                case RULES:
-
+                case RULES_OF_CONTACT:
+                    sendMessage(chatId, RULES_OF_CONTACT_FULL);
                     break;
                 case DOCS:
-
+                    sendMessage(chatId, DOCS_CONTENT);
                     break;
                 case TRANSPORT:
-
+                    sendMessage(chatId, TRANSPRORT_RECS);
                     break;
                 case HOUSE:
                     sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_HOUSE, KEYBOARD_HOUSE);
                     break;
                 case HOUSE_FOR_PUPPY:
-
+                    sendMessage(chatId, HOUSE_FOR_PUPPY_RECS);
                     break;
                 case HOUSE_FOR_ADULT:
-
+                    sendMessage(chatId, HOUSE_FOR_ADULT_RECS);
                     break;
                 case HOUSE_FOR_SICK:
-
+                    sendMessage(chatId, HOUSE_FOR_SICK_RECS);
                     break;
-
                 case ADVICES:
-
+                    sendMessage(chatId, ADVICES_FULL);
                     break;
                 case CYNOLOG:
-
+                    sendMessage(chatId, CYNOLOG_FULL);
                     break;
                 case REFUSAL:
-
+                    sendMessage(chatId, REFUSAL_FULL);
                     break;
                 case FINISH_VOLUNTEER:
                     // Если юзер нажал кнопку Закончить разговор с волонтером, то удаляем последнее сообщение из мапы -
