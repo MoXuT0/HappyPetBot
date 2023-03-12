@@ -11,6 +11,7 @@ public class Constants {
     public static final String PET_INFO_CMD = "Узнать как взять собаку из приюта";
     public static final String SEND_REPORT_CMD = "Прислать отчет о питомце";
     public static final String CALL_VOLUNTEER_CMD = "Позвать волонтера";
+    public static final String FINISH_VOLUNTEER_CMD = "Закончить разговор с волонтером";
 
     //Команды этап 1
     public static final String SHELTER_ABOUT_CMD = "Общая информация о приюте";
@@ -60,6 +61,9 @@ public class Constants {
     // Ответы этап 0
     public static final String MESSAGE_TEXT_GREETINGS = "ТЕКСТ ПРИВЕТСТВИЯ";
     public static final String MESSAGE_TEXT_NO_COMMAND = "Нет такой команды";
+    public static final String MESSAGE_TEXT_WRITE_VOLUNTEER = "Напишите волонтеру:";
+    public static final String MESSAGE_TEXT_TALK_ENDED = "Разговор с волонтером завершен";
+    public static final String MESSAGE_TEXT_WAS_SENT = "Ваше сообщение отправлено, волонтер скоро ответит Вам";
 
     // Ответы этап 1
     public static final String MESSAGE_TEXT_SHELTER_INFO = "Что именно вы хотите узнать о приюте?";
@@ -67,7 +71,6 @@ public class Constants {
     public static final String MESSAGE_TEXT_SHELTER_SCHEDULE_ADDRESS = "РАСПИСАНИЕ, АДРЕСС";
     public static final String MESSAGE_TEXT_SHELTER_SAFETY = "ПРАВИЛА БЕЗОПАСНОСТИ";
     public static final String MESSAGE_TEXT_SEND_CONTACT = "ОТПРАВКА КОНТАКТНЫХ ДАННЫХ";
-    public static final String MESSAGE_TEXT_CALL_VOLUNTEER = "ВЫЗОВ ВОЛОНТЕРА";
 
     // Ответы этап 2
     public static final String MESSAGE_TEXT_PET_INFO = "Что вас интересует?";
@@ -82,11 +85,7 @@ public class Constants {
     public static final String MESSAGE_TEXT_PET_CYNOLOGISTS = "РЕКОМЕНДАЦИИ ПО ПРОВЕРЕННЫМ КИНОЛОГАМИ";
     public static final String MESSAGE_TEXT_PET_REFUSAL = "ПРИЧИНЫ ОТКАЗА";
 
+    // Константы для вызова волонтера
     public static final long VOLUNTEER_ID = 1607411391;
-    public static final String FINISH_VOLUNTEER = "Закончить разговор с волонтером";
     public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
-    public static final String WRITE_VOLUNTEER = "Напишите волонтеру:";
-    public static final String TALK_ENDED = "Разговор с волонтером завершен";
-    public static final String NO_SUCH_COMMAND = "Нет такой команды";
-    public static final String MESSAGE_WAS_SENT = "Ваше сообщение отправлено, волонтер скоро ответит Вам";
 }

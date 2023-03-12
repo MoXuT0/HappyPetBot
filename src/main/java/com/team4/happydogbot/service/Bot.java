@@ -48,7 +48,7 @@ public class Bot extends TelegramLongPollingBot {
             long chatId = update.getMessage().getChatId();
             switch (messageText) {
                 case START_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_GREETINGS, null);
+                    sendMessage(chatId, MESSAGE_TEXT_GREETINGS);
                     sendStartMessageWithReplyKeyboard(chatId, update.getMessage().getChat().getFirstName());
                     break;
                 case SHELTER_INFO_CMD:
@@ -65,74 +65,73 @@ public class Bot extends TelegramLongPollingBot {
                     // то есть пока в мапе лежит текст и chatId - это значит что юзер находится в состоянии разговора с волонтером,
                     // отправляем сообщение пользователю
                     REQUEST_FROM_USER.put(messageText, chatId);
-                    sendMessageWithInlineKeyboard(chatId, WRITE_VOLUNTEER, FINISH_VOLUNTEER);
+                    sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_WRITE_VOLUNTEER, FINISH_VOLUNTEER_CMD);
                     break;
                 default:
                     talkWithVolunteerOrNoSuchCommand(chatId, update);
                     break;
             }
-
         } else if (update.hasCallbackQuery()) {
             String messageData = update.getCallbackQuery().getData();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
             switch (messageData) {
                 case SHELTER_ABOUT_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_SHELTER_ABOUT, null);
+                    sendMessage(chatId, MESSAGE_TEXT_SHELTER_ABOUT);
                     break;
                 case SHELTER_SCHEDULE_ADDRESS_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_SHELTER_SCHEDULE_ADDRESS, null);
+                    sendMessage(chatId, MESSAGE_TEXT_SHELTER_SCHEDULE_ADDRESS);
                     break;
                 case SHELTER_SAFETY_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_SHELTER_SAFETY, null);
+                    sendMessage(chatId, MESSAGE_TEXT_SHELTER_SAFETY);
                     break;
                 case PET_RULES_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_PET_RULES, null);
+                    sendMessage(chatId, MESSAGE_TEXT_PET_RULES);
                     break;
                 case PET_DOCS_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_PET_DOCS, null);
+                    sendMessage(chatId, MESSAGE_TEXT_PET_DOCS);
                     break;
                 case PET_TRANSPORT_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_PET_TRANSPORT, null);
+                    sendMessage(chatId, MESSAGE_TEXT_PET_TRANSPORT);
                     break;
                 case PET_HOUSE_CMD:
                     sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_PET_HOUSE_CHOOSE, KEYBOARD_PET_HOUSE);
                     break;
                 case PET_HOUSE_FOR_PUPPY_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_PET_HOUSE_PUPPY, null);
+                    sendMessage(chatId, MESSAGE_TEXT_PET_HOUSE_PUPPY);
                     break;
                 case PET_HOUSE_FOR_ADULT_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_PET_HOUSE_ADULT, null);
+                    sendMessage(chatId, MESSAGE_TEXT_PET_HOUSE_ADULT);
                     break;
                 case PET_HOUSE_FOR_SICK_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_PET_HOUSE_SICK, null);
+                    sendMessage(chatId, MESSAGE_TEXT_PET_HOUSE_SICK);
                     break;
                 case PET_ADVICES_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_PET_ADVICES, null);
+                    sendMessage(chatId, MESSAGE_TEXT_PET_ADVICES);
                     break;
                 case PET_CYNOLOGISTS_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_PET_CYNOLOGISTS, null);
+                    sendMessage(chatId, MESSAGE_TEXT_PET_CYNOLOGISTS);
                     break;
                 case PET_REFUSAL_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_PET_REFUSAL, null);
+                    sendMessage(chatId, MESSAGE_TEXT_PET_REFUSAL);
                     break;
                 case SEND_CONTACT_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT, null);
+                    sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT);
                     // МЕТОД ОТПРАВКИ КОНТАКТНЫХ ДАННЫХ
                     break;
-                case FINISH_VOLUNTEER:
+                case FINISH_VOLUNTEER_CMD:
                     // Если юзер нажал кнопку Закончить разговор с волонтером, то удаляем последнее сообщение из мапы -
                     // т е выходим из состояния разговора с волонтером, выводим сообщение, что разговор с волонтером закончен
                     findAndRemoveRequestFromUser(chatId);
-                    sendMessage(chatId, TALK_ENDED);
+                    sendMessage(chatId, MESSAGE_TEXT_TALK_ENDED);
                     break;
                 default:
-                    sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND , null);
+                    sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
                     break;
             }
         }
     }
 
-    /* Отправляет ответ c клавиатурой*/
+    /* Отправляет ответ с клавиатурой*/
     private void sendMessage(long chatId, String textToSend, ReplyKeyboard keyboard) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(String.valueOf(chatId));
@@ -188,7 +187,6 @@ public class Bot extends TelegramLongPollingBot {
 
         return inlineKeyboardAbout;
     }
-
 
     /* Создает клавиатуру Этапа 0 */
     private ReplyKeyboardMarkup replyKeyboardMaker() {
@@ -289,7 +287,7 @@ public class Bot extends TelegramLongPollingBot {
             findAndRemoveRequestFromUser(chatId);
             REQUEST_FROM_USER.put(update.getMessage().getText(), chatId);
             forwardMessageToVolunteer(chatId, update.getMessage().getMessageId());
-            sendMessage(chatId, MESSAGE_WAS_SENT);
+            sendMessage(chatId, MESSAGE_TEXT_WAS_SENT);
         } else if (VOLUNTEER_ID == chatId
                 // Если сообщение поступило от волонтера и содержит Reply на другое сообщение и текст в
                 // Reply совпадает с тем что в мапе,то это сообщение отправляем юзеру
@@ -299,12 +297,12 @@ public class Bot extends TelegramLongPollingBot {
             sendMessageWithInlineKeyboard(
                     REQUEST_FROM_USER.get(s), // получаем chatId по сообщению на которое отвечаем
                     "Сообщение от волонтера " + update.getMessage().getChat().getFirstName() + ":\n<i>" +
-                            update.getMessage().getText() + "</i>\n" + "\n" + WRITE_VOLUNTEER,
-                    FINISH_VOLUNTEER);
+                            update.getMessage().getText() + "</i>\n" + "\n" + MESSAGE_TEXT_WRITE_VOLUNTEER,
+                    FINISH_VOLUNTEER_CMD);
         } else {
             // Если сообщение не подходит не под одну команду и волонтер и юзер не находятся в состоянии
-            // разговора то выводим сообщение нет такой команды
-            sendMessage(chatId, NO_SUCH_COMMAND);
+            // разговора, то выводим сообщение нет такой команды
+            sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
         }
     }
 }
