@@ -35,7 +35,7 @@ public class Bot extends TelegramLongPollingBot {
         return config.getToken();
     }
 
-    /* Принимает коменду пользователя, отправляет ответ */
+    /* Принимает команду пользователя, отправляет ответ */
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
@@ -121,7 +121,7 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    /* Отправляет ответ c клавиатурой, может и без, если ReplyKeyboard поставить null*/
+    /* Отправляет ответ с клавиатурой, может и без, если ReplyKeyboard поставить null*/
     private void sendMessage(long chatId, String textToSend, ReplyKeyboard keyboard) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(String.valueOf(chatId));
@@ -134,7 +134,7 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    /* Отправляет ответ с  InlineKeyboard */
+    /* Отправляет ответ с InlineKeyboard */
     void sendMessageWithInlineKeyboard(long chatId, String textToSend, String... buttons) {
         InlineKeyboardMarkup inlineKeyboard = InlineKeyboardMaker(buttons);
         sendMessage(chatId, textToSend, inlineKeyboard);
