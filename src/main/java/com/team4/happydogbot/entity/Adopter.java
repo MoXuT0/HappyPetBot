@@ -23,14 +23,19 @@ import java.util.Objects;
 public class Adopter {
     @Id
     private Long chatId;
+    @Column(name = "first_name", nullable = false, length = 25)
     private String firstName;
+    @Column(name = "last_name", nullable = false, length = 25)
     private String lastName;
+    @Column(name = "user_name", nullable = false)
     private String userName;
+    @Column(name = "age")
     private int age;
+    @Column(name = "address", nullable = false, length = 50)
     private String address;
+    @Column(name = "phone_number", nullable = false, length = 15)
     private String telephoneNumber;
-    //поле для отображения уровня взаимодействия с пользователем
-    //(отображает этап или состояние, в котором находится пользователь)
+    @Column(name = "status", nullable = false, length = 15)
     @Enumerated(EnumType.STRING)
     Status state;
 
