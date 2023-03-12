@@ -20,8 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.team4.happydogbot.constants.BotCommands.*;
-import static com.team4.happydogbot.constants.BotReplies.*;
+import static com.team4.happydogbot.constants.Constants.*;
 
 @Slf4j
 @Service
@@ -45,7 +44,6 @@ public class Bot extends TelegramLongPollingBot {
         return config.getToken();
     }
 
-    /* Принимает команду пользователя, отправляет ответ */
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
@@ -76,6 +74,7 @@ public class Bot extends TelegramLongPollingBot {
                     talkWithVolunteerOrNoSuchCommand(chatId, update);
                     break;
             }
+
         } else if (update.hasCallbackQuery()) {
             String messageData = update.getCallbackQuery().getData();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
@@ -136,7 +135,32 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    /* Отправляет ответ с клавиатурой*/
+
+    /**
+     * Отправляет сообщение
+     * @param chatId идентификатор пользователя
+     * @param textToSend текст сообщения
+     * @throws TelegramApiException
+     */
+    private void sendMessage(long chatId, String textToSend) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(String.valueOf(chatId));
+        sendMessage.setText(textToSend);
+        try {
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** Отправляет сообщение c клавиатурой
+     *
+     * @param chatId идентификатор пользователя
+     * @param textToSend текст сообщения
+     * @param keyboard клавиатура
+     * @throws TelegramApiException
+     */
+
     private void sendMessage(long chatId, String textToSend, ReplyKeyboard keyboard) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(String.valueOf(chatId));
@@ -162,19 +186,39 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    /* Отправляет ответ с InlineKeyboard */
+    /**
+     * Отправляет сообщение с InlineKeyboard<br>
+     * Используется методы
+     * {@link #sendMessage(long, String, ReplyKeyboard)}
+     * {@link #InlineKeyboardMaker(String...)}
+     *
+     * @param chatId идентификатор пользователя
+     * @param textToSend текст сообщения
+     * @param buttons множество (массив или varargs) кнопок клавиатуры
+     */
     void sendMessageWithInlineKeyboard(long chatId, String textToSend, String... buttons) {
         InlineKeyboardMarkup inlineKeyboard = InlineKeyboardMaker(buttons);
         sendMessage(chatId, textToSend, inlineKeyboard);
     }
 
-    /* Отправляет ответ и клавиатуру Этапа 0 по команде start */
+
+
+    /** Отправляет сообщение и клавиатуру Этапа 0 по команде start
+     *
+     * @param chatId идентификатор пользователя
+     * @param name имя пользователя
+     */
     void sendStartMessageWithReplyKeyboard(long chatId, String name) {
         String startAnswer = name + ", выберите действие";
         sendMessage(chatId, startAnswer, replyKeyboardMaker());
     }
 
-    /* Создает InlineKeyboard, принимает набор команд */
+
+    /** Создает InlineKeyboard
+     *
+     * @param buttons множество (массив или varargs) кнопок клавиатуры
+     * @return клавиатура привязанная к сообщению
+     */
     InlineKeyboardMarkup InlineKeyboardMaker(String... buttons) {
         InlineKeyboardMarkup inlineKeyboardAbout = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
@@ -193,7 +237,11 @@ public class Bot extends TelegramLongPollingBot {
         return inlineKeyboardAbout;
     }
 
-    /* Создает клавиатуру Этапа 0 */
+
+    /**
+     * Создает клавиатуру Этапа 0
+     * @return клавиатура с вариантами команд
+     */
     private ReplyKeyboardMarkup replyKeyboardMaker() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setSelective(true);
