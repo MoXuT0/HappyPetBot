@@ -16,10 +16,12 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.team4.happydogbot.constants.Constants.*;
+import static com.team4.happydogbot.constants.BotCommands.*;
+import static com.team4.happydogbot.constants.BotReplies.*;
 
 @Slf4j
 @Service
@@ -29,6 +31,9 @@ public class Bot extends TelegramLongPollingBot {
     public Bot(BotConfig config) {
         this.config = config;
     }
+
+    public static final long VOLUNTEER_ID = 1607411391;
+    public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
 
     @Override
     public String getBotUsername() {
