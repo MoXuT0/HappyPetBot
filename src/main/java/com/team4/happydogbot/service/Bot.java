@@ -20,7 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.team4.happydogbot.constants.Constants.*;
+import static com.team4.happydogbot.constants.BotCommands.*;
+import static com.team4.happydogbot.constants.BotReplies.*;
 
 @Slf4j
 @Service
@@ -135,7 +136,6 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-
     /**
      * Отправляет сообщение
      * @param chatId идентификатор пользователя
@@ -149,12 +149,12 @@ public class Bot extends TelegramLongPollingBot {
         try {
             execute(sendMessage);
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            log.error("Error occurred: " + e.getMessage());
         }
     }
 
-    /** Отправляет сообщение c клавиатурой
-     *
+    /**
+     * Отправляет сообщение c клавиатурой
      * @param chatId идентификатор пользователя
      * @param textToSend текст сообщения
      * @param keyboard клавиатура
@@ -167,18 +167,6 @@ public class Bot extends TelegramLongPollingBot {
         sendMessage.setText(textToSend);
         sendMessage.setReplyMarkup(keyboard);
         sendMessage.setParseMode(ParseMode.HTML);
-        try {
-            execute(sendMessage);
-        } catch (TelegramApiException e) {
-            log.error("Error occurred: " + e.getMessage());
-        }
-    }
-
-    /* Отправляет ответ без клавиатуры*/
-    private void sendMessage(long chatId, String textToSend) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(String.valueOf(chatId));
-        sendMessage.setText(textToSend);
         try {
             execute(sendMessage);
         } catch (TelegramApiException e) {
@@ -201,10 +189,8 @@ public class Bot extends TelegramLongPollingBot {
         sendMessage(chatId, textToSend, inlineKeyboard);
     }
 
-
-
-    /** Отправляет сообщение и клавиатуру Этапа 0 по команде start
-     *
+    /**
+     * Отправляет сообщение и клавиатуру Этапа 0 по команде start
      * @param chatId идентификатор пользователя
      * @param name имя пользователя
      */
@@ -213,9 +199,8 @@ public class Bot extends TelegramLongPollingBot {
         sendMessage(chatId, startAnswer, replyKeyboardMaker());
     }
 
-
-    /** Создает InlineKeyboard
-     *
+    /**
+     * Создает InlineKeyboard
      * @param buttons множество (массив или varargs) кнопок клавиатуры
      * @return клавиатура привязанная к сообщению
      */
@@ -236,7 +221,6 @@ public class Bot extends TelegramLongPollingBot {
 
         return inlineKeyboardAbout;
     }
-
 
     /**
      * Создает клавиатуру Этапа 0
