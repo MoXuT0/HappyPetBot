@@ -179,14 +179,14 @@ public class Bot extends TelegramLongPollingBot {
         // Первая строчка клавиатуры
         KeyboardRow keyboardRow1 = new KeyboardRow();
         // Добавляем кнопки в первую строчку клавиатуры
-        keyboardRow1.add("Узнать информацию о приюте");
-        keyboardRow1.add("Узнать как взять собаку из приюта");
+        keyboardRow1.add(SHELTER_INFO_CMD);
+        keyboardRow1.add(PET_INFO_CMD);
 
         // Вторая строчка клавиатуры
         KeyboardRow keyboardRow2 = new KeyboardRow();
         // Добавляем кнопки во вторую строчку клавиатуры
-        keyboardRow2.add("Прислать отчет о питомце");
-        keyboardRow2.add("Позвать волонтера");
+        keyboardRow2.add(SEND_REPORT_CMD);
+        keyboardRow2.add(CALL_VOLUNTEER_CMD);
 
         // Добавляем все строчки клавиатуры в список
         keyboard.add(keyboardRow1);
