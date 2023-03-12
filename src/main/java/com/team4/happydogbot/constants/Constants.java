@@ -1,6 +1,8 @@
 package com.team4.happydogbot.constants;
 
 
+import java.util.HashMap;
+
 public class Constants {
 
     public static final String MESSAGE_TEXT_ABOUT = "Что именно вы хотите узнать о приюте?";
@@ -33,5 +35,17 @@ public class Constants {
 
     public static final String[] KEYBOARD_HOUSE = {HOUSE_FOR_PUPPY, HOUSE_FOR_ADULT, HOUSE_FOR_SICK };
 
+    public static final long VOLUNTEER_ID = 1607411391;
 
+    public static final String FINISH_VOLUNTEER = "Закончить разговор с волонтером";
+
+    public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
+
+    public static final String WRITE_VOLUNTEER = "Напишите волонтеру:";
+
+    public static final String TALK_ENDED = "Разговор с волонтером завершен";
+
+    public static final String NO_SUCH_COMMAND = "Нет такой команды";
+
+    public static final String MESSAGE_WAS_SENT = "Ваше сообщение отправлено, волонтер скоро ответит Вам";
 }
