@@ -47,7 +47,6 @@ public class Report {
     //поле текста при добавлении фото
     @Column(name = "report_text", nullable = false)
     private String caption;
-    //поле для статуса проверки(выполняется волонтером) отчета (по умолчанию - null)
     @Column(name = "examination")
     private Boolean examination;
 
