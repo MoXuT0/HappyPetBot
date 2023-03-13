@@ -55,13 +55,12 @@ public class Bot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
+            User user = update.getMessage().getFrom();
             switch (messageText) {
                 case START_CMD:
                     sendMessage(chatId, MESSAGE_TEXT_GREETINGS);
                     sendStartMessageWithReplyKeyboard(chatId, update.getMessage().getChat().getFirstName());
-                    var textMessage = update.getMessage();
-                    var user = textMessage.getFrom();
-                    var adopter = findOrSaveAdopter(user);
+                    findOrSaveAdopter(user);
                     break;
                 case SHELTER_INFO_CMD:
                     sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_SHELTER_INFO, KEYBOARD_SHELTER_ABOUT);
@@ -83,7 +82,6 @@ public class Bot extends TelegramLongPollingBot {
                     talkWithVolunteerOrNoSuchCommand(chatId, update);
                     break;
             }
-
         } else if (update.hasCallbackQuery()) {
             String messageData = update.getCallbackQuery().getData();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
@@ -158,7 +156,6 @@ public class Bot extends TelegramLongPollingBot {
             execute(sendMessage);
         } catch (TelegramApiException e) {
             log.error("Error occurred: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
@@ -180,7 +177,6 @@ public class Bot extends TelegramLongPollingBot {
             execute(sendMessage);
         } catch (TelegramApiException e) {
             log.error("Error occurred: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
@@ -293,7 +289,6 @@ public class Bot extends TelegramLongPollingBot {
             execute(forwardMessage);
         } catch (TelegramApiException e) {
             log.error("Error occurred: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
@@ -373,14 +368,14 @@ public class Bot extends TelegramLongPollingBot {
         return persistentAdopter;
     }
 
-    private void processUpdate(Long chatId, Update update) {
-        String userMessage = update.getMessage().getText();
-        String[] userMessages = userMessage.split(" ");
-        Adopter adopter = new Adopter();
-        adopter.setFirstName(userMessages[0]);
-        adopter.setLastName(userMessages[1]);
-        adopter.setTelephoneNumber(userMessages[2]);
-        adopterRepository.save(adopter);
-        sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT_SUCCESS);
-    }
+//    private void processUpdate(Long chatId, Update update) {
+//        String userMessage = update.getMessage().getText();
+//        String[] userMessages = userMessage.split(" ");
+//        Adopter adopter = new Adopter();
+//        adopter.setFirstName(userMessages[0]);
+//        adopter.setLastName(userMessages[1]);
+//        adopter.setTelephoneNumber(userMessages[2]);
+//        adopterRepository.save(adopter);
+//        sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT_SUCCESS);
+//    }
 }
