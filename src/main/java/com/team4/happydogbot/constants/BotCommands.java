@@ -54,5 +54,14 @@ public class BotCommands {
             PET_HOUSE_FOR_ADULT_CMD,
             PET_HOUSE_FOR_SICK_CMD
     };
+    //Команды этапа 3. Ведение питомца
+    public static final String REPORT_FORM = "Форма ежедневного отчета";
+    public static final String SEND_REPORT  = "Отправить отчет";
+
+    public static final String[] KEYBOARD_REPORT = {
+            REPORT_FORM,
+            SEND_REPORT
+    };
+
 
 }
