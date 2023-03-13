@@ -1,6 +1,8 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.config.BotConfig;
+import com.team4.happydogbot.model.Adopter;
+import com.team4.happydogbot.repository.AdopterRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -8,6 +10,7 @@ import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -27,9 +30,11 @@ import static com.team4.happydogbot.constants.BotReplies.*;
 @Service
 public class Bot extends TelegramLongPollingBot {
     final BotConfig config;
+    private final AdopterRepository adopterRepository;
 
-    public Bot(BotConfig config) {
+    public Bot(BotConfig config, AdopterRepository adopterRepository) {
         this.config = config;
+        this.adopterRepository = adopterRepository;
     }
 
     public static final long VOLUNTEER_ID = 1607411391;
@@ -54,6 +59,9 @@ public class Bot extends TelegramLongPollingBot {
                 case START_CMD:
                     sendMessage(chatId, MESSAGE_TEXT_GREETINGS);
                     sendStartMessageWithReplyKeyboard(chatId, update.getMessage().getChat().getFirstName());
+                    var textMessage = update.getMessage();
+                    var user = textMessage.getFrom();
+                    var adopter = findOrSaveAdopter(user);
                     break;
                 case SHELTER_INFO_CMD:
                     sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_SHELTER_INFO, KEYBOARD_SHELTER_ABOUT);
@@ -120,8 +128,7 @@ public class Bot extends TelegramLongPollingBot {
                     sendMessage(chatId, MESSAGE_TEXT_PET_REFUSAL);
                     break;
                 case SEND_CONTACT_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT);
-                    // МЕТОД ОТПРАВКИ КОНТАКТНЫХ ДАННЫХ
+                    //processUpdate(chatId, update);
                     break;
                 case FINISH_VOLUNTEER_CMD:
                     // Если юзер нажал кнопку Закончить разговор с волонтером, то удаляем последнее сообщение из мапы -
@@ -150,6 +157,7 @@ public class Bot extends TelegramLongPollingBot {
             execute(sendMessage);
         } catch (TelegramApiException e) {
             log.error("Error occurred: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -171,6 +179,7 @@ public class Bot extends TelegramLongPollingBot {
             execute(sendMessage);
         } catch (TelegramApiException e) {
             log.error("Error occurred: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -283,6 +292,7 @@ public class Bot extends TelegramLongPollingBot {
             execute(forwardMessage);
         } catch (TelegramApiException e) {
             log.error("Error occurred: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -341,5 +351,33 @@ public class Bot extends TelegramLongPollingBot {
             // разговора, то выводим сообщение нет такой команды
             sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
         }
+    }
+
+    /**
+     * Метод для добавления нового пользователя в базу данных
+     * @param user
+     * @return
+     */
+    private Adopter findOrSaveAdopter(User user) {
+        Adopter persistentAdopter = adopterRepository.findAdopterByChatId(user.getId());
+        if (persistentAdopter == null) {
+            Adopter transientAdopter= new Adopter();
+            transientAdopter.setChatId(user.getId());
+            transientAdopter.setName(user.getFirstName()+user.getLastName());
+            transientAdopter.setUserName(user.getUserName());
+            transientAdopter.setIsActive(true);
+            return adopterRepository.save(transientAdopter);
+        }
+        return persistentAdopter;
+    }
+
+    private void processUpdate(Long chatId, Update update) {
+        String userMessage = update.getMessage().getText();
+        String[] userMessages = userMessage.split(" ");
+        Adopter adopter = new Adopter();
+        adopter.setName(userMessages[0]);
+        adopter.setTelephoneNumber(userMessages[1]);
+        adopterRepository.save(adopter);
+        sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT_SUCCESS);
     }
 }
