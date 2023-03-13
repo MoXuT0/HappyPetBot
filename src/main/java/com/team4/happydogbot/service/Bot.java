@@ -69,7 +69,7 @@ public class Bot extends TelegramLongPollingBot {
                     sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_PET_INFO, KEYBOARD_PET_ADOPT);
                     break;
                 case SEND_REPORT_CMD:
-                    //Здесь будет метод для этапа 3
+                    sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_REPORT, KEYBOARD_REPORT);
                     break;
                 case CALL_VOLUNTEER_CMD:
                     // Создаем мапу и кладем в нее сообщение в кач-ве ключа и chatId в кач-ве значения того, кто позвал волонтера,
@@ -134,6 +134,12 @@ public class Bot extends TelegramLongPollingBot {
                     // т е выходим из состояния разговора с волонтером, выводим сообщение, что разговор с волонтером закончен
                     findAndRemoveRequestFromUser(chatId);
                     sendMessage(chatId, MESSAGE_TEXT_TALK_ENDED);
+                    break;
+                case REPORT_FORM:
+                    sendMessage(chatId, MESSAGE_TEXT_REPORT_FORM);
+                    break;
+                case SEND_REPORT:
+                    //метод для отправки отчета
                     break;
                 default:
                     sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
