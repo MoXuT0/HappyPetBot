@@ -128,6 +128,7 @@ public class Bot extends TelegramLongPollingBot {
                     sendMessage(chatId, MESSAGE_TEXT_PET_REFUSAL);
                     break;
                 case SEND_CONTACT_CMD:
+                    sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT);
                     //processUpdate(chatId, update);
                     break;
                 case FINISH_VOLUNTEER_CMD:
@@ -337,7 +338,7 @@ public class Bot extends TelegramLongPollingBot {
             sendMessage(chatId, MESSAGE_TEXT_WAS_SENT);
         } else if (VOLUNTEER_ID == chatId
                 // Если сообщение поступило от волонтера и содержит Reply на другое сообщение и текст в
-                // Reply совпадает с тем что в мапе,то это сообщение отправляем юзеру
+                // Reply совпадает с тем что в мапе, то это сообщение отправляем юзеру
                 && update.getMessage().getReplyToMessage() != null
                 && REQUEST_FROM_USER.containsKey(update.getMessage().getReplyToMessage().getText())) {
             String s = update.getMessage().getReplyToMessage().getText();
@@ -354,7 +355,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     /**
-     * Метод для добавления нового пользователя в базу данных
+     * Добавление нового пользователя в базу данных
      * @param user
      * @return
      */
@@ -363,7 +364,8 @@ public class Bot extends TelegramLongPollingBot {
         if (persistentAdopter == null) {
             Adopter transientAdopter= new Adopter();
             transientAdopter.setChatId(user.getId());
-            transientAdopter.setName(user.getFirstName()+user.getLastName());
+            transientAdopter.setFirstName(user.getFirstName());
+            transientAdopter.setLastName(user.getLastName());
             transientAdopter.setUserName(user.getUserName());
             transientAdopter.setIsActive(true);
             return adopterRepository.save(transientAdopter);
@@ -375,8 +377,9 @@ public class Bot extends TelegramLongPollingBot {
         String userMessage = update.getMessage().getText();
         String[] userMessages = userMessage.split(" ");
         Adopter adopter = new Adopter();
-        adopter.setName(userMessages[0]);
-        adopter.setTelephoneNumber(userMessages[1]);
+        adopter.setFirstName(userMessages[0]);
+        adopter.setLastName(userMessages[1]);
+        adopter.setTelephoneNumber(userMessages[2]);
         adopterRepository.save(adopter);
         sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT_SUCCESS);
     }
