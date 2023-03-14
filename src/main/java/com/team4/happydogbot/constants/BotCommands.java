@@ -17,6 +17,7 @@ public class BotCommands {
     public static final String SHELTER_SCHEDULE_ADDRESS_CMD = "Расписание, адрес";
     public static final String SHELTER_SAFETY_CMD = "Техника безопасности";
     public static final String SEND_CONTACT_CMD = "Отправить свои контакты";
+    public static final String SEND_PHONE_NUMBER_CMD = "Отправить номер телефона";
 
     public static final String[] KEYBOARD_SHELTER_ABOUT = {
             SHELTER_ABOUT_CMD,
