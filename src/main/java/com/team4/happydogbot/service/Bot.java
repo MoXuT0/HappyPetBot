@@ -4,6 +4,7 @@ import com.team4.happydogbot.config.BotConfig;
 import com.team4.happydogbot.model.Adopter;
 import com.team4.happydogbot.repository.AdopterRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
@@ -15,6 +16,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -30,11 +32,12 @@ import static com.team4.happydogbot.constants.BotReplies.*;
 @Service
 public class Bot extends TelegramLongPollingBot {
     final BotConfig config;
-    private final AdopterRepository adopterRepository;
 
-    public Bot(BotConfig config, AdopterRepository adopterRepository) {
+    @Autowired
+    private AdopterRepository adopterRepository;
+
+    public Bot(BotConfig config) {
         this.config = config;
-        this.adopterRepository = adopterRepository;
     }
 
     public static final long VOLUNTEER_ID = 1607411391;
@@ -77,6 +80,12 @@ public class Bot extends TelegramLongPollingBot {
                     // отправляем сообщение пользователю
                     REQUEST_FROM_USER.put(messageText, chatId);
                     sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_WRITE_VOLUNTEER, FINISH_VOLUNTEER_CMD);
+                    break;
+                case SEND_CONTACT_CMD:
+                    sendContactMessage(chatId);
+                    break;
+                case BACK_CMD:
+                    sendStartMessageWithReplyKeyboard(chatId, update.getMessage().getChat().getFirstName());
                     break;
                 default:
                     talkWithVolunteerOrNoSuchCommand(chatId, update);
@@ -125,10 +134,6 @@ public class Bot extends TelegramLongPollingBot {
                 case PET_REFUSAL_CMD:
                     sendMessage(chatId, MESSAGE_TEXT_PET_REFUSAL);
                     break;
-                case SEND_CONTACT_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT);
-                    //processUpdate(chatId, update);
-                    break;
                 case FINISH_VOLUNTEER_CMD:
                     // Если юзер нажал кнопку Закончить разговор с волонтером, то удаляем последнее сообщение из мапы -
                     // т е выходим из состояния разговора с волонтером, выводим сообщение, что разговор с волонтером закончен
@@ -145,6 +150,10 @@ public class Bot extends TelegramLongPollingBot {
                     sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
                     break;
             }
+        } else if (update.hasMessage() && update.getMessage().hasContact()) {
+            long chatId = update.getMessage().getChatId();
+            sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT_SUCCESS);
+            processContact(chatId, update);
         }
     }
 
@@ -259,9 +268,15 @@ public class Bot extends TelegramLongPollingBot {
         keyboardRow2.add(SEND_REPORT_CMD);
         keyboardRow2.add(CALL_VOLUNTEER_CMD);
 
+        // Вторая строчка клавиатуры
+        KeyboardRow keyboardRow3 = new KeyboardRow();
+        // Добавляем кнопки во вторую строчку клавиатуры
+        keyboardRow3.add(SEND_CONTACT_CMD);
+
         // Добавляем все строчки клавиатуры в список
         keyboard.add(keyboardRow1);
         keyboard.add(keyboardRow2);
+        keyboard.add(keyboardRow3);
 
         // и устанавливаем этот список нашей клавиатуре
         replyKeyboardMarkup.setKeyboard(keyboard);
@@ -374,14 +389,32 @@ public class Bot extends TelegramLongPollingBot {
         return persistentAdopter;
     }
 
-//    private void processUpdate(Long chatId, Update update) {
-//        String userMessage = update.getMessage().getText();
-//        String[] userMessages = userMessage.split(" ");
-//        Adopter adopter = new Adopter();
-//        adopter.setFirstName(userMessages[0]);
-//        adopter.setLastName(userMessages[1]);
-//        adopter.setTelephoneNumber(userMessages[2]);
-//        adopterRepository.save(adopter);
-//        sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT_SUCCESS);
-//    }
+    void sendContactMessage(long chatId) {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(false);
+
+        KeyboardRow keyboardRow1 = new KeyboardRow();
+        KeyboardButton contact = new KeyboardButton(SEND_CONTACT_CMD);
+        contact.setRequestContact(true);
+        keyboardRow1.add(contact);
+
+        KeyboardRow keyboardRow2 = new KeyboardRow();
+        keyboardRow2.add("Назад");
+
+        List<KeyboardRow> keyboard = new ArrayList<>();
+        keyboard.add(keyboardRow1);
+        keyboard.add(keyboardRow2);
+
+        replyKeyboardMarkup.setKeyboard(keyboard);
+
+        sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT, replyKeyboardMarkup);
+    }
+
+    private void processContact(Long chatId, Update update) {
+        String userMessage = update.getMessage().getContact().getPhoneNumber();
+        sendMessage(chatId, userMessage);
+        // ДОДЕЛАТЬ ЗАПИСЬ В БД
+    }
 }

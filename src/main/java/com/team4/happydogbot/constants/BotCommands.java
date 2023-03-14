@@ -4,6 +4,7 @@ public class BotCommands {
 
     // Команды этап 0. Входная точка общения бота с пользователем
     public static final String START_CMD = "/start";
+    public static final String BACK_CMD = "Назад";
     public static final String SHELTER_INFO_CMD = "Узнать информацию о приюте";
     public static final String PET_INFO_CMD = "Узнать как взять собаку из приюта";
     public static final String SEND_REPORT_CMD = "Прислать отчет о питомце";
