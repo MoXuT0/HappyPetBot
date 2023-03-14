@@ -5,7 +5,9 @@ import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,18 +21,26 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "adopter")
+@Table(name = "adopters")
 public class Adopter {
     @Id
     private Long chatId;
+    @Column(name = "first_name")
     private String firstName;
+    @Column(name = "last_name")
     private String lastName;
+    @Column(name = "user_name")
     private String userName;
+    @Column(name = "age")
     private int age;
+    @Column(name = "address")
     private String address;
+    @Column(name = "telephone_number")
     private String telephoneNumber;
     //поле для отображения уровня взаимодействия с пользователем
     //(отображает этап или состояние, в котором находится пользователь)
+    @CreationTimestamp
+    private LocalDateTime firstLoginDate;
     @Enumerated(EnumType.STRING)
     Status state;
 

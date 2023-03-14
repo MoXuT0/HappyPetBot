@@ -1,7 +1,7 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.config.BotConfig;
-import com.team4.happydogbot.model.Adopter;
+import com.team4.happydogbot.entity.Adopter;
 import com.team4.happydogbot.repository.AdopterRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -383,7 +383,6 @@ public class Bot extends TelegramLongPollingBot {
             transientAdopter.setFirstName(user.getFirstName());
             transientAdopter.setLastName(user.getLastName());
             transientAdopter.setUserName(user.getUserName());
-            transientAdopter.setIsActive(true);
             return adopterRepository.save(transientAdopter);
         }
         return persistentAdopter;
