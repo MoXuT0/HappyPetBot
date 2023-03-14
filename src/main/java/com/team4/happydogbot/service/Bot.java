@@ -152,8 +152,8 @@ public class Bot extends TelegramLongPollingBot {
             }
         } else if (update.hasMessage() && update.getMessage().hasContact()) {
             long chatId = update.getMessage().getChatId();
+            processContact(update);
             sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT_SUCCESS);
-            processContact(chatId, update);
         }
     }
 
@@ -389,19 +389,23 @@ public class Bot extends TelegramLongPollingBot {
         return persistentAdopter;
     }
 
-    void sendContactMessage(long chatId) {
+    /**
+     * Создает клавиатуру и отсылает сообщение с ней для получения контактных данных пользователя
+     * @param chatId идентификатор чата пользователя
+     */
+    private void sendContactMessage(long chatId) {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setSelective(true);
         replyKeyboardMarkup.setResizeKeyboard(true);
         replyKeyboardMarkup.setOneTimeKeyboard(false);
 
         KeyboardRow keyboardRow1 = new KeyboardRow();
-        KeyboardButton contact = new KeyboardButton(SEND_CONTACT_CMD);
+        KeyboardButton contact = new KeyboardButton(SEND_PHONE_NUMBER_CMD);
         contact.setRequestContact(true);
         keyboardRow1.add(contact);
 
         KeyboardRow keyboardRow2 = new KeyboardRow();
-        keyboardRow2.add("Назад");
+        keyboardRow2.add(BACK_CMD);
 
         List<KeyboardRow> keyboard = new ArrayList<>();
         keyboard.add(keyboardRow1);
@@ -412,9 +416,16 @@ public class Bot extends TelegramLongPollingBot {
         sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT, replyKeyboardMarkup);
     }
 
-    private void processContact(Long chatId, Update update) {
-        String userMessage = update.getMessage().getContact().getPhoneNumber();
-        sendMessage(chatId, userMessage);
-        // ДОДЕЛАТЬ ЗАПИСЬ В БД
+    /**
+     * Обрабатывает присланные пользователем контактные данные и записывает их базу данных
+     * @param update принятый контакт пользователя
+     */
+    private void processContact(Update update) {
+        User user = update.getMessage().getFrom();
+        Adopter adopter = adopterRepository.findAdopterByChatId(user.getId());
+        if (adopter != null) {
+            adopter.setTelephoneNumber(update.getMessage().getContact().getPhoneNumber());
+            adopterRepository.save(adopter);
+        }
     }
 }
