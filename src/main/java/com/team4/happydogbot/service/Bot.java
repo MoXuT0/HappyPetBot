@@ -412,7 +412,7 @@ public class Bot extends TelegramLongPollingBot {
 
         replyKeyboardMarkup.setKeyboard(keyboard);
 
-        sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT, replyKeyboardMarkup);
+        sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT_CHOOSE, replyKeyboardMarkup);
     }
 
     /**
