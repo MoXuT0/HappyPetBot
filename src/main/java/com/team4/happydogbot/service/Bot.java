@@ -1,7 +1,10 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.config.BotConfig;
+import com.team4.happydogbot.entity.Adopter;
+import com.team4.happydogbot.entity.Report;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
@@ -15,10 +18,12 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.team4.happydogbot.constants.BotCommands.*;
 import static com.team4.happydogbot.constants.BotReplies.*;
@@ -27,6 +32,7 @@ import static com.team4.happydogbot.constants.BotReplies.*;
 @Service
 public class Bot extends TelegramLongPollingBot {
     final BotConfig config;
+
 
     public Bot(BotConfig config) {
         this.config = config;
@@ -348,4 +354,26 @@ public class Bot extends TelegramLongPollingBot {
             sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
         }
     }
+//Разкоментить после добавления репозиториев
+    /*
+    @Scheduled(cron = "30 30 8 * * *")
+    private void sendNoteForVolunteer() {
+
+        List<Adopter> adopters = adopterRepository.findAll();
+        List<Adopter> adoptersWithProbationPeriod = adopters.stream().filter(x -> x.getState() == PROBATION)
+                .collect(Collectors.toList());
+        List<Report> reports = reportRepository.findAll();
+        for (Adopter adopter : adoptersWithProbationPeriod) {
+            Report report = reports.stream().filter(x -> (x.getChatId() == adopter.getChatId())
+                            && (x.getExamination()))
+                    .reduce((first, last) -> last)
+                    .orElseThrow();
+            if(LocalDate.now().getDayOfYear() - report.getReportDate().getDayOfYear() >=2){
+                sendMessage(VOLUNTEER_ID, "Внимание! Усыновитель "+ adopter.getFirstName()
+                        + " " + adopter.getLastName() + " уже больше 2 дней не присылает отчеты!");
+            }
+        }
+    }
+
+ */
 }
