@@ -2,7 +2,6 @@ package com.team4.happydogbot.entity;
 
 import javax.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,8 +10,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Class describing the user(adopter)
- * @param 'status' a field to display the level of user interaction (displays the stage or state the user is in)
+ * Класс, описывающий пользователя (adopter)
+ *
+ * @param 'status' поле для отображения уровня взаимодействия с пользователем
+ * (отображает этап или состояние, в котором находится пользователь)
  */
 @Data
 @NoArgsConstructor
@@ -21,8 +22,6 @@ import java.util.Objects;
 @Table(name = "adopter")
 public class Adopter {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
     private Long chatId;
     private String firstName;
     private String lastName;
@@ -35,8 +34,7 @@ public class Adopter {
     @Enumerated(EnumType.STRING)
     Status state;
 
-    @JsonBackReference
-    @OneToMany(mappedBy = "adopter", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "adopter", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Report> reports;
 
 //    @JsonBackReference
@@ -50,8 +48,7 @@ public class Adopter {
         this.state = state;
     }
 
-    public Adopter(long id, Long chatId, String firstName, String lastName, String userName, int age, String address, String telephoneNumber, Status state) {
-        this.id = id;
+    public Adopter(Long chatId, String firstName, String lastName, String userName, int age, String address, String telephoneNumber, Status state) {
         this.chatId = chatId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -67,11 +64,11 @@ public class Adopter {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Adopter adopter = (Adopter) o;
-        return id == adopter.id && age == adopter.age && Objects.equals(chatId, adopter.chatId) && Objects.equals(firstName, adopter.firstName) && Objects.equals(lastName, adopter.lastName) && Objects.equals(userName, adopter.userName) && Objects.equals(address, adopter.address) && Objects.equals(telephoneNumber, adopter.telephoneNumber) && state == adopter.state;
+        return age == adopter.age && Objects.equals(chatId, adopter.chatId) && Objects.equals(firstName, adopter.firstName) && Objects.equals(lastName, adopter.lastName) && Objects.equals(userName, adopter.userName) && Objects.equals(address, adopter.address) && Objects.equals(telephoneNumber, adopter.telephoneNumber) && state == adopter.state;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, chatId, firstName, lastName, userName, age, address, telephoneNumber, state);
+        return Objects.hash(chatId, firstName, lastName, userName, age, address, telephoneNumber, state);
     }
 }
