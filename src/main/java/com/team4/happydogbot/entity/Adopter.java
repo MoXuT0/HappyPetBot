@@ -1,11 +1,14 @@
 package com.team4.happydogbot.entity;
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Class describing the user(adopter)
@@ -19,34 +22,56 @@ import java.util.List;
 public class Adopter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private long id;
-    @Column(name = "chat_id")
     private Long chatId;
-    @Column(name = "first_name", nullable = false, length = 25)
     private String firstName;
-    @Column(name = "last_name", nullable = false, length = 25)
     private String lastName;
-    @Column(name = "user_name", nullable = false)
     private String userName;
-    @Column(name = "age")
     private int age;
-    @Column(name = "address", nullable = false, length = 50)
     private String address;
-    @Column(name = "phone_number", nullable = false, length = 15)
     private String telephoneNumber;
     //поле для отображения уровня взаимодействия с пользователем
     //(отображает этап или состояние, в котором находится пользователь)
-    @Column(name = "status", nullable = false, length = 15)
     @Enumerated(EnumType.STRING)
     Status state;
 
-    @OneToMany(mappedBy = "adopter", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonBackReference
+    @OneToMany(mappedBy = "adopter", fetch = FetchType.EAGER)
     private List<Report> reports;
+
+//    @JsonBackReference
+//    @OneToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "animal_id")
+//    private Animal animal;
 
     public Adopter(Long chatId, String userName, Status state) {
         this.chatId = chatId;
         this.userName = userName;
         this.state = state;
+    }
+
+    public Adopter(long id, Long chatId, String firstName, String lastName, String userName, int age, String address, String telephoneNumber, Status state) {
+        this.id = id;
+        this.chatId = chatId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.userName = userName;
+        this.age = age;
+        this.address = address;
+        this.telephoneNumber = telephoneNumber;
+        this.state = Status.USER;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Adopter adopter = (Adopter) o;
+        return id == adopter.id && age == adopter.age && Objects.equals(chatId, adopter.chatId) && Objects.equals(firstName, adopter.firstName) && Objects.equals(lastName, adopter.lastName) && Objects.equals(userName, adopter.userName) && Objects.equals(address, adopter.address) && Objects.equals(telephoneNumber, adopter.telephoneNumber) && state == adopter.state;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, chatId, firstName, lastName, userName, age, address, telephoneNumber, state);
     }
 }
