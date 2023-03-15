@@ -24,12 +24,9 @@ import java.time.LocalDate;
 public class Report {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    //@Column(name = "report_id")
-    private long id;
-//    @CreationTimestamp
-//    @Column(name = "chat_id", nullable = false)
-//    private Long chatId;
-    //@CreationTimestamp
+    @Column(name = "report_id")
+    private long reportId;
+    @CreationTimestamp
     @Column(name = "report_date")
     private LocalDate reportDate;
     //поля для обработки фотографий
@@ -37,9 +34,9 @@ public class Report {
     private File filePicture;
     private String filePath;
     //поле текста при добавлении фото
-   // @Column(name = "report_text")
+    @Column(name = "report_text")
     private String caption;
-    //@Column(name = "examination")
+    @Column(name = "examination")
     private Boolean examination = null;
 
     @ManyToOne(fetch = FetchType.EAGER)

@@ -1,5 +1,6 @@
 package com.team4.happydogbot.controllers;
 
+import com.team4.happydogbot.entity.Adopter;
 import com.team4.happydogbot.entity.Report;
 import com.team4.happydogbot.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +15,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collection;
 
 @RestController
 @RequestMapping("/report")
@@ -43,7 +46,13 @@ public class ReportController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Некорректные параметры отчета"
+                    description = "Некорректные параметры отчета",
+                    content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
+                            )
+                    }
             )
     }
     )
@@ -65,7 +74,7 @@ public class ReportController {
                     )
             }
     )
-    @Parameters( value = {
+    @Parameters(value = {
             @Parameter(name = "id", example = "1")
     }
     )
@@ -82,7 +91,13 @@ public class ReportController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Отчет не был найден"
+                    description = "Отчет не был найден",
+                    content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
+                            )
+                    }
             )
     }
     )
@@ -93,5 +108,70 @@ public class ReportController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(report);
+    }
+
+    @Operation(summary = "Удаление отчета по id",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Отчет, найденный по id",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = Adopter.class)
+                            )
+                    )
+            }
+    )
+    @Parameters(value = {
+            @Parameter(name = "id", example = "1")
+    }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Отчет удален",
+                    content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
+                            )
+                    }
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Отчет не был удален",
+                    content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
+                            )
+                    }
+            )
+    }
+    )
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        if (reportService.remove(id)) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+
+    @Operation(summary = "Просмотр всех отчетов",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Отчеты найдены",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = Adopter.class)
+                            )
+                    )
+            }
+    )
+    @GetMapping("/all")
+    public Collection<Report> getAll() {
+        return this.reportService.getAll();
     }
 }

@@ -1,7 +1,7 @@
 package com.team4.happydogbot.entity;
 
 /**
- * Class containing options for all stages of the user's state
+ * Класс, содержащий параметры для всех стадий пользовательского состояния
  */
 public enum Status {
 
