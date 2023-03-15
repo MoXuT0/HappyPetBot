@@ -21,7 +21,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "adopters")
+@Table(name = "adopter")
 public class Adopter {
     @Id
     private Long chatId;
