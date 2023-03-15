@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 
+
 @RestController
 @RequestMapping("/report")
 @Tag(name = "Отчеты", description = "CRUD-операции и другие эндпоинты для работы с отчетами")

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 
+
 @RestController
 @RequestMapping("/adopter")
 @Tag(name = "Усыновители", description = "CRUD-операции и другие эндпоинты для работы с усыновителями")
