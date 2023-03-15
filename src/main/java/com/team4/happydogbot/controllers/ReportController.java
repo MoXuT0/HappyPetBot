@@ -157,7 +157,6 @@ public class ReportController {
         return ResponseEntity.notFound().build();
     }
 
-
     @Operation(summary = "Просмотр всех отчетов",
             responses = {
                     @ApiResponse(

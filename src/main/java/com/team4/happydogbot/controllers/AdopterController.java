@@ -190,7 +190,6 @@ public class AdopterController {
         return ResponseEntity.notFound().build();
     }
 
-
     @Operation(summary = "Просмотр всех усыновителей",
             responses = {
                     @ApiResponse(

@@ -18,7 +18,6 @@ public class AdopterService {
 
     /**
      * Метод создает нового пользователя
-     *
      * @param adopter
      * @return {@link AdopterRepository#save(Object)}
      * @see AdopterService
@@ -29,7 +28,6 @@ public class AdopterService {
 
     /**
      * Метод находит и возвращает пользователя по id
-     *
      * @param id
      * @return {@link AdopterRepository#findById(Object)}
      * @throws IllegalArgumentException
@@ -42,7 +40,6 @@ public class AdopterService {
 
     /**
      * Метод находит и удаляет пользователя по id
-     *
      * @param id
      * @return
      */
@@ -56,7 +53,6 @@ public class AdopterService {
 
     /**
      * Метод обновляет и возвращает пользователя
-     *
      * @param adopter
      * @return {@link AdopterRepository#save(Object)}
      * @throws IllegalArgumentException
@@ -72,7 +68,6 @@ public class AdopterService {
 
     /**
      * Метод находит всех пользователей
-     *
      * @return {@link AdopterRepository#findById(Object)}
      * @see AdopterService
      */

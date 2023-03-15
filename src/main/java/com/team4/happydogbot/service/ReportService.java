@@ -4,11 +4,8 @@ import com.team4.happydogbot.entity.Report;
 import com.team4.happydogbot.repository.ReportRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.objects.File;
 
 import javax.transaction.Transactional;
-import java.io.IOException;
-import java.time.LocalDate;
 import java.util.Collection;
 
 
