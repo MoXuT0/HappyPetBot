@@ -24,7 +24,7 @@ public class Report {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "report_id")
-    private long reportId;
+    private Long reportId;
     @CreationTimestamp
     @Column(name = "report_date")
     private LocalDate reportDate;

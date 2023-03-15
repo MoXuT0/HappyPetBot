@@ -36,7 +36,7 @@ public class ReportService {
      * @throws IllegalArgumentException
      * @see ReportService
      */
-    public Report get(long id) {
+    public Report get(Long id) {
         return this.reportRepository.findById(id)
                 .orElseThrow(IllegalArgumentException::new);
     }
@@ -46,7 +46,7 @@ public class ReportService {
      * @param id
      * @see ReportService
      */
-    public boolean remove(long id) {
+    public boolean remove(Long id) {
         if (reportRepository.existsById(id)) {
             reportRepository.deleteById(id);
             return true;

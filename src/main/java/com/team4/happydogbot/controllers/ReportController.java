@@ -102,7 +102,7 @@ public class ReportController {
     }
     )
     @GetMapping("/{id}")
-    public ResponseEntity<Report> get(@PathVariable long id) {
+    public ResponseEntity<Report> get(@PathVariable Long id) {
         Report report = reportService.get(id);
         if (report == null) {
             return ResponseEntity.notFound().build();
@@ -129,23 +129,11 @@ public class ReportController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Отчет удален",
-                    content = {
-                            @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
-                            )
-                    }
+                    description = "Отчет удален"
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Отчет не был удален",
-                    content = {
-                            @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
-                            )
-                    }
+                    description = "Отчет не был удален"
             )
     }
     )

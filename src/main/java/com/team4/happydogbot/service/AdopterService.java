@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -33,7 +34,7 @@ public class AdopterService {
      * @throws IllegalArgumentException
      * @see AdopterService
      */
-    public Adopter get(long id) {
+    public Adopter get(Long id) {
         return this.adopterRepository.findById(id)
                 .orElseThrow(IllegalArgumentException::new);
     }
@@ -43,7 +44,7 @@ public class AdopterService {
      * @param id
      * @return
      */
-    public boolean remove(long id) {
+    public boolean remove(Long id) {
         if (adopterRepository.existsById(id)) {
             adopterRepository.deleteById(id);
             return true;
@@ -58,10 +59,9 @@ public class AdopterService {
      * @throws IllegalArgumentException
      * @see AdopterService
      */
-    public boolean update(Adopter adopter) {
+    public Optional<Adopter> update(Adopter adopter) {
         if (adopterRepository.existsById(adopter.getChatId())) {
-            adopterRepository.save(adopter);
-            return true;
+            return Optional.ofNullable(adopterRepository.save(adopter));
         }
         throw new IllegalArgumentException();
     }

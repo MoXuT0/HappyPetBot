@@ -99,9 +99,9 @@ public class AdopterController {
             )
     }
     )
-    @GetMapping("/{id}")
-    public ResponseEntity<Adopter> get(@PathVariable long id) {
-        Adopter adopter = adopterService.get(id);
+    @GetMapping("/{chatId}")
+    public ResponseEntity<Adopter> get(@PathVariable Long chatId) {
+        Adopter adopter = adopterService.get(chatId);
         if (adopter == null) {
             return ResponseEntity.notFound().build();
         }
@@ -127,29 +127,17 @@ public class AdopterController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Усыновитель удален",
-                    content = {
-                            @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
-                            )
-                    }
+                    description = "Усыновитель удален"
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Усыновитель не был удален",
-                    content = {
-                            @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
-                            )
-                    }
+                    description = "Усыновитель не был удален"
             )
     }
     )
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (adopterService.remove(id)) {
+    @DeleteMapping("/{chatId}")
+    public ResponseEntity<Void> delete(@PathVariable Long chatId) {
+        if (adopterService.remove(chatId)) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
@@ -184,10 +172,7 @@ public class AdopterController {
     )
     @PutMapping
     public ResponseEntity<Adopter> update(@RequestBody Adopter adopter) {
-        if (adopterService.update(adopter)) {
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.of(adopterService.update(adopter));
     }
 
     @Operation(summary = "Просмотр всех усыновителей",
