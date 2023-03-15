@@ -24,7 +24,7 @@ import java.time.LocalDate;
 public class Report {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "report_id")
+    //@Column(name = "report_id")
     private long id;
 //    @CreationTimestamp
 //    @Column(name = "chat_id", nullable = false)
@@ -37,20 +37,12 @@ public class Report {
     private File filePicture;
     private String filePath;
     //поле текста при добавлении фото
+   // @Column(name = "report_text")
     private String caption;
-    //поле для статуса проверки(выполняется волонтером) отчета (по умолчанию - null)
+    //@Column(name = "examination")
     private Boolean examination = null;
-    @ManyToOne(fetch = FetchType.EAGER)
-    private byte[] picture;
-    private File filePicture;
-    private String filePath;
-    //поле текста при добавлении фото
-    @Column(name = "report_text", nullable = false)
-    private String caption;
-    @Column(name = "examination")
-    private Boolean examination;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "chat_id")
     @JsonBackReference
     private Adopter adopter;
