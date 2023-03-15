@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.Optional;
 
+
 @Slf4j
 @Service
 public class AdopterService {
