@@ -19,8 +19,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "report")
-public class Report {
+@Table(name = "report_dog")
+public class ReportDog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "report_id")
@@ -41,5 +41,5 @@ public class Report {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "chat_id")
     @JsonBackReference
-    private Adopter adopter;
+    private AdopterDog adopterDog;
 }

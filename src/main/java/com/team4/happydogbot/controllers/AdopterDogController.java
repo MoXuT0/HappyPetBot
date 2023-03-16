@@ -1,7 +1,7 @@
 package com.team4.happydogbot.controllers;
 
-import com.team4.happydogbot.entity.Adopter;
-import com.team4.happydogbot.service.AdopterService;
+import com.team4.happydogbot.entity.AdopterDog;
+import com.team4.happydogbot.service.AdopterDogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -20,11 +20,11 @@ import java.util.Collection;
 @RestController
 @RequestMapping("/adopter")
 @Tag(name = "Усыновители", description = "CRUD-операции и другие эндпоинты для работы с усыновителями")
-public class AdopterController {
-    private final AdopterService adopterService;
+public class AdopterDogController {
+    private final AdopterDogService adopterDogService;
 
-    public AdopterController(AdopterService adopterService) {
-        this.adopterService = adopterService;
+    public AdopterDogController(AdopterDogService adopterDogService) {
+        this.adopterDogService = adopterDogService;
     }
 
     @Operation(
@@ -38,7 +38,7 @@ public class AdopterController {
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = AdopterDog.class))
                             )
                     }
             ),
@@ -48,16 +48,16 @@ public class AdopterController {
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = AdopterDog.class))
                             )
                     }
             )
     }
     )
     @PostMapping
-    public ResponseEntity<Adopter> add(@RequestBody Adopter adopter) {
-        adopterService.add(adopter);
-        return ResponseEntity.ok(adopter);
+    public ResponseEntity<AdopterDog> add(@RequestBody AdopterDog adopterDog) {
+        adopterDogService.add(adopterDog);
+        return ResponseEntity.ok(adopterDog);
     }
 
     @Operation(summary = "Получение усыновителя по chatId",
@@ -67,7 +67,7 @@ public class AdopterController {
                             description = "Усыновитель, найденный по chatId",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = Adopter.class)
+                                    schema = @Schema(implementation = AdopterDog.class)
                             )
                     )
             }
@@ -83,7 +83,7 @@ public class AdopterController {
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = AdopterDog.class))
                             )
                     }
             ),
@@ -93,19 +93,19 @@ public class AdopterController {
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = AdopterDog.class))
                             )
                     }
             )
     }
     )
     @GetMapping("/{chatId}")
-    public ResponseEntity<Adopter> get(@PathVariable Long chatId) {
-        Adopter adopter = adopterService.get(chatId);
-        if (adopter == null) {
+    public ResponseEntity<AdopterDog> get(@PathVariable Long chatId) {
+        AdopterDog adopterDog = adopterDogService.get(chatId);
+        if (adopterDog == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(adopter);
+        return ResponseEntity.ok(adopterDog);
     }
 
     @Operation(summary = "Удаление усыновителя по chatId",
@@ -115,7 +115,7 @@ public class AdopterController {
                             description = "Усыновитель, найденный по chatId",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = Adopter.class)
+                                    schema = @Schema(implementation = AdopterDog.class)
                             )
                     )
             }
@@ -137,7 +137,7 @@ public class AdopterController {
     )
     @DeleteMapping("/{chatId}")
     public ResponseEntity<Void> delete(@PathVariable Long chatId) {
-        if (adopterService.remove(chatId)) {
+        if (adopterDogService.remove(chatId)) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
@@ -154,7 +154,7 @@ public class AdopterController {
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = AdopterDog.class))
                             )
                     }
             ),
@@ -164,15 +164,15 @@ public class AdopterController {
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = AdopterDog.class))
                             )
                     }
             )
     }
     )
     @PutMapping
-    public ResponseEntity<Adopter> update(@RequestBody Adopter adopter) {
-        return ResponseEntity.of(adopterService.update(adopter));
+    public ResponseEntity<AdopterDog> update(@RequestBody AdopterDog adopterDog) {
+        return ResponseEntity.of(adopterDogService.update(adopterDog));
     }
 
     @Operation(summary = "Просмотр всех усыновителей",
@@ -182,14 +182,14 @@ public class AdopterController {
                             description = "Усыновители найдены",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = Adopter.class)
+                                    schema = @Schema(implementation = AdopterDog.class)
                             )
                     )
             }
     )
     @GetMapping("/all")
-    public Collection<Adopter> getAll() {
-        return this.adopterService.getAll();
+    public Collection<AdopterDog> getAll() {
+        return this.adopterDogService.getAll();
     }
 }
 

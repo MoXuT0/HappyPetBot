@@ -1,5 +1,6 @@
 package com.team4.happydogbot.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,16 +20,16 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "adopter")
-public class Adopter {
+@Table(name = "adopter_dog")
+public class AdopterDog {
     @Id
     @Column(name = "adopter_id")
     private Long chatId;
-    @Column(name = "first_name", nullable = false)
+    @Column(name = "first_name", nullable = true)
     private String firstName;
-    @Column(name = "last_name", nullable = false)
+    @Column(name = "last_name", nullable = true)
     private String lastName;
-    @Column(name = "user_name", nullable = false)
+    @Column(name = "user_name", nullable = true)
     private String userName;
     @Column(name = "age")
     private int age;
@@ -42,12 +43,19 @@ public class Adopter {
     @Enumerated(EnumType.STRING)
     Status state;
 
-    @OneToMany(mappedBy = "adopter", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "adopterDog", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonManagedReference
-    private List<Report> reports;
+    private List<ReportDog> reportDogs;
 
-    public Adopter(Long chatId, String firstName, String lastName, String userName, int age, String address,
-                   String telephoneNumber, Status state) {
+//    @OneToOne(fetch = FetchType.EAGER)
+//    @JsonBackReference
+//    @JoinColumn(name = "dog_id")
+    @OneToOne(mappedBy = "adopterDog", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private Dog dog;
+
+    public AdopterDog(Long chatId, String firstName, String lastName, String userName, int age, String address,
+                      String telephoneNumber, Status state) {
         this.chatId = chatId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -62,11 +70,11 @@ public class Adopter {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Adopter adopter = (Adopter) o;
-        return age == adopter.age && Objects.equals(chatId, adopter.chatId)
-                && Objects.equals(firstName, adopter.firstName) && Objects.equals(lastName, adopter.lastName)
-                && Objects.equals(userName, adopter.userName) && Objects.equals(address, adopter.address)
-                && Objects.equals(telephoneNumber, adopter.telephoneNumber) && state == adopter.state;
+        AdopterDog adopterDog = (AdopterDog) o;
+        return age == adopterDog.age && Objects.equals(chatId, adopterDog.chatId)
+                && Objects.equals(firstName, adopterDog.firstName) && Objects.equals(lastName, adopterDog.lastName)
+                && Objects.equals(userName, adopterDog.userName) && Objects.equals(address, adopterDog.address)
+                && Objects.equals(telephoneNumber, adopterDog.telephoneNumber) && state == adopterDog.state;
     }
 
     @Override

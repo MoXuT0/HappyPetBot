@@ -1,8 +1,8 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.config.BotConfig;
-import com.team4.happydogbot.entity.Adopter;
-import com.team4.happydogbot.repository.AdopterRepository;
+import com.team4.happydogbot.entity.AdopterDog;
+import com.team4.happydogbot.repository.AdopterDogRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,7 +10,6 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -35,7 +34,7 @@ public class Bot extends TelegramLongPollingBot {
     final BotConfig config;
 
     @Autowired
-    private AdopterRepository adopterRepository;
+    private AdopterDogRepository adopterDogRepository;
 
     public Bot(BotConfig config) {
         this.config = config;
@@ -376,17 +375,17 @@ public class Bot extends TelegramLongPollingBot {
      * @param user пользователь телеграмм бота
      * @return запись пользователя в базу данных если такого еще нет либо самого пользователя с поиском по chatId
      */
-    private Adopter findOrSaveAdopter(User user) {
-        Adopter persistentAdopter = adopterRepository.findAdopterByChatId(user.getId());
-        if (persistentAdopter == null) {
-            Adopter transientAdopter= new Adopter();
-            transientAdopter.setChatId(user.getId());
-            transientAdopter.setFirstName(user.getFirstName());
-            transientAdopter.setLastName(user.getLastName());
-            transientAdopter.setUserName(user.getUserName());
-            return adopterRepository.save(transientAdopter);
+    private AdopterDog findOrSaveAdopter(User user) {
+        AdopterDog persistentAdopterDog = adopterDogRepository.findAdopterByChatId(user.getId());
+        if (persistentAdopterDog == null) {
+            AdopterDog transientAdopterDog = new AdopterDog();
+            transientAdopterDog.setChatId(user.getId());
+            transientAdopterDog.setFirstName(user.getFirstName());
+            transientAdopterDog.setLastName(user.getLastName());
+            transientAdopterDog.setUserName(user.getUserName());
+            return adopterDogRepository.save(transientAdopterDog);
         }
-        return persistentAdopter;
+        return persistentAdopterDog;
     }
 
     /**
@@ -422,10 +421,10 @@ public class Bot extends TelegramLongPollingBot {
      */
     private void processContact(Update update) {
         User user = update.getMessage().getFrom();
-        Adopter adopter = adopterRepository.findAdopterByChatId(user.getId());
-        if (adopter != null) {
-            adopter.setTelephoneNumber(update.getMessage().getContact().getPhoneNumber());
-            adopterRepository.save(adopter);
+        AdopterDog adopterDog = adopterDogRepository.findAdopterByChatId(user.getId());
+        if (adopterDog != null) {
+            adopterDog.setTelephoneNumber(update.getMessage().getContact().getPhoneNumber());
+            adopterDogRepository.save(adopterDog);
         }
     }
 }
