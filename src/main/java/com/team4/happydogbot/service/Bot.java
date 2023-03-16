@@ -1,8 +1,14 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.config.BotConfig;
+import com.team4.happydogbot.entity.Adopter;
+import com.team4.happydogbot.entity.Report;
 import com.team4.happydogbot.replies.Reply;
+import com.team4.happydogbot.repository.AdopterRepository;
+import com.team4.happydogbot.repository.ReportRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
@@ -18,22 +24,32 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.team4.happydogbot.constants.BotCommands.*;
 import static com.team4.happydogbot.constants.BotReplies.*;
+import static com.team4.happydogbot.entity.Status.PROBATION;
 
 @Slf4j
 @Service
 public class Bot extends TelegramLongPollingBot {
     final BotConfig config;
 
+    private final AdopterRepository adopterRepository;
 
-    public Bot(BotConfig config) {
+    private final ReportRepository reportRepository;
+
+
+
+    public Bot(BotConfig config, AdopterRepository adopterRepository, ReportRepository reportRepository) {
         this.config = config;
+        this.adopterRepository = adopterRepository;
+        this.reportRepository = reportRepository;
     }
 
     public static final long VOLUNTEER_ID = 1607411391;
@@ -335,6 +351,32 @@ public class Bot extends TelegramLongPollingBot {
             // Если сообщение не подходит не под одну команду и волонтер и юзер не находятся в состоянии
             // разговора, то выводим сообщение нет такой команды
             sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
+        }
+    }
+
+    /**
+     * Метод организует по расписанию автоматическую проверку наличия отчетов со сроком регистрации равным 2 и более
+     * дней от текущей даты по следующему алгоритму:<br>
+     * - получение списка Adopter со статусом PROBATION;<br>
+     * - получение для каждого adopter из списка отчетов последний отчет;<br>
+     * - отправка сообщения волонтеру по итогу проверки на разницу дня года текущей даты и дня года даты регистрации отчета
+     */
+    @Scheduled(cron = "30 30 8 * * *")
+    private void sendNoteForVolunteer() {
+
+        List<Adopter> adopters = adopterRepository.findAll();
+        List<Adopter> adoptersWithProbationPeriod = adopters.stream().filter(x -> x.getState() == PROBATION).toList();
+        List<Report> reports = reportRepository.findAll();
+        for (Adopter adopter : adoptersWithProbationPeriod) {
+            Report report = reports.stream().filter(x -> (x.getAdopter().equals(adopter))
+                            && (x.getExamination()))
+                    .reduce((first, last) -> last)
+                    .orElseThrow();
+            //для проверки рабоспособности в условии ниже добавить +3 после LocalDate.now().getDayOfYear()
+            if(LocalDate.now().getDayOfYear()  - report.getReportDate().getDayOfYear() >=2){
+                sendMessage(VOLUNTEER_ID, "Внимание! Усыновитель "+ adopter.getFirstName()
+                        + " " + adopter.getLastName() + " уже больше 2 дней не присылает отчеты!");
+            }
         }
     }
 }
