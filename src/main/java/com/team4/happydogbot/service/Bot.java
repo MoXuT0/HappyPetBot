@@ -1,7 +1,10 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.config.BotConfig;
+import com.team4.happydogbot.entity.Adopter;
+import com.team4.happydogbot.repository.AdopterRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
@@ -9,10 +12,12 @@ import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -28,6 +33,9 @@ import static com.team4.happydogbot.constants.BotReplies.*;
 @Service
 public class Bot extends TelegramLongPollingBot {
     final BotConfig config;
+
+    @Autowired
+    private AdopterRepository adopterRepository;
 
     public Bot(BotConfig config) {
         this.config = config;
@@ -51,10 +59,12 @@ public class Bot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
+            User user = update.getMessage().getFrom();
             switch (messageText) {
                 case START_CMD:
                     sendMessage(chatId, MESSAGE_TEXT_GREETINGS);
                     sendStartMessageWithReplyKeyboard(chatId, update.getMessage().getChat().getFirstName());
+                    findOrSaveAdopter(user);
                     break;
                 case SHELTER_INFO_CMD:
                     sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_SHELTER_INFO, KEYBOARD_SHELTER_ABOUT);
@@ -72,11 +82,16 @@ public class Bot extends TelegramLongPollingBot {
                     REQUEST_FROM_USER.put(messageText, chatId);
                     sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_WRITE_VOLUNTEER, FINISH_VOLUNTEER_CMD);
                     break;
+                case SEND_CONTACT_CMD:
+                    sendContactMessage(chatId);
+                    break;
+                case BACK_CMD:
+                    sendStartMessageWithReplyKeyboard(chatId, update.getMessage().getChat().getFirstName());
+                    break;
                 default:
                     talkWithVolunteerOrNoSuchCommand(chatId, update);
                     break;
             }
-
         } else if (update.hasCallbackQuery()) {
             String messageData = update.getCallbackQuery().getData();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
@@ -120,10 +135,6 @@ public class Bot extends TelegramLongPollingBot {
                 case PET_REFUSAL_CMD:
                     sendMessage(chatId, MESSAGE_TEXT_PET_REFUSAL);
                     break;
-                case SEND_CONTACT_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT);
-                    // МЕТОД ОТПРАВКИ КОНТАКТНЫХ ДАННЫХ
-                    break;
                 case FINISH_VOLUNTEER_CMD:
                     // Если юзер нажал кнопку Закончить разговор с волонтером, то удаляем последнее сообщение из мапы -
                     // т е выходим из состояния разговора с волонтером, выводим сообщение, что разговор с волонтером закончен
@@ -140,6 +151,10 @@ public class Bot extends TelegramLongPollingBot {
                     sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
                     break;
             }
+        } else if (update.hasMessage() && update.getMessage().hasContact()) {
+            long chatId = update.getMessage().getChatId();
+            processContact(update);
+            sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT_SUCCESS);
         }
     }
 
@@ -254,9 +269,15 @@ public class Bot extends TelegramLongPollingBot {
         keyboardRow2.add(SEND_REPORT_CMD);
         keyboardRow2.add(CALL_VOLUNTEER_CMD);
 
+        // Третья строчка клавиатуры
+        KeyboardRow keyboardRow3 = new KeyboardRow();
+        // Добавляем кнопку во третью строчку клавиатуры
+        keyboardRow3.add(SEND_CONTACT_CMD);
+
         // Добавляем все строчки клавиатуры в список
         keyboard.add(keyboardRow1);
         keyboard.add(keyboardRow2);
+        keyboard.add(keyboardRow3);
 
         // и устанавливаем этот список нашей клавиатуре
         replyKeyboardMarkup.setKeyboard(keyboard);
@@ -334,7 +355,7 @@ public class Bot extends TelegramLongPollingBot {
             sendMessage(chatId, MESSAGE_TEXT_WAS_SENT);
         } else if (VOLUNTEER_ID == chatId
                 // Если сообщение поступило от волонтера и содержит Reply на другое сообщение и текст в
-                // Reply совпадает с тем что в мапе,то это сообщение отправляем юзеру
+                // Reply совпадает с тем что в мапе, то это сообщение отправляем юзеру
                 && update.getMessage().getReplyToMessage() != null
                 && REQUEST_FROM_USER.containsKey(update.getMessage().getReplyToMessage().getText())) {
             String s = update.getMessage().getReplyToMessage().getText();
@@ -347,6 +368,64 @@ public class Bot extends TelegramLongPollingBot {
             // Если сообщение не подходит не под одну команду и волонтер и юзер не находятся в состоянии
             // разговора, то выводим сообщение нет такой команды
             sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
+        }
+    }
+
+    /**
+     * Добавление нового пользователя в базу данных
+     * @param user пользователь телеграмм бота
+     * @return запись пользователя в базу данных если такого еще нет либо самого пользователя с поиском по chatId
+     */
+    private Adopter findOrSaveAdopter(User user) {
+        Adopter persistentAdopter = adopterRepository.findAdopterByChatId(user.getId());
+        if (persistentAdopter == null) {
+            Adopter transientAdopter= new Adopter();
+            transientAdopter.setChatId(user.getId());
+            transientAdopter.setFirstName(user.getFirstName());
+            transientAdopter.setLastName(user.getLastName());
+            transientAdopter.setUserName(user.getUserName());
+            return adopterRepository.save(transientAdopter);
+        }
+        return persistentAdopter;
+    }
+
+    /**
+     * Создает клавиатуру и отсылает сообщение с ней для получения контактных данных пользователя
+     * @param chatId идентификатор чата пользователя
+     */
+    private void sendContactMessage(long chatId) {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(false);
+
+        KeyboardRow keyboardRow1 = new KeyboardRow();
+        KeyboardButton contact = new KeyboardButton(SEND_PHONE_NUMBER_CMD);
+        contact.setRequestContact(true);
+        keyboardRow1.add(contact);
+
+        KeyboardRow keyboardRow2 = new KeyboardRow();
+        keyboardRow2.add(BACK_CMD);
+
+        List<KeyboardRow> keyboard = new ArrayList<>();
+        keyboard.add(keyboardRow1);
+        keyboard.add(keyboardRow2);
+
+        replyKeyboardMarkup.setKeyboard(keyboard);
+
+        sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT_CHOOSE, replyKeyboardMarkup);
+    }
+
+    /**
+     * Обрабатывает присланные пользователем контактные данные и записывает их базу данных
+     * @param update принятый контакт пользователя
+     */
+    private void processContact(Update update) {
+        User user = update.getMessage().getFrom();
+        Adopter adopter = adopterRepository.findAdopterByChatId(user.getId());
+        if (adopter != null) {
+            adopter.setTelephoneNumber(update.getMessage().getContact().getPhoneNumber());
+            adopterRepository.save(adopter);
         }
     }
 }
