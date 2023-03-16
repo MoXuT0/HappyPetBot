@@ -15,6 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
+
 @RestController
 @RequestMapping("/adopter")
 @Tag(name = "Усыновители", description = "CRUD-операции и другие эндпоинты для работы с усыновителями")
@@ -27,7 +29,7 @@ public class AdopterController {
 
     @Operation(
             summary = "Добавление усыновителя",
-            description = "Добавление нового усыновителя из тела запроса с присвоением id из генератора"
+            description = "Добавление нового усыновителя из тела запроса"
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -42,7 +44,13 @@ public class AdopterController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Некорректные параметры усыновителя"
+                    description = "Некорректные параметры усыновителя",
+                    content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
+                            )
+                    }
             )
     }
     )
@@ -52,20 +60,20 @@ public class AdopterController {
         return ResponseEntity.ok(adopter);
     }
 
-    @Operation(summary = "Получение усыновителя по id",
-                    responses = {
-                            @ApiResponse(
-                                    responseCode = "200",
-                                    description = "Усыновитель, найденный по id",
-                                    content = @Content(
-                                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                            schema = @Schema(implementation = Adopter.class)
-                                    )
+    @Operation(summary = "Получение усыновителя по chatId",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Усыновитель, найденный по chatId",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = Adopter.class)
                             )
-                    }
-            )
-    @Parameters( value = {
-            @Parameter(name = "id", example = "1")
+                    )
+            }
+    )
+    @Parameters(value = {
+            @Parameter(name = "chatId", example = "1234567890")
     }
     )
     @ApiResponses(value = {
@@ -81,16 +89,107 @@ public class AdopterController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Усыновитель не был найден"
+                    description = "Усыновитель не был найден",
+                    content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
+                            )
+                    }
             )
     }
     )
-    @GetMapping("/{id}")
-    public ResponseEntity<Adopter> get(@PathVariable long id) {
-        Adopter adopter = adopterService.get(id);
+    @GetMapping("/{chatId}")
+    public ResponseEntity<Adopter> get(@PathVariable Long chatId) {
+        Adopter adopter = adopterService.get(chatId);
         if (adopter == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(adopter);
     }
+
+    @Operation(summary = "Удаление усыновителя по chatId",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Усыновитель, найденный по chatId",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = Adopter.class)
+                            )
+                    )
+            }
+    )
+    @Parameters(value = {
+            @Parameter(name = "chatId", example = "1234567890")
+    }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Усыновитель удален"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Усыновитель не был удален"
+            )
+    }
+    )
+    @DeleteMapping("/{chatId}")
+    public ResponseEntity<Void> delete(@PathVariable Long chatId) {
+        if (adopterService.remove(chatId)) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @Operation(
+            summary = "Изменение данных усыновителя",
+            description = "Обновление данных усыновителя из тела запроса"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Данные усыновителя обновлены",
+                    content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
+                            )
+                    }
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Данные усыновителя не обновлены",
+                    content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
+                            )
+                    }
+            )
+    }
+    )
+    @PutMapping
+    public ResponseEntity<Adopter> update(@RequestBody Adopter adopter) {
+        return ResponseEntity.of(adopterService.update(adopter));
+    }
+
+    @Operation(summary = "Просмотр всех усыновителей",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Усыновители найдены",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = Adopter.class)
+                            )
+                    )
+            }
+    )
+    @GetMapping("/all")
+    public Collection<Adopter> getAll() {
+        return this.adopterService.getAll();
+    }
 }
+

@@ -1,13 +1,13 @@
 package com.team4.happydogbot.entity;
 
-import javax.persistence.*;
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import javax.persistence.*;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,41 +24,34 @@ import java.util.Objects;
 @Table(name = "adopter")
 public class Adopter {
     @Id
+    @Column(name = "adopter_id")
     private Long chatId;
-    @Column(name = "first_name")
+    @Column(name = "first_name", nullable = false, length = 25)
     private String firstName;
-    @Column(name = "last_name")
+    @Column(name = "last_name", nullable = false, length = 25)
     private String lastName;
-    @Column(name = "user_name")
+    @Column(name = "user_name", nullable = false, length = 25)
     private String userName;
     @Column(name = "age")
     private int age;
-    @Column(name = "address")
+    @Column(name = "address", nullable = false, length = 50)
     private String address;
-    @Column(name = "telephone_number")
+    @Column(name = "phone_number", nullable = false, length = 15)
     private String telephoneNumber;
+    @Column(name = "status")
     //поле для отображения уровня взаимодействия с пользователем
     //(отображает этап или состояние, в котором находится пользователь)
-    @CreationTimestamp
-    private LocalDateTime firstLoginDate;
     @Enumerated(EnumType.STRING)
     Status state;
+    @CreationTimestamp
+    private LocalDateTime firstLoginDate;
 
     @OneToMany(mappedBy = "adopter", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Report> reports;
 
-//    @JsonBackReference
-//    @OneToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "animal_id")
-//    private Animal animal;
-
-    public Adopter(Long chatId, String userName, Status state) {
-        this.chatId = chatId;
-        this.userName = userName;
-        this.state = state;
-    }
-
-    public Adopter(Long chatId, String firstName, String lastName, String userName, int age, String address, String telephoneNumber, Status state) {
+    public Adopter(Long chatId, String firstName, String lastName, String userName, int age, String address,
+                   String telephoneNumber, Status state) {
         this.chatId = chatId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -74,7 +67,10 @@ public class Adopter {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Adopter adopter = (Adopter) o;
-        return age == adopter.age && Objects.equals(chatId, adopter.chatId) && Objects.equals(firstName, adopter.firstName) && Objects.equals(lastName, adopter.lastName) && Objects.equals(userName, adopter.userName) && Objects.equals(address, adopter.address) && Objects.equals(telephoneNumber, adopter.telephoneNumber) && state == adopter.state;
+        return age == adopter.age && Objects.equals(chatId, adopter.chatId)
+                && Objects.equals(firstName, adopter.firstName) && Objects.equals(lastName, adopter.lastName)
+                && Objects.equals(userName, adopter.userName) && Objects.equals(address, adopter.address)
+                && Objects.equals(telephoneNumber, adopter.telephoneNumber) && state == adopter.state;
     }
 
     @Override
