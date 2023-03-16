@@ -4,6 +4,7 @@ public class BotCommands {
 
     // Команды этап 0. Входная точка общения бота с пользователем
     public static final String START_CMD = "/start";
+    public static final String BACK_CMD = "Назад";
     public static final String SHELTER_INFO_CMD = "Узнать информацию о приюте";
     public static final String PET_INFO_CMD = "Узнать как взять собаку из приюта";
     public static final String SEND_REPORT_CMD = "Прислать отчет о питомце";
@@ -16,12 +17,12 @@ public class BotCommands {
     public static final String SHELTER_SCHEDULE_ADDRESS_CMD = "Расписание, адрес";
     public static final String SHELTER_SAFETY_CMD = "Техника безопасности";
     public static final String SEND_CONTACT_CMD = "Отправить свои контакты";
+    public static final String SEND_PHONE_NUMBER_CMD = "Отправить номер телефона";
 
     public static final String[] KEYBOARD_SHELTER_ABOUT = {
             SHELTER_ABOUT_CMD,
             SHELTER_SCHEDULE_ADDRESS_CMD,
             SHELTER_SAFETY_CMD,
-            SEND_CONTACT_CMD
     };
 
     // Команды этап 2. Помощь потенциальным «усыновителям» собаки из приюта
@@ -42,7 +43,6 @@ public class BotCommands {
             PET_ADVICES_CMD,
             PET_CYNOLOGISTS_CMD,
             PET_REFUSAL_CMD,
-            SEND_CONTACT_CMD
     };
 
     public static final String PET_HOUSE_FOR_PUPPY_CMD = "Для щенка";
