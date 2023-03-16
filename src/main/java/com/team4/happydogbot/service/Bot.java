@@ -269,9 +269,9 @@ public class Bot extends TelegramLongPollingBot {
         keyboardRow2.add(SEND_REPORT_CMD);
         keyboardRow2.add(CALL_VOLUNTEER_CMD);
 
-        // Вторая строчка клавиатуры
+        // Третья строчка клавиатуры
         KeyboardRow keyboardRow3 = new KeyboardRow();
-        // Добавляем кнопки во вторую строчку клавиатуры
+        // Добавляем кнопку во третью строчку клавиатуры
         keyboardRow3.add(SEND_CONTACT_CMD);
 
         // Добавляем все строчки клавиатуры в список
