@@ -8,8 +8,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class HappyDogBotApplication {
 
     public static void main(String[] args) {
+        try {
+            SpringApplication.run(HappyDogBotApplication.class, args);
 
-        SpringApplication.run(HappyDogBotApplication.class, args);
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
+        }
+
     }
 }
 
