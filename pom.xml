@@ -14,7 +14,7 @@
     <name>HappyDogBot</name>
     <description>HappyDogBot</description>
     <properties>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
     </properties>
     <dependencies>
         <dependency>
@@ -68,10 +68,12 @@
             <artifactId>java-telegram-bot-api</artifactId>
             <version>6.5.0</version>
         </dependency>
+
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
         </dependency>
+
     </dependencies>
 
     <build>
