@@ -373,8 +373,8 @@ public class Bot extends TelegramLongPollingBot {
 
     /**
      * Добавление нового пользователя в базу данных
-     * @param user
-     * @return
+     * @param user пользователь телеграмм бота
+     * @return запись пользователя в базу данных если такого еще нет либо самого пользователя с поиском по chatId
      */
     private Adopter findOrSaveAdopter(User user) {
         Adopter persistentAdopter = adopterRepository.findAdopterByChatId(user.getId());
