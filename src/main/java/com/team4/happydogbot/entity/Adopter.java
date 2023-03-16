@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Objects;
@@ -43,8 +41,6 @@ public class Adopter {
     //(отображает этап или состояние, в котором находится пользователь)
     @Enumerated(EnumType.STRING)
     Status state;
-    @CreationTimestamp
-    private LocalDateTime firstLoginDate;
 
     @OneToMany(mappedBy = "adopter", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonManagedReference
