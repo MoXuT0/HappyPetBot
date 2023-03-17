@@ -1,8 +1,8 @@
 package com.team4.happydogbot.controllers;
 
-import com.team4.happydogbot.entity.Adopter;
-import com.team4.happydogbot.entity.Report;
-import com.team4.happydogbot.service.ReportService;
+import com.team4.happydogbot.entity.AdopterCat;
+import com.team4.happydogbot.entity.ReportCat;
+import com.team4.happydogbot.service.ReportCatService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -20,14 +20,14 @@ import java.util.Collection;
 
 
 @RestController
-@RequestMapping("/report")
+@RequestMapping("/report_cat")
 @Tag(name = "Отчеты", description = "CRUD-операции и другие эндпоинты для работы с отчетами")
-public class ReportController {
+public class ReportCatController {
 
-    private final ReportService reportService;
+    private final ReportCatService reportCatService;
 
-    public ReportController(ReportService reportService) {
-        this.reportService = reportService;
+    public ReportCatController(ReportCatService reportCatService) {
+        this.reportCatService = reportCatService;
     }
 
     @Operation(
@@ -41,7 +41,7 @@ public class ReportController {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    array = @ArraySchema(schema = @Schema(implementation = Report.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = ReportCat.class))
                             )
                     }
             ),
@@ -51,16 +51,16 @@ public class ReportController {
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = ReportCat.class))
                             )
                     }
             )
     }
     )
     @PostMapping
-    public ResponseEntity<Report> add(@RequestBody Report report) {
-        reportService.add(report);
-        return ResponseEntity.ok(report);
+    public ResponseEntity<ReportCat> add(@RequestBody ReportCat reportCat) {
+        reportCatService.add(reportCat);
+        return ResponseEntity.ok(reportCat);
     }
 
     @Operation(summary = "Получение отчета по id",
@@ -70,7 +70,7 @@ public class ReportController {
                             description = "Отчет, найденный по id",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = Report.class)
+                                    schema = @Schema(implementation = ReportCat.class)
                             )
                     )
             }
@@ -86,7 +86,7 @@ public class ReportController {
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = Report.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = ReportCat.class))
                             )
                     }
             ),
@@ -96,19 +96,19 @@ public class ReportController {
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = Adopter.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = ReportCat.class))
                             )
                     }
             )
     }
     )
     @GetMapping("/{id}")
-    public ResponseEntity<Report> get(@PathVariable Long id) {
-        Report report = reportService.get(id);
-        if (report == null) {
+    public ResponseEntity<ReportCat> get(@PathVariable Long id) {
+        ReportCat reportCat = reportCatService.get(id);
+        if (reportCat == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(report);
+        return ResponseEntity.ok(reportCat);
     }
 
     @Operation(summary = "Удаление отчета по id",
@@ -118,7 +118,7 @@ public class ReportController {
                             description = "Отчет, найденный по id",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = Adopter.class)
+                                    schema = @Schema(implementation = ReportCat.class)
                             )
                     )
             }
@@ -140,7 +140,7 @@ public class ReportController {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (reportService.remove(id)) {
+        if (reportCatService.remove(id)) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
@@ -153,13 +153,13 @@ public class ReportController {
                             description = "Отчеты найдены",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = Adopter.class)
+                                    schema = @Schema(implementation = ReportCat.class)
                             )
                     )
             }
     )
     @GetMapping("/all")
-    public Collection<Report> getAll() {
-        return this.reportService.getAll();
+    public Collection<ReportCat> getAll() {
+        return this.reportCatService.getAll();
     }
 }
