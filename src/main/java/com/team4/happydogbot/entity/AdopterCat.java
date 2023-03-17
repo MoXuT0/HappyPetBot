@@ -19,10 +19,10 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "adopter")
-public class Adopter {
+@Table(name = "adopter_cat")
+public class AdopterCat {
     @Id
-    @Column(name = "adopter_id")
+    @Column(name = "chat_id")
     private Long chatId;
     @Column(name = "first_name", nullable = false)
     private String firstName;
@@ -40,14 +40,17 @@ public class Adopter {
     //поле для отображения уровня взаимодействия с пользователем
     //(отображает этап или состояние, в котором находится пользователь)
     @Enumerated(EnumType.STRING)
-    Status state;
+    private Status state;
 
-    @OneToMany(mappedBy = "adopter", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "adopterCat", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference
-    private List<Report> reports;
+    private List<ReportCat> reports;
 
-    public Adopter(Long chatId, String firstName, String lastName, String userName, int age, String address,
-                   String telephoneNumber, Status state) {
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Cat cat;
+
+    public AdopterCat(Long chatId, String firstName, String lastName, String userName, int age, String address,
+                      String telephoneNumber, Status state) {
         this.chatId = chatId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -62,7 +65,7 @@ public class Adopter {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Adopter adopter = (Adopter) o;
+        AdopterCat adopter = (AdopterCat) o;
         return age == adopter.age && Objects.equals(chatId, adopter.chatId)
                 && Objects.equals(firstName, adopter.firstName) && Objects.equals(lastName, adopter.lastName)
                 && Objects.equals(userName, adopter.userName) && Objects.equals(address, adopter.address)
