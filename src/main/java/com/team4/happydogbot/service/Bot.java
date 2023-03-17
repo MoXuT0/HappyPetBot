@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 
 import static com.team4.happydogbot.constants.BotCommands.*;
 import static com.team4.happydogbot.constants.BotReplies.*;
+import static com.team4.happydogbot.entity.Status.ADDITIONAL_PERIOD;
 import static com.team4.happydogbot.entity.Status.PROBATION;
 
 @Slf4j
@@ -365,7 +366,8 @@ public class Bot extends TelegramLongPollingBot {
     private void sendNoteForVolunteer() {
 
         List<Adopter> adopters = adopterRepository.findAll();
-        List<Adopter> adoptersWithProbationPeriod = adopters.stream().filter(x -> x.getState() == PROBATION).toList();
+        List<Adopter> adoptersWithProbationPeriod = adopters.stream().filter(x -> (x.getState() == PROBATION)||
+                (x.getState() == ADDITIONAL_PERIOD)).toList();
         List<Report> reports = reportRepository.findAll();
         for (Adopter adopter : adoptersWithProbationPeriod) {
             Report report = reports.stream().filter(x -> (x.getAdopter().equals(adopter))
