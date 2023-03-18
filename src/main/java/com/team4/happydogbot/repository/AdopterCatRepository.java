@@ -11,5 +11,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface AdopterCatRepository extends JpaRepository<AdopterCat, Long> {
-    AdopterCat findAdopterByChatId(Long id);
+
 }

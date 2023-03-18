@@ -1,22 +1,22 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.config.BotConfig;
-import com.team4.happydogbot.entity.AdopterDog;
 import com.team4.happydogbot.repository.AdopterDogRepository;
+import com.team4.happydogbot.replies.Reply;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -40,7 +40,12 @@ public class Bot extends TelegramLongPollingBot {
         this.config = config;
         this.adopterDogRepository = adopterDogRepository;
     }
+
     public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
+    public boolean isDog = true;
+
+    Reply reply = new Reply(this);
+
 
     @Override
     public String getBotUsername() {
@@ -54,115 +59,77 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
-            User user = update.getMessage().getFrom();
-            switch (messageText) {
-                case START_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_GREETINGS);
-                    sendStartMessageWithReplyKeyboard(chatId, update.getMessage().getChat().getFirstName());
-                    findOrSaveAdopter(user);
-                    break;
-                case SHELTER_INFO_CMD:
-                    sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_SHELTER_INFO, KEYBOARD_SHELTER_ABOUT);
-                    break;
-                case PET_INFO_CMD:
-                    sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_PET_INFO, KEYBOARD_PET_ADOPT);
-                    break;
-                case SEND_REPORT_CMD:
-                    sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_REPORT, KEYBOARD_REPORT);
-                    break;
-                case CALL_VOLUNTEER_CMD:
-                    // Создаем мапу и кладем в нее сообщение в кач-ве ключа и chatId в кач-ве значения того, кто позвал волонтера,
-                    // то есть пока в мапе лежит текст и chatId - это значит что юзер находится в состоянии разговора с волонтером,
-                    // отправляем сообщение пользователю
-                    REQUEST_FROM_USER.put(messageText, chatId);
-                    sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_WRITE_VOLUNTEER, FINISH_VOLUNTEER_CMD);
-                    break;
-                case SEND_CONTACT_CMD:
-                    sendContactMessage(chatId);
-                    break;
-                case BACK_CMD:
-                    sendStartMessageWithReplyKeyboard(chatId, update.getMessage().getChat().getFirstName());
-                    break;
-                default:
-                    talkWithVolunteerOrNoSuchCommand(chatId, update);
-                    break;
-            }
+            if (!isDog && reply.catReplies.containsKey(messageText)) {
+                reply.catReplies.get(messageText).accept(chatId);
+            } else if (reply.dogReplies.containsKey(messageText)) {
+                reply.dogReplies.get(messageText).accept(chatId);
+
+            } else if (START_CMD.equals(messageText)) {
+                sendMessage(chatId, update.getMessage().getChat().getFirstName() + MESSAGE_TEXT_GREETINGS);
+                sendMessage(chatId, MESSAGE_TEXT_CHOOSE_SHELTER, replyKeyboardShelter());
+            } else if (CALL_VOLUNTEER_CMD.equals(messageText)) {
+                REQUEST_FROM_USER.put(messageText, chatId);
+                sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_WRITE_VOLUNTEER, FINISH_VOLUNTEER_CMD);
+                // Создаем мапу и кладем в нее сообщение в кач-ве ключа и chatId в кач-ве значения того, кто позвал волонтера,
+                // то есть пока в мапе лежит текст и chatId - это значит что юзер находится в состоянии разговора с волонтером,
+                // отправляем сообщение пользователю
+            } else talkWithVolunteerOrNoSuchCommand(chatId, update);
+
         } else if (update.hasCallbackQuery()) {
             String messageData = update.getCallbackQuery().getData();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
-            switch (messageData) {
-                case SHELTER_ABOUT_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_SHELTER_ABOUT);
-                    break;
-                case SHELTER_SCHEDULE_ADDRESS_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_SHELTER_SCHEDULE_ADDRESS);
-                    break;
-                case SHELTER_SAFETY_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_SHELTER_SAFETY);
-                    break;
-                case PET_RULES_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_PET_RULES);
-                    break;
-                case PET_DOCS_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_PET_DOCS);
-                    break;
-                case PET_TRANSPORT_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_PET_TRANSPORT);
-                    break;
-                case PET_HOUSE_CMD:
-                    sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_PET_HOUSE_CHOOSE, KEYBOARD_PET_HOUSE);
-                    break;
-                case PET_HOUSE_FOR_PUPPY_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_PET_HOUSE_PUPPY);
-                    break;
-                case PET_HOUSE_FOR_ADULT_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_PET_HOUSE_ADULT);
-                    break;
-                case PET_HOUSE_FOR_SICK_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_PET_HOUSE_SICK);
-                    break;
-                case PET_ADVICES_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_PET_ADVICES);
-                    break;
-                case PET_CYNOLOGISTS_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_PET_CYNOLOGISTS);
-                    break;
-                case PET_REFUSAL_CMD:
-                    sendMessage(chatId, MESSAGE_TEXT_PET_REFUSAL);
-                    break;
-                case FINISH_VOLUNTEER_CMD:
-                    // Если юзер нажал кнопку Закончить разговор с волонтером, то удаляем последнее сообщение из мапы -
-                    // т е выходим из состояния разговора с волонтером, выводим сообщение, что разговор с волонтером закончен
-                    findAndRemoveRequestFromUser(chatId);
-                    sendMessage(chatId, MESSAGE_TEXT_TALK_ENDED);
-                    break;
-                case REPORT_FORM:
-                    sendMessage(chatId, MESSAGE_TEXT_REPORT_FORM);
-                    break;
-                case SEND_REPORT:
-                    //метод для отправки отчета
-                    break;
-                default:
-                    sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
-                    break;
-            }
-        } else if (update.hasMessage() && update.getMessage().hasContact()) {
-            long chatId = update.getMessage().getChatId();
-            processContact(update);
-            sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT_SUCCESS);
+
+            if (!isDog && reply.catReplies.containsKey(messageData)) {
+                reply.catReplies.get(messageData).accept(chatId);
+            } else if (reply.dogReplies.containsKey(messageData)) {
+                reply.dogReplies.get(messageData).accept(chatId);
+
+            } else if (CALL_VOLUNTEER_CMD.equals(messageData)) {
+                REQUEST_FROM_USER.put(messageData, chatId);
+                sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_WRITE_VOLUNTEER, FINISH_VOLUNTEER_CMD);
+            } else if (SEND_REPORT_CMD.equals(messageData) && isDog) {
+                //МЕТОД ОТПРАВКИ КОНТАКТНЫХ ДАННЫХ в таблицу для собак
+            } else if (SEND_REPORT_CMD.equals(messageData)) {
+                //МЕТОД ОТПРАВКИ КОНТАКТНЫХ ДАННЫХ в таблицу для кошек
+            } else if (SEND_CONTACT_CMD.equals(messageData) && isDog) {
+                //метод для отправки отчета в таблицу для собак
+            } else if (SEND_CONTACT_CMD.equals(messageData)) {
+                //метод для отправки отчет в таблица для кошек
+            } else sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
+        }
+
+    }
+
+    /**
+     * Отправляет пользователю документ
+     *
+     * @param chatId  идентификатор пользователя
+     * @param fileUrl URL документа, документ должен храниться на сервере
+     */
+    public void sendDocument(long chatId, String fileUrl) {
+        SendDocument sendDocument = new SendDocument();
+        sendDocument.setChatId(String.valueOf(chatId));
+        sendDocument.setCaption("Информация по вашему вопросу сожержится в файле");
+        sendDocument.setDocument(new InputFile(fileUrl));
+        try {
+            execute(sendDocument);
+        } catch (TelegramApiException e) {
+            log.error("Error occurred: " + e.getMessage());
         }
     }
 
     /**
-     * Отправляет сообщение
-     * @param chatId идентификатор пользователя
+     * Отправляет пользователю сообщение
+     *
+     * @param chatId     идентификатор пользователя
      * @param textToSend текст сообщения
      * @throws TelegramApiException
      */
-    private void sendMessage(long chatId, String textToSend) {
+    public void sendMessage(long chatId, String textToSend) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(String.valueOf(chatId));
         sendMessage.setText(textToSend);
@@ -175,13 +142,13 @@ public class Bot extends TelegramLongPollingBot {
 
     /**
      * Отправляет сообщение c клавиатурой
-     * @param chatId идентификатор пользователя
+     *
+     * @param chatId     идентификатор пользователя
      * @param textToSend текст сообщения
-     * @param keyboard клавиатура
+     * @param keyboard   клавиатура
      * @throws TelegramApiException
      */
-
-    private void sendMessage(long chatId, String textToSend, ReplyKeyboard keyboard) {
+    public void sendMessage(long chatId, String textToSend, ReplyKeyboard keyboard) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(String.valueOf(chatId));
         sendMessage.setText(textToSend);
@@ -200,31 +167,22 @@ public class Bot extends TelegramLongPollingBot {
      * {@link #sendMessage(long, String, ReplyKeyboard)}
      * {@link #InlineKeyboardMaker(String...)}
      *
-     * @param chatId идентификатор пользователя
+     * @param chatId     идентификатор пользователя
      * @param textToSend текст сообщения
-     * @param buttons множество (массив или varargs) кнопок клавиатуры
+     * @param buttons    множество (массив или varargs) кнопок клавиатуры
      */
-    void sendMessageWithInlineKeyboard(long chatId, String textToSend, String... buttons) {
+    public void sendMessageWithInlineKeyboard(long chatId, String textToSend, String... buttons) {
         InlineKeyboardMarkup inlineKeyboard = InlineKeyboardMaker(buttons);
         sendMessage(chatId, textToSend, inlineKeyboard);
     }
 
     /**
-     * Отправляет сообщение и клавиатуру Этапа 0 по команде start
-     * @param chatId идентификатор пользователя
-     * @param name имя пользователя
-     */
-    void sendStartMessageWithReplyKeyboard(long chatId, String name) {
-        String startAnswer = name + ", выберите действие";
-        sendMessage(chatId, startAnswer, replyKeyboardMaker());
-    }
-
-    /**
      * Создает InlineKeyboard
+     *
      * @param buttons множество (массив или varargs) кнопок клавиатуры
      * @return клавиатура привязанная к сообщению
      */
-    InlineKeyboardMarkup InlineKeyboardMaker(String... buttons) {
+    public InlineKeyboardMarkup InlineKeyboardMaker(String... buttons) {
         InlineKeyboardMarkup inlineKeyboardAbout = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
         //создаем кнопки
@@ -243,12 +201,13 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     /**
-     * Создает клавиатуру Этапа 0
+     * Создает клавиатуру внизу экрана
+     * Эта клавиатура всегда доступна пользователю
+     *
      * @return клавиатура с вариантами команд
      */
-    private ReplyKeyboardMarkup replyKeyboardMaker() {
+    public ReplyKeyboardMarkup replyKeyboardBottom() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        replyKeyboardMarkup.setSelective(true);
         replyKeyboardMarkup.setResizeKeyboard(true);
         replyKeyboardMarkup.setOneTimeKeyboard(false);
 
@@ -267,10 +226,8 @@ public class Bot extends TelegramLongPollingBot {
         keyboardRow2.add(SEND_REPORT_CMD);
         keyboardRow2.add(CALL_VOLUNTEER_CMD);
 
-        // Третья строчка клавиатуры
         KeyboardRow keyboardRow3 = new KeyboardRow();
-        // Добавляем кнопку во третью строчку клавиатуры
-        keyboardRow3.add(SEND_CONTACT_CMD);
+        keyboardRow3.add(SHELTER_CHOOSE);
 
         // Добавляем все строчки клавиатуры в список
         keyboard.add(keyboardRow1);
@@ -284,11 +241,30 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     /**
+     * Создает клавиатуру для выбора приюта внизу экрана
+     *
+     * @return клавиатура с вариантами команд
+     */
+    public ReplyKeyboardMarkup replyKeyboardShelter() {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+        List<KeyboardRow> keyboard = new ArrayList<>();
+        KeyboardRow keyboardRow1 = new KeyboardRow();
+        keyboardRow1.add(SHELTER_CAT);
+        keyboardRow1.add(SHELTER_DOG);
+        keyboard.add(keyboardRow1);
+        replyKeyboardMarkup.setKeyboard(keyboard);
+        return replyKeyboardMarkup;
+    }
+
+    /**
      * Находит и удаляет последний запрос волонтеру от пользователя по chatId пользователя
      *
      * @param chatId идентификатор чата пользователя, который позвал волонтера и написал сообщение волонтеру
      */
-    private void findAndRemoveRequestFromUser(long chatId) {
+    public void findAndRemoveRequestFromUser(long chatId) {
         for (Map.Entry<String, Long> stringLongEntry : REQUEST_FROM_USER.entrySet()) {
             if (stringLongEntry.getValue() == chatId) {
                 REQUEST_FROM_USER.remove(stringLongEntry.getKey());
@@ -366,64 +342,6 @@ public class Bot extends TelegramLongPollingBot {
             // Если сообщение не подходит не под одну команду и волонтер и юзер не находятся в состоянии
             // разговора, то выводим сообщение нет такой команды
             sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
-        }
-    }
-
-    /**
-     * Добавление нового пользователя в базу данных
-     * @param user пользователь телеграмм бота
-     * @return запись пользователя в базу данных если такого еще нет либо самого пользователя с поиском по chatId
-     */
-    private AdopterDog findOrSaveAdopter(User user) {
-        AdopterDog persistentAdopterDog = adopterDogRepository.findAdopterByChatId(user.getId());
-        if (persistentAdopterDog == null) {
-            AdopterDog transientAdopterDog = new AdopterDog();
-            transientAdopterDog.setChatId(user.getId());
-            transientAdopterDog.setFirstName(user.getFirstName());
-            transientAdopterDog.setLastName(user.getLastName());
-            transientAdopterDog.setUserName(user.getUserName());
-            return adopterDogRepository.save(transientAdopterDog);
-        }
-        return persistentAdopterDog;
-    }
-
-    /**
-     * Создает клавиатуру и отсылает сообщение с ней для получения контактных данных пользователя
-     * @param chatId идентификатор чата пользователя
-     */
-    private void sendContactMessage(long chatId) {
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        replyKeyboardMarkup.setSelective(true);
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setOneTimeKeyboard(false);
-
-        KeyboardRow keyboardRow1 = new KeyboardRow();
-        KeyboardButton contact = new KeyboardButton(SEND_PHONE_NUMBER_CMD);
-        contact.setRequestContact(true);
-        keyboardRow1.add(contact);
-
-        KeyboardRow keyboardRow2 = new KeyboardRow();
-        keyboardRow2.add(BACK_CMD);
-
-        List<KeyboardRow> keyboard = new ArrayList<>();
-        keyboard.add(keyboardRow1);
-        keyboard.add(keyboardRow2);
-
-        replyKeyboardMarkup.setKeyboard(keyboard);
-
-        sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT_CHOOSE, replyKeyboardMarkup);
-    }
-
-    /**
-     * Обрабатывает присланные пользователем контактные данные и записывает их базу данных
-     * @param update принятый контакт пользователя
-     */
-    private void processContact(Update update) {
-        User user = update.getMessage().getFrom();
-        AdopterDog adopterDog = adopterDogRepository.findAdopterByChatId(user.getId());
-        if (adopterDog != null) {
-            adopterDog.setTelephoneNumber(update.getMessage().getContact().getPhoneNumber());
-            adopterDogRepository.save(adopterDog);
         }
     }
 }
