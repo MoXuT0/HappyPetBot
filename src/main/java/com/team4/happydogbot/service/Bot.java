@@ -106,7 +106,7 @@ public class Bot extends TelegramLongPollingBot {
         SendDocument sendDocument = new SendDocument();
         sendDocument.setChatId(String.valueOf(chatId));
         sendDocument.setCaption("Информация по вашему вопросу сожержится в файле");
-        sendDocument.setDocument(new InputFile(" "));
+        sendDocument.setDocument(new InputFile("https://github.com/TamaraZolotovskaya/HappyDogBot/raw/dev/src/main/resources/static/dog.pdf"));
         try {
             execute(sendDocument);
         } catch (TelegramApiException e) {
