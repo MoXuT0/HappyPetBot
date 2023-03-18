@@ -1,7 +1,7 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.entity.Dog;
-import com.team4.happydogbot.exceptions.DogNotFoundException;
+import com.team4.happydogbot.exception.DogNotFoundException;
 import com.team4.happydogbot.repository.DogRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -9,6 +9,11 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.Optional;
 
+/**
+ *Класс - сервис, содержащий набор CRUD операций над объектом Dog
+ * @see Dog
+ * @see DogRepository
+ */
 @Slf4j
 @Service
 public class DogService {

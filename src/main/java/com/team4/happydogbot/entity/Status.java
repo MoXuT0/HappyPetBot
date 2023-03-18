@@ -2,6 +2,8 @@ package com.team4.happydogbot.entity;
 
 /**
  * Класс, содержащий параметры для всех стадий пользовательского состояния
+ * @see AdopterCat
+ * @see AdopterDog
  */
 public enum Status {
 
@@ -16,5 +18,4 @@ public enum Status {
     Status(String status) {
         this.status = status;
     }
-
 }

@@ -1,15 +1,13 @@
 package com.team4.happydogbot.repository;
 
-import com.team4.happydogbot.entity.Dog;
+import com.team4.happydogbot.entity.Cat;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 /**
  * Интерфейс, содержащий методы для работы с базой данных животных
- * @see Dog
- * @see com.team4.happydogbot.service.DogService
+ * @see Cat
+ * @see com.team4.happydogbot.service.CatService
  */
-@Repository
-public interface DogRepository extends JpaRepository<Dog, Long> {
+public interface CatRepository extends JpaRepository<Cat, Long> {
 
 }

@@ -1,15 +1,15 @@
 package com.team4.happydogbot.repository;
 
-import com.team4.happydogbot.entity.AdopterDog;
+import com.team4.happydogbot.entity.AdopterCat;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
  * Интерфейс, содержащий методы для работы с базой данных усыновителей
- * @see AdopterDog
- * @see com.team4.happydogbot.service.AdopterDogService
+ * @see AdopterCat
+ * @see com.team4.happydogbot.service.AdopterCatService
  */
 @Repository
-public interface AdopterDogRepository extends JpaRepository<AdopterDog, Long> {
-    AdopterDog findAdopterByChatId(Long id);
+public interface AdopterCatRepository extends JpaRepository<AdopterCat, Long> {
+    AdopterCat findAdopterByChatId(Long id);
 }

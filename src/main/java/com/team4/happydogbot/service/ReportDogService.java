@@ -1,7 +1,7 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.entity.ReportDog;
-import com.team4.happydogbot.exceptions.ReportDogNotFoundException;
+import com.team4.happydogbot.exception.ReportDogNotFoundException;
 import com.team4.happydogbot.repository.ReportDogRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,7 +10,11 @@ import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.Optional;
 
-
+/**
+ *Класс - сервис, содержащий набор CRUD операций над объектом ReportDog
+ * @see ReportDog
+ * @see ReportDogRepository
+ */
 @Slf4j
 @Service
 @Transactional

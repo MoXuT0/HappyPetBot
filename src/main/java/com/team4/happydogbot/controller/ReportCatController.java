@@ -1,7 +1,7 @@
-package com.team4.happydogbot.controllers;
+package com.team4.happydogbot.controller;
 
-import com.team4.happydogbot.entity.ReportDog;
-import com.team4.happydogbot.service.ReportDogService;
+import com.team4.happydogbot.entity.ReportCat;
+import com.team4.happydogbot.service.ReportCatService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -14,18 +14,24 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Collection;
 
+/**
+ * Класс - контроллер для объекта Cat, содержащий набор API endpoints
+ * для обращения к маршрутам отдельными HTTP методами
+ * @see ReportCat
+ * @see ReportCatService
+ * @see ReportCatController
+ */
 @RestController
-@RequestMapping("/report")
+@RequestMapping("/report_cat")
 @Tag(name = "Отчеты", description = "CRUD-операции и другие эндпоинты для работы с отчетами")
-public class ReportDogController {
+public class ReportCatController {
 
-    private final ReportDogService reportService;
+    private final ReportCatService reportCatService;
 
-    public ReportDogController(ReportDogService reportService) {
-        this.reportService = reportService;
+    public ReportCatController(ReportCatService reportCatService) {
+        this.reportCatService = reportCatService;
     }
 
     @Operation(
@@ -39,7 +45,7 @@ public class ReportDogController {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    array = @ArraySchema(schema = @Schema(implementation = ReportDog.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = ReportCat.class))
                             )
                     }
             ),
@@ -49,16 +55,16 @@ public class ReportDogController {
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = ReportDog.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = ReportCat.class))
                             )
                     }
             )
     }
     )
     @PostMapping
-    public ResponseEntity<ReportDog> add(@RequestBody ReportDog reportDog) {
-        reportService.add(reportDog);
-        return ResponseEntity.ok(reportDog);
+    public ResponseEntity<ReportCat> add(@RequestBody ReportCat reportCat) {
+        reportCatService.add(reportCat);
+        return ResponseEntity.ok(reportCat);
     }
 
     @Operation(summary = "Получение отчета по id",
@@ -68,7 +74,7 @@ public class ReportDogController {
                             description = "Отчет, найденный по id",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ReportDog.class)
+                                    schema = @Schema(implementation = ReportCat.class)
                             )
                     )
             }
@@ -84,7 +90,7 @@ public class ReportDogController {
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = ReportDog.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = ReportCat.class))
                             )
                     }
             ),
@@ -94,19 +100,19 @@ public class ReportDogController {
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = ReportDog.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = ReportCat.class))
                             )
                     }
             )
     }
     )
     @GetMapping("/{id}")
-    public ResponseEntity<ReportDog> get(@PathVariable Long id) {
-        ReportDog reportDog = reportService.get(id);
-        if (reportDog == null) {
+    public ResponseEntity<ReportCat> get(@PathVariable Long id) {
+        ReportCat reportCat = reportCatService.get(id);
+        if (reportCat == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(reportDog);
+        return ResponseEntity.ok(reportCat);
     }
 
     @Operation(summary = "Удаление отчета по id",
@@ -116,7 +122,7 @@ public class ReportDogController {
                             description = "Отчет, найденный по id",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ReportDog.class)
+                                    schema = @Schema(implementation = ReportCat.class)
                             )
                     )
             }
@@ -138,7 +144,7 @@ public class ReportDogController {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (reportService.remove(id)) {
+        if (reportCatService.remove(id)) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
@@ -155,7 +161,7 @@ public class ReportDogController {
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = ReportDog.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = ReportCat.class))
                             )
                     }
             ),
@@ -165,15 +171,15 @@ public class ReportDogController {
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = ReportDog.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = ReportCat.class))
                             )
                     }
             )
     }
     )
     @PutMapping
-    public ResponseEntity<ReportDog> update(@RequestBody ReportDog reportDog) {
-        return ResponseEntity.of(reportService.update(reportDog));
+    public ResponseEntity<ReportCat> update(@RequestBody ReportCat reportCat) {
+        return ResponseEntity.of(reportCatService.update(reportCat));
     }
 
     @Operation(summary = "Просмотр всех отчетов",
@@ -183,13 +189,13 @@ public class ReportDogController {
                             description = "Отчеты найдены",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ReportDog.class)
+                                    schema = @Schema(implementation = ReportCat.class)
                             )
                     )
             }
     )
     @GetMapping("/all")
-    public Collection<ReportDog> getAll() {
-        return this.reportService.getAll();
+    public Collection<ReportCat> getAll() {
+        return this.reportCatService.getAll();
     }
 }

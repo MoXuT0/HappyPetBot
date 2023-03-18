@@ -12,16 +12,16 @@ import java.time.LocalDate;
 /**
  * Класс, описывающий отчеты пользователей о состоянии животного
  * @param 'examination' поле для статуса проверки (выполняется волонтером) отчета (по умолчанию - null)
- * @see AdopterDog
- * @see Dog
- * @see ReportDog
+ * @see AdopterCat
+ * @see Cat
+ * @see ReportCat
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "report_dog")
-public class ReportDog {
+@Table(name = "report_cat")
+public class ReportCat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -41,5 +41,5 @@ public class ReportDog {
     @ManyToOne
     @JoinColumn(name = "chat_id")
     @JsonBackReference
-    private AdopterDog adopterDog;
+    private AdopterCat adopterCat;
 }

@@ -1,4 +1,4 @@
-package com.team4.happydogbot.controllers;
+package com.team4.happydogbot.controller;
 
 import com.team4.happydogbot.entity.AdopterDog;
 import com.team4.happydogbot.service.AdopterDogService;
@@ -14,11 +14,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Collection;
 
+/**
+ * Класс - контроллер для объекта AdopterDog, содержащий набор API endpoints
+ * для обращения к маршрутам отдельными HTTP методами
+ * @see AdopterDog
+ * @see AdopterDogService
+ * @see AdopterDogController
+ */
 @RestController
-@RequestMapping("/adopter")
+@RequestMapping("/adopter_dog")
 @Tag(name = "Усыновители", description = "CRUD-операции и другие эндпоинты для работы с усыновителями")
 public class AdopterDogController {
     private final AdopterDogService adopterDogService;

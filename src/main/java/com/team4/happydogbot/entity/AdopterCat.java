@@ -4,24 +4,23 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import javax.persistence.*;
 import java.util.List;
 import java.util.Objects;
 
 /**
- * Класс, описывающий пользователя, как потенциального усыновителя собаки
+ * Класс, описывающий пользователя, как потенциального усыновителя кота
  * @param 'status' поле для отображения статуса пользовательского состояния
  * (отображает этап или состояние, в котором находится пользователь)
- * @see Dog
- * @see AdopterDog
+ * @see Cat
+ * @see AdopterCat
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "adopter_dog")
-public class AdopterDog {
+@Table(name = "adopter_cat")
+public class AdopterCat {
     @Id
     @Column(name = "chat_id", nullable = false)
     private Long chatId;
@@ -41,23 +40,22 @@ public class AdopterDog {
     @Enumerated(EnumType.STRING)
     private Status state = Status.REGISTRATION;
 
-    @OneToMany(mappedBy = "adopterDog", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "adopterCat", cascade = CascadeType.ALL)
     @JsonManagedReference
-    private List<ReportDog> reports;
+    private List<ReportCat> reports;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "dog_id")
-    private Dog dog;
+    @JoinColumn(name = "cat_id")
+    private Cat cat;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AdopterDog adopterDog = (AdopterDog) o;
-        return age == adopterDog.age && Objects.equals(chatId, adopterDog.chatId)
-                && Objects.equals(firstName, adopterDog.firstName) && Objects.equals(lastName, adopterDog.lastName)
-                && Objects.equals(userName, adopterDog.userName) && Objects.equals(address, adopterDog.address)
-                && Objects.equals(telephoneNumber, adopterDog.telephoneNumber) && state == adopterDog.state;
+        if (!(o instanceof AdopterCat that)) return false;
+        return age == that.age && Objects.equals(chatId, that.chatId) && Objects.equals(firstName, that.firstName)
+                && Objects.equals(lastName, that.lastName) && Objects.equals(userName, that.userName)
+                && Objects.equals(address, that.address) && Objects.equals(telephoneNumber, that.telephoneNumber)
+                && state == that.state;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.team4.happydogbot.exceptions;
+package com.team4.happydogbot.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class ReportDogNotFoundException extends RuntimeException {
 
     public ReportDogNotFoundException() {
-        super("Отчет по собакам не найден!");
+        super("ReportDog is not found!");
     }
 }
