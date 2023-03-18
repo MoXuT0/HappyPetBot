@@ -3,6 +3,7 @@ package com.team4.happydogbot.service;
 import com.team4.happydogbot.entity.Dog;
 import com.team4.happydogbot.repository.DogRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -46,9 +47,14 @@ public class DogService {
      * @param id
      * @return
      */
+    @Nullable
     public boolean remove(Long id) {
-        if (dogRepository.existsById(id)) {
+        log.info("Был вызван метод удаления собаки по id={}", id);
+
+        if (dogRepository.getReferenceById(id).getAdopterDog() != null) {
             dogRepository.getReferenceById(id).getAdopterDog().setDog(null);
+        }
+        if (dogRepository.existsById(id)) {
             dogRepository.deleteById(id);
             return true;
         }
