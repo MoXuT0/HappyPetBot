@@ -42,11 +42,10 @@ public class Reply {
         catReplies.put(PET_REFUSAL_CMD, chatId -> bot.sendMessage(chatId, MESSAGE_CAT_REFUSAL));
         catReplies.put(PET_HOUSE_CMD, chatId -> bot.sendMessageWithInlineKeyboard(chatId, MESSAGE_CAT_HOUSE_CHOOSE, KEYBOARD_CAT_HOUSE));
 
-        catReplies.put(PET_HOUSE_FOR_KITTY_CMD, chatId -> bot.sendDocument(chatId));
-        //тестирую отправку документа, метод будет выглядеть по другому
-        catReplies.put(PET_HOUSE_FOR_ADULT_CMD, chatId -> bot.sendMessage(chatId, MESSAGE_DOG_HOUSE_ADULT));
-        catReplies.put(PET_HOUSE_FOR_SICK_CMD, chatId -> bot.sendMessage(chatId, MESSAGE_DOG_HOUSE_SICK));
-        //тестирую отправку документа, возможно методы будут выглядеть по другому
+        catReplies.put(PET_HOUSE_FOR_KITTY_CMD, chatId -> bot.sendDocument(chatId, URL_CAT_HOUSE_KITTY));
+        catReplies.put(PET_HOUSE_FOR_ADULT_CMD, chatId -> bot.sendDocument(chatId, URL_CAT_HOUSE_ADULT));
+        catReplies.put(PET_HOUSE_FOR_SICK_CMD, chatId -> bot.sendDocument(chatId, URL_CAT_HOUSE_SICK));
+
     }
 
     /**
@@ -93,10 +92,9 @@ public class Reply {
         dogReplies.put(PET_REFUSAL_CMD, chatId -> bot.sendMessage(chatId, MESSAGE_DOG_REFUSAL));
         dogReplies.put(PET_HOUSE_CMD, chatId -> bot.sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_DOG_HOUSE_CHOOSE, KEYBOARD_DOG_HOUSE));
 
-        dogReplies.put(PET_HOUSE_FOR_PUPPY_CMD, chatId -> bot.sendDocument(chatId));
-        //тестирую отправку документа, метод будет выглядеть по другому
-        dogReplies.put(PET_HOUSE_FOR_ADULT_CMD, chatId -> bot.sendMessage(chatId, MESSAGE_DOG_HOUSE_ADULT));
-        dogReplies.put(PET_HOUSE_FOR_SICK_CMD, chatId -> bot.sendMessage(chatId, MESSAGE_DOG_HOUSE_SICK));
+        dogReplies.put(PET_HOUSE_FOR_PUPPY_CMD, chatId -> bot.sendDocument(chatId, URL_DOG_HOUSE_PUPPY));
+        dogReplies.put(PET_HOUSE_FOR_ADULT_CMD, chatId -> bot.sendDocument(chatId, URL_DOG_HOUSE_ADULT));
+        dogReplies.put(PET_HOUSE_FOR_SICK_CMD, chatId -> bot.sendDocument(chatId, URL_DOG_HOUSE_SICK));
 
         // Этап 3
         dogReplies.put(REPORT_FORM, chatId -> bot.sendMessage(chatId, MESSAGE_TEXT_REPORT_FORM));
