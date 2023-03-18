@@ -1,9 +1,9 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.entity.Dog;
+import com.team4.happydogbot.exceptions.DogNotFoundException;
 import com.team4.happydogbot.repository.DogRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -14,7 +14,6 @@ import java.util.Optional;
 public class DogService {
 
     private final DogRepository dogRepository;
-
 
     public DogService(DogRepository dogRepository) {
         this.dogRepository = dogRepository;
@@ -27,6 +26,8 @@ public class DogService {
      * @see DogService
      */
     public Dog add(Dog dog) {
+        log.info("Was invoked method to create a dog");
+
         return this.dogRepository.save(dog);
     }
 
@@ -34,45 +35,49 @@ public class DogService {
      * Метод находит и возвращает собаку по id
      * @param id
      * @return {@link DogRepository#findById(Object)}
-     * @throws IllegalArgumentException
+     * @throws DogNotFoundException если собака с указанным id не найдена
      * @see DogService
      */
     public Dog get(Long id) {
+        log.info("Was invoked method to get a dog by id={}", id);
+
         return this.dogRepository.findById(id)
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(DogNotFoundException::new);
     }
 
     /**
      * Метод находит и удаляет собаку по id
      * @param id
-     * @return
+     * @return true если удаление прошло успешно
+     * @throws DogNotFoundException если собака с указанным id не найдена
      */
-    @Nullable
     public boolean remove(Long id) {
-        log.info("Был вызван метод удаления собаки по id={}", id);
+        log.info("Was invoked method to remove a dog by id={}", id);
 
-        if (dogRepository.getReferenceById(id).getAdopterDog() != null) {
-            dogRepository.getReferenceById(id).getAdopterDog().setDog(null);
-        }
         if (dogRepository.existsById(id)) {
+            if (dogRepository.getReferenceById(id).getAdopterDog() != null) {
+                dogRepository.getReferenceById(id).getAdopterDog().setDog(null);
+            }
             dogRepository.deleteById(id);
             return true;
         }
-        return false;
+        throw new DogNotFoundException();
     }
 
     /**
      * Метод обновляет и возвращает собаку
      * @param dog
      * @return {@link DogRepository#save(Object)}
-     * @throws IllegalArgumentException
+     * @throws DogNotFoundException если собака с указанным id не найдена
      * @see DogService
      */
     public Optional<Dog> update(Dog dog) {
+        log.info("Was invoked method to update a dog");
+
         if (dogRepository.existsById(dog.getId())) {
             return Optional.ofNullable(dogRepository.save(dog));
         }
-        throw new IllegalArgumentException();
+        throw new DogNotFoundException();
     }
 
     /**
@@ -81,6 +86,8 @@ public class DogService {
      * @see DogService
      */
     public Collection<Dog> getAll() {
+        log.info("Was invoked method to get all dogs");
+
         return this.dogRepository.findAll();
     }
 }

@@ -144,6 +144,38 @@ public class ReportDogController {
         return ResponseEntity.notFound().build();
     }
 
+    @Operation(
+            summary = "Изменение отчета",
+            description = "Обновление отчета из тела запроса"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Данные отчета обновлены",
+                    content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = ReportDog.class))
+                            )
+                    }
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Данные отчета не обновлены",
+                    content = {
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = ReportDog.class))
+                            )
+                    }
+            )
+    }
+    )
+    @PutMapping
+    public ResponseEntity<ReportDog> update(@RequestBody ReportDog reportDog) {
+        return ResponseEntity.of(reportService.update(reportDog));
+    }
+
     @Operation(summary = "Просмотр всех отчетов",
             responses = {
                     @ApiResponse(

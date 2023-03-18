@@ -12,7 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.File;
 import java.time.LocalDate;
 
 /**
- * Класс, описывающий отчеты(reports) пользователей (adopters) о состоянии животного
+ * Класс, описывающий отчеты(reports) пользователей (adopters) о состоянии животного (Dog)
  * @param 'examination' поле для статуса проверки (выполняется волонтером) отчета (по умолчанию - null)
  */
 @Data
