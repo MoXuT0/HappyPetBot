@@ -1,7 +1,6 @@
 package com.team4.happydogbot.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,31 +13,19 @@ import javax.persistence.*;
 @Entity
 @Table(name = "dog")
 public class Dog {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "dog_id")
+    @Column(name = "id")
     private Long id;
-    @Column(name = "breed")
-    private String breed;
-    @Column(name = "name")
+    @Column(name = "name", nullable = false, length = 25)
     private String name;
+    @Column(name = "breed", nullable = false, length = 25)
+    private String breed;
     @Column(name = "year_birth")
     private int yearOfBirth;
     @Column(name = "description")
     private String description;
-//    @OneToOne(mappedBy = "dog", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-//    @JsonManagedReference
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "chat_id")
+    @OneToOne(mappedBy = "dog")
     @JsonBackReference
     private AdopterDog adopterDog;
-
-    public Dog(Long id, String breed, String name, int yearOfBirth, String description) {
-        this.id = id;
-        this.breed = breed;
-        this.name = name;
-        this.yearOfBirth = yearOfBirth;
-        this.description = description;
-    }
 }

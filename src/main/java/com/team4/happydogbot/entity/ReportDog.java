@@ -23,8 +23,8 @@ import java.time.LocalDate;
 public class ReportDog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "report_id")
-    private Long reportId;
+    @Column(name = "id")
+    private Long id;
     @CreationTimestamp
     @Column(name = "report_date")
     private LocalDate reportDate;
@@ -37,8 +37,7 @@ public class ReportDog {
     private String caption;
     @Column(name = "examination")
     private Boolean examination = null;
-
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "chat_id")
     @JsonBackReference
     private AdopterDog adopterDog;

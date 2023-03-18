@@ -48,6 +48,7 @@ public class DogService {
      */
     public boolean remove(Long id) {
         if (dogRepository.existsById(id)) {
+            dogRepository.getReferenceById(id).getAdopterDog().setDog(null);
             dogRepository.deleteById(id);
             return true;
         }

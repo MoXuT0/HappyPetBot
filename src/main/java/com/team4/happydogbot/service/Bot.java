@@ -31,16 +31,15 @@ import static com.team4.happydogbot.constants.BotReplies.*;
 @Slf4j
 @Service
 public class Bot extends TelegramLongPollingBot {
-    final BotConfig config;
+    private final BotConfig config;
+
+    private final AdopterDogRepository adopterDogRepository;
 
     @Autowired
-    private AdopterDogRepository adopterDogRepository;
-
-    public Bot(BotConfig config) {
+    public Bot(BotConfig config, AdopterDogRepository adopterDogRepository) {
         this.config = config;
+        this.adopterDogRepository = adopterDogRepository;
     }
-
-    public static final long VOLUNTEER_ID = 1607411391;
     public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
 
     @Override
@@ -305,7 +304,7 @@ public class Bot extends TelegramLongPollingBot {
      * @param messageId идентификатор пересылаемого волонтеру сообщения
      */
     private void forwardMessageToVolunteer(long chatId, int messageId) {
-        ForwardMessage forwardMessage = new ForwardMessage(String.valueOf(VOLUNTEER_ID), String.valueOf(chatId), messageId);
+        ForwardMessage forwardMessage = new ForwardMessage(String.valueOf(config.getVolunteerChatId()), String.valueOf(chatId), messageId);
         try {
             execute(forwardMessage);
         } catch (TelegramApiException e) {
@@ -352,7 +351,7 @@ public class Bot extends TelegramLongPollingBot {
             REQUEST_FROM_USER.put(update.getMessage().getText(), chatId);
             forwardMessageToVolunteer(chatId, update.getMessage().getMessageId());
             sendMessage(chatId, MESSAGE_TEXT_WAS_SENT);
-        } else if (VOLUNTEER_ID == chatId
+        } else if (config.getVolunteerChatId() == chatId
                 // Если сообщение поступило от волонтера и содержит Reply на другое сообщение и текст в
                 // Reply совпадает с тем что в мапе, то это сообщение отправляем юзеру
                 && update.getMessage().getReplyToMessage() != null

@@ -1,6 +1,5 @@
 package com.team4.happydogbot.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,48 +22,33 @@ import java.util.Objects;
 @Table(name = "adopter_dog")
 public class AdopterDog {
     @Id
-    @Column(name = "adopter_id")
+    @Column(name = "chat_id", nullable = false)
     private Long chatId;
-    @Column(name = "first_name", nullable = true)
+    @Column(name = "first_name", nullable = false, length = 25)
     private String firstName;
-    @Column(name = "last_name", nullable = true)
+    @Column(name = "last_name", length = 25)
     private String lastName;
-    @Column(name = "user_name", nullable = true)
+    @Column(name = "user_name", nullable = false, length = 25)
     private String userName;
     @Column(name = "age")
     private int age;
-    @Column(name = "address")
+    @Column(name = "address", length = 50)
     private String address;
-    @Column(name = "phone_number")
+    @Column(name = "phone_number", nullable = false, length = 15)
     private String telephoneNumber;
     @Column(name = "status")
     //поле для отображения уровня взаимодействия с пользователем
     //(отображает этап или состояние, в котором находится пользователь)
     @Enumerated(EnumType.STRING)
-    Status state;
+    private Status state = Status.REGISTRATION;
 
-    @OneToMany(mappedBy = "adopterDog", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "adopterDog", cascade = CascadeType.ALL)
     @JsonManagedReference
-    private List<ReportDog> reportDogs;
+    private List<ReportDog> reports;
 
-//    @OneToOne(fetch = FetchType.EAGER)
-//    @JsonBackReference
-//    @JoinColumn(name = "dog_id")
-    @OneToOne(mappedBy = "adopterDog", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "dog_id")
     private Dog dog;
-
-    public AdopterDog(Long chatId, String firstName, String lastName, String userName, int age, String address,
-                      String telephoneNumber, Status state) {
-        this.chatId = chatId;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.userName = userName;
-        this.age = age;
-        this.address = address;
-        this.telephoneNumber = telephoneNumber;
-        this.state = Status.USER;
-    }
 
     @Override
     public boolean equals(Object o) {
