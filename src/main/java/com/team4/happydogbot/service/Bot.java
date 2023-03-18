@@ -101,12 +101,16 @@ public class Bot extends TelegramLongPollingBot {
 
     }
 
-    //@Tamara пока проверяю работу метода
-    public void sendDocument(long chatId) {
+    /**
+     * Отправляет пользователю документ
+     * @param chatId идентификатор пользователя
+     * @param fileUrl URL документа, документ должен храниться на сервере
+     */
+    public void sendDocument(long chatId, String fileUrl) {
         SendDocument sendDocument = new SendDocument();
         sendDocument.setChatId(String.valueOf(chatId));
         sendDocument.setCaption("Информация по вашему вопросу сожержится в файле");
-        sendDocument.setDocument(new InputFile("https://github.com/TamaraZolotovskaya/HappyDogBot/raw/dev/src/main/resources/static/dog.pdf"));
+        sendDocument.setDocument(new InputFile(fileUrl));
         try {
             execute(sendDocument);
         } catch (TelegramApiException e) {
@@ -115,7 +119,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     /**
-     * Отправляет сообщение
+     * Отправляет пользователю сообщение
      *
      * @param chatId     идентификатор пользователя
      * @param textToSend текст сообщения
