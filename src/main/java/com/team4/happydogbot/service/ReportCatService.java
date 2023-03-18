@@ -1,20 +1,23 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.entity.ReportCat;
-import com.team4.happydogbot.exceptions.ReportCatNotFoundException;
+import com.team4.happydogbot.exception.ReportCatNotFoundException;
 import com.team4.happydogbot.repository.ReportCatRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-
 import javax.transaction.Transactional;
 import java.util.Collection;
 
-
+/**
+ *Класс - сервис, содержащий набор CRUD операций над объектом ReportCat
+ * @see ReportCat
+ * @see ReportCatRepository
+ */
 @Slf4j
 @Service
 @Transactional
 public class ReportCatService {
+
     private final ReportCatRepository reportCatRepository;
 
     public ReportCatService(ReportCatRepository reportRepository) {
@@ -28,6 +31,7 @@ public class ReportCatService {
      * @see ReportCatService
      */
     public ReportCat add(ReportCat reportCat) {
+        log.info("Was invoked method to add a reportCat");
         return this.reportCatRepository.save(reportCat);
     }
 
@@ -39,6 +43,7 @@ public class ReportCatService {
      * @see ReportCatService
      */
     public ReportCat get(Long id) {
+        log.info("Was invoked method to get a reportCat by id={}", id);
         return this.reportCatRepository.findById(id)
                 .orElseThrow(ReportCatNotFoundException::new);
     }
@@ -46,14 +51,16 @@ public class ReportCatService {
     /**
      * Метод находит и удаляет отчет по id
      * @param id
+     * @throws ReportCatNotFoundException
      * @see ReportCatService
      */
     public boolean remove(Long id) {
+        log.info("Was invoked method to remove a reportCat by id={}", id);
         if (reportCatRepository.existsById(id)) {
             reportCatRepository.deleteById(id);
             return true;
         }
-        return false;
+        throw new ReportCatNotFoundException();
     }
 
     /**
@@ -62,6 +69,7 @@ public class ReportCatService {
      * @see ReportCatService
      */
     public Collection<ReportCat> getAll() {
+        log.info("Was invoked method to get all reportsCat");
         return this.reportCatRepository.findAll();
     }
 }

@@ -1,4 +1,4 @@
-package com.team4.happydogbot.exceptions;
+package com.team4.happydogbot.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

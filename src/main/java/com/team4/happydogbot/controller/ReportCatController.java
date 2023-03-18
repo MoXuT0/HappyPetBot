@@ -1,6 +1,5 @@
-package com.team4.happydogbot.controllers;
+package com.team4.happydogbot.controller;
 
-import com.team4.happydogbot.entity.AdopterCat;
 import com.team4.happydogbot.entity.ReportCat;
 import com.team4.happydogbot.service.ReportCatService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,10 +14,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Collection;
 
-
+/**
+ * Класс - контроллер для объекта Cat, содержащий набор API endpoints
+ * для обращения к маршрутам отдельными HTTP методами
+ * @see ReportCat
+ * @see ReportCatService
+ * @see ReportCatController
+ */
 @RestController
 @RequestMapping("/report_cat")
 @Tag(name = "Отчеты", description = "CRUD-операции и другие эндпоинты для работы с отчетами")

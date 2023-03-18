@@ -1,7 +1,7 @@
-package com.team4.happydogbot.controllers;
+package com.team4.happydogbot.controller;
 
-import com.team4.happydogbot.entity.AdopterCat;
-import com.team4.happydogbot.service.AdopterCatService;
+import com.team4.happydogbot.entity.Cat;
+import com.team4.happydogbot.service.CatService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -14,183 +14,188 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Collection;
 
-
+/**
+ * Класс - контроллер для объекта Cat, содержащий набор API endpoints
+ * для обращения к маршрутам отдельными HTTP методами
+ * @see Cat
+ * @see CatService
+ * @see CatController
+ */
 @RestController
-@RequestMapping("/adopter_cat")
-@Tag(name = "Усыновители", description = "CRUD-операции и другие эндпоинты для работы с усыновителями")
-public class AdopterCatController {
-    private final AdopterCatService adopterCatService;
+@RequestMapping("/cat")
+@Tag(name = "Коты", description = "CRUD-операции и другие эндпоинты для работы с собаками")
+public class CatController {
 
-    public AdopterCatController(AdopterCatService adopterCatService) {
-        this.adopterCatService = adopterCatService;
+   private final CatService catService;
+
+    public CatController(CatService catService) {
+        this.catService = catService;
     }
 
     @Operation(
-            summary = "Добавление усыновителя",
-            description = "Добавление нового усыновителя из тела запроса"
+            summary = "Добавление кота",
+            description = "Добавление нового кота из тела запроса"
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Усыновитель был добавлен",
+                    description = "Кот был добавлен",
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = AdopterCat.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = Cat.class))
                             )
                     }
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Некорректные параметры усыновителя",
+                    description = "Некорректные параметры кота",
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = AdopterCat.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = Cat.class))
                             )
                     }
             )
     }
     )
     @PostMapping
-    public ResponseEntity<AdopterCat> add(@RequestBody AdopterCat adopterCat) {
-        adopterCatService.add(adopterCat);
-        return ResponseEntity.ok(adopterCat);
+    public ResponseEntity<Cat> add(@RequestBody Cat cat) {
+        catService.add(cat);
+        return ResponseEntity.ok(cat);
     }
 
-    @Operation(summary = "Получение усыновителя по chatId",
+    @Operation(summary = "Получение кота по id",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Усыновитель, найденный по chatId",
+                            description = "Кот, найденная по id",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = AdopterCat.class)
+                                    schema = @Schema(implementation = Cat.class)
                             )
                     )
             }
     )
     @Parameters(value = {
-            @Parameter(name = "chatId", example = "1234567890")
+            @Parameter(name = "id", example = "1")
     }
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Усыновитель был найден",
+                    description = "Кот был найден",
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = AdopterCat.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = Cat.class))
                             )
                     }
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Усыновитель не был найден",
+                    description = "Кот не был найден",
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = AdopterCat.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = Cat.class))
                             )
                     }
             )
     }
     )
-    @GetMapping("/{chatId}")
-    public ResponseEntity<AdopterCat> get(@PathVariable Long chatId) {
-        AdopterCat adopterCat = adopterCatService.get(chatId);
-        if (adopterCat == null) {
+    @GetMapping("/{id}")
+    public ResponseEntity<Cat> get(@PathVariable Long id) {
+        Cat dog = catService.get(id);
+        if (dog == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(adopterCat);
+        return ResponseEntity.ok(dog);
     }
 
-    @Operation(summary = "Удаление усыновителя по chatId",
+    @Operation(summary = "Удаление кота по id",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Усыновитель, найденный по chatId",
+                            description = "Кот, найденная по id",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = AdopterCat.class)
+                                    schema = @Schema(implementation = Cat.class)
                             )
                     )
             }
     )
     @Parameters(value = {
-            @Parameter(name = "chatId", example = "1234567890")
+            @Parameter(name = "id", example = "1")
     }
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Усыновитель удален"
+                    description = "Кот удален"
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Усыновитель не был удален"
+                    description = "Кот не был удален"
             )
     }
     )
-    @DeleteMapping("/{chatId}")
-    public ResponseEntity<Void> delete(@PathVariable Long chatId) {
-        if (adopterCatService.remove(chatId)) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        if (catService.remove(id)) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
     }
 
     @Operation(
-            summary = "Изменение данных усыновителя",
-            description = "Обновление данных усыновителя из тела запроса"
+            summary = "Изменение данных кота",
+            description = "Обновление данных кота из тела запроса"
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Данные усыновителя обновлены",
+                    description = "Данные кота обновлены",
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = AdopterCat.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = Cat.class))
                             )
                     }
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Данные усыновителя не обновлены",
+                    description = "Данные кота не обновлены",
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = AdopterCat.class))
+                                    array = @ArraySchema(schema = @Schema(implementation = Cat.class))
                             )
                     }
             )
     }
     )
     @PutMapping
-    public ResponseEntity<AdopterCat> update(@RequestBody AdopterCat adopterCat) {
-        return ResponseEntity.of(adopterCatService.update(adopterCat));
+    public ResponseEntity<Cat> update(@RequestBody Cat cat) {
+        return ResponseEntity.of(catService.update(cat));
     }
 
-    @Operation(summary = "Просмотр всех усыновителей",
+    @Operation(summary = "Просмотр всех котов",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Усыновители найдены",
+                            description = "Коты найдены",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = AdopterCat.class)
+                                    schema = @Schema(implementation = Cat.class)
                             )
                     )
             }
     )
     @GetMapping("/all")
-    public Collection<AdopterCat> getAll() {
-        return this.adopterCatService.getAll();
+    public Collection<Cat> getAll() {
+        return this.catService.getAll();
     }
 }
-

@@ -4,9 +4,13 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import javax.persistence.*;
 
+/**
+ * Класс, описывающий обитателя кошачьего приюта
+ * @see Cat
+ * @see AdopterCat
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,7 +19,7 @@ import javax.persistence.*;
 public class Cat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "cat_id")
     private Long id;
     @Column(name = "name", nullable = false, length = 25)
     private String name;
@@ -26,6 +30,7 @@ public class Cat {
     @Column(name = "description")
     private String description;
 
-    @OneToOne(mappedBy = "cat", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "cat")
+    @JsonBackReference
     private AdopterCat adopterCat;
 }
