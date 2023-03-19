@@ -42,7 +42,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
-    public boolean isDog = true;
+//    public boolean isDog = true;
 
     Reply reply = new Reply(this);
 
