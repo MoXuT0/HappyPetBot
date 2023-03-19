@@ -57,11 +57,13 @@ public class Reply {
         dogReplies.put(SHELTER_CHOOSE, chatId -> bot.sendMessage(chatId, MESSAGE_TEXT_CHOOSE_SHELTER, bot.replyKeyboardShelter()));
         dogReplies.put(SHELTER_CAT, chatId -> {
             bot.sendMessage(chatId, MESSAGE_TEXT_CHOOSE_ACTION, bot.replyKeyboardBottom());
-            bot.isDog = false;
+//            bot.isDog = false;
+            bot.changeUserStatusOfShelter(chatId, false);
         });
         dogReplies.put(SHELTER_DOG, chatId -> {
             bot.sendMessage(chatId, MESSAGE_TEXT_CHOOSE_ACTION, bot.replyKeyboardBottom());
-            bot.isDog = true;
+//            bot.isDog = true;
+            bot.changeUserStatusOfShelter(chatId, true);
         });
         dogReplies.put(SHELTER_INFO_CMD, chatId -> bot.sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_SHELTER_INFO, KEYBOARD_SHELTER_ABOUT));
         dogReplies.put(PET_INFO_CMD, chatId -> bot.sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_PET_INFO, KEYBOARD_DOG_ADOPT));
