@@ -1,14 +1,10 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.config.BotConfig;
-import com.team4.happydogbot.entity.Adopter;
-import com.team4.happydogbot.entity.Report;
+import com.team4.happydogbot.repository.AdopterDogRepository;
 import com.team4.happydogbot.replies.Reply;
-import com.team4.happydogbot.repository.AdopterRepository;
-import com.team4.happydogbot.repository.ReportRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
@@ -24,36 +20,24 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.team4.happydogbot.constants.BotCommands.*;
 import static com.team4.happydogbot.constants.BotReplies.*;
-import static com.team4.happydogbot.entity.Status.ADDITIONAL_PERIOD;
-import static com.team4.happydogbot.entity.Status.PROBATION;
 
 @Slf4j
 @Service
 public class Bot extends TelegramLongPollingBot {
-    final BotConfig config;
-
-    private final AdopterRepository adopterRepository;
-
-    private final ReportRepository reportRepository;
+    private final BotConfig config;
 
 
-
-    public Bot(BotConfig config, AdopterRepository adopterRepository, ReportRepository reportRepository) {
+    public Bot(BotConfig config) {
         this.config = config;
-        this.adopterRepository = adopterRepository;
-        this.reportRepository = reportRepository;
     }
 
-    public static final long VOLUNTEER_ID = 1607411391;
     public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
     public boolean isDog = true;
 
@@ -69,7 +53,6 @@ public class Bot extends TelegramLongPollingBot {
     public String getBotToken() {
         return config.getToken();
     }
-
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -118,12 +101,17 @@ public class Bot extends TelegramLongPollingBot {
 
     }
 
-    //@Tamara пока проверяю работу метода
-    public void sendDocument(long chatId) {
+    /**
+     * Отправляет пользователю документ
+     *
+     * @param chatId  идентификатор пользователя
+     * @param fileUrl URL документа, документ должен храниться на сервере
+     */
+    public void sendDocument(long chatId, String fileUrl) {
         SendDocument sendDocument = new SendDocument();
         sendDocument.setChatId(String.valueOf(chatId));
         sendDocument.setCaption("Информация по вашему вопросу сожержится в файле");
-        sendDocument.setDocument(new InputFile(" "));
+        sendDocument.setDocument(new InputFile(fileUrl));
         try {
             execute(sendDocument);
         } catch (TelegramApiException e) {
@@ -132,7 +120,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     /**
-     * Отправляет сообщение
+     * Отправляет пользователю сообщение
      *
      * @param chatId     идентификатор пользователя
      * @param textToSend текст сообщения
@@ -208,7 +196,6 @@ public class Bot extends TelegramLongPollingBot {
 
         return inlineKeyboardAbout;
     }
-
 
     /**
      * Создает клавиатуру внизу экрана
@@ -290,7 +277,7 @@ public class Bot extends TelegramLongPollingBot {
      * @param messageId идентификатор пересылаемого волонтеру сообщения
      */
     private void forwardMessageToVolunteer(long chatId, int messageId) {
-        ForwardMessage forwardMessage = new ForwardMessage(String.valueOf(VOLUNTEER_ID), String.valueOf(chatId), messageId);
+        ForwardMessage forwardMessage = new ForwardMessage(String.valueOf(config.getVolunteerChatId()), String.valueOf(chatId), messageId);
         try {
             execute(forwardMessage);
         } catch (TelegramApiException e) {
@@ -337,9 +324,9 @@ public class Bot extends TelegramLongPollingBot {
             REQUEST_FROM_USER.put(update.getMessage().getText(), chatId);
             forwardMessageToVolunteer(chatId, update.getMessage().getMessageId());
             sendMessage(chatId, MESSAGE_TEXT_WAS_SENT);
-        } else if (VOLUNTEER_ID == chatId
+        } else if (config.getVolunteerChatId() == chatId
                 // Если сообщение поступило от волонтера и содержит Reply на другое сообщение и текст в
-                // Reply совпадает с тем что в мапе,то это сообщение отправляем юзеру
+                // Reply совпадает с тем что в мапе, то это сообщение отправляем юзеру
                 && update.getMessage().getReplyToMessage() != null
                 && REQUEST_FROM_USER.containsKey(update.getMessage().getReplyToMessage().getText())) {
             String s = update.getMessage().getReplyToMessage().getText();

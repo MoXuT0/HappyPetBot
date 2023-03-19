@@ -1,30 +1,31 @@
 package com.team4.happydogbot.entity;
 
 import javax.persistence.*;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.telegram.telegrambots.meta.api.objects.File;
-
 import java.time.LocalDate;
 
 /**
- * Класс, описывающий отчеты(reports) пользователей (adopters) о состоянии животного
+ * Класс, описывающий отчеты пользователей о состоянии животного
  * @param 'examination' поле для статуса проверки (выполняется волонтером) отчета (по умолчанию - null)
+ * @see AdopterCat
+ * @see Cat
+ * @see ReportCat
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "report")
-public class Report {
+@Table(name = "report_cat")
+public class ReportCat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "report_id")
-    private Long reportId;
+    @Column(name = "id")
+    private Long id;
     @CreationTimestamp
     @Column(name = "report_date")
     private LocalDate reportDate;
@@ -37,9 +38,8 @@ public class Report {
     private String caption;
     @Column(name = "examination")
     private Boolean examination = null;
-
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "chat_id")
     @JsonBackReference
-    private Adopter adopter;
+    private AdopterCat adopterCat;
 }

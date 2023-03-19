@@ -2,10 +2,11 @@ package com.team4.happydogbot.entity;
 
 /**
  * Класс, содержащий параметры для всех стадий пользовательского состояния
+ * @see AdopterCat
+ * @see AdopterDog
  */
 public enum Status {
 
-    USER("Пользователь общается с ботом"),
     REGISTRATION("Пользователь оставил свои контактные данные"),
     ADOPTION_DENIED("Потенциальному родителю отказано в усыновлении животного"),
     PROBATION("Назначен испытательный срок - 30 календарных дней"),
@@ -17,5 +18,4 @@ public enum Status {
     Status(String status) {
         this.status = status;
     }
-
 }

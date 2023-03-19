@@ -77,8 +77,14 @@ public class BotReplies {
             "В общественном транспорте будет некомфортно ехать ни вам, ни собаке, " +
             "а слишком шумная обстановка может напугать животное.";
     public static final String MESSAGE_TEXT_DOG_HOUSE_CHOOSE = "О доме для какой собаки вы хотите узнать?";
-    public static final String MESSAGE_DOG_HOUSE_PUPPY = "src/main/resources/dog.pdf";
-    /*public static final String MESSAGE_TEXT_PET_HOUSE_PUPPY = "Если вы jпланируете заводить щенка, необходимо:\n" +
+    public static final String URL_DOG_HOUSE_PUPPY = "https://github.com/TamaraZolotovskaya/HappyDogBot/raw/dev/src/main/resources/static/petHomeDocs/HomeForYoungDog.pdf";
+    public static final String URL_DOG_HOUSE_ADULT = "https://github.com/TamaraZolotovskaya/HappyDogBot/raw/dev/src/main/resources/static/petHomeDocs/HomeForAdultDog.pdf";
+    public static final String URL_DOG_HOUSE_SICK = "https://github.com/TamaraZolotovskaya/HappyDogBot/raw/dev/src/main/resources/static/petHomeDocs/HomeForSickDog.pdf";
+    public static final String URL_CAT_HOUSE_KITTY = "https://github.com/TamaraZolotovskaya/HappyDogBot/raw/dev/src/main/resources/static/petHomeDocs/HomeForYoungCat.pdf";
+    public static final String URL_CAT_HOUSE_ADULT = "https://github.com/TamaraZolotovskaya/HappyDogBot/raw/dev/src/main/resources/static/petHomeDocs/HomeForAdultCat.pdf";
+    public static final String URL_CAT_HOUSE_SICK = "https://github.com/TamaraZolotovskaya/HappyDogBot/raw/dev/src/main/resources/static/petHomeDocs/HomeForSickCat.pdf";
+
+    /*public static final String MESSAGE_TEXT_PET_HOUSE_PUPPY = "Если вы планируете заводить щенка, необходимо:\n" +
             "1. Позаботьтесь о безопасности в доме. Собаки могут грызть провода и играть с ними, " +
             "поэтому все электрокабели необходимо провести по верху или спрятать в специальные короба под плинтус. " +
             "Уберите потенциально опасные предметы со столиков и нижних полок: стеклянные и фарфоровые вазы, " +
@@ -93,7 +99,7 @@ public class BotReplies {
             "4. Подберите корм, миски купите минимум две — одну для воды, другую для еды. " +
             "Лучше всего подойдут керамические или металлические, тогда собака не сможет их сгрызть. \n" +
             "5. Вам потребуются средства для ухода за питомцем: щетка для расчесывания шерсти, шампунь для мытья, " +
-            "зубная паста и щетка, лосьоны для чистки глаз и ушей.\n";*/
+            "зубная паста и щетка, лосьоны для чистки глаз и ушей.\n";
     public static final String MESSAGE_DOG_HOUSE_ADULT = "Если вы планируете заводить взрослую собаку, необходимо:\n" +
             "1. Позаботьтесь о безопасности в доме. Собаки могут грызть провода и играть с ними, " +
             "поэтому все электрокабели необходимо провести по верху или спрятать в специальные короба под плинтус. " +
@@ -123,7 +129,7 @@ public class BotReplies {
             "Лучше всего подойдут керамические или металлические, тогда собака не сможет их сгрызть. \n" +
             "5. Вам потребуются средства для ухода за питомцем: щетка для расчесывания шерсти, шампунь для мытья, " +
             "зубная паста и щетка, лосьоны для чистки глаз и ушей.\n" +
-            "6. Уточните у волонтера какие именно ограничения у выбранного питомца, чтобы лучше подготовиться";
+            "6. Уточните у волонтера какие именно ограничения у выбранного питомца, чтобы лучше подготовиться";*/
     public static final String MESSAGE_DOG_ADVICES = "Cоветы кинолога:\n" +
             "1. Поймите разницу между дрессировкой и воспитанием собаки.\n" +
             "2. Займитесь воспитание собаки с 1-го дня.\n" +

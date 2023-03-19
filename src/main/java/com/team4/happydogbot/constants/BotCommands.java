@@ -1,10 +1,5 @@
 package com.team4.happydogbot.constants;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.team4.happydogbot.constants.BotReplies.*;
-
 public class BotCommands {
 
     // Команды этап 0. Входная точка общения бота с пользователем
