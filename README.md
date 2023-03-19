@@ -1,7 +1,8 @@
-[![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Montserrat&weight=600&size=25&pause=1000&color=010304&background=FFFFFF00&center=%D0%9B%D0%9E%D0%96%D0%AC&vCenter=%D0%9B%D0%9E%D0%96%D0%AC&repeat=%D0%B8%D1%81%D1%82%D0%B8%D0%BD%D0%BD%D1%8B%D0%B9&width=435&lines=HappyDogBot)](https://git.io/typing-svg) 
+[![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Montserrat&weight=600&size=25&color=010304&background=FFFFFF00&center=%D0%9B%D0%9E%D0%96%D0%AC&vCenter=%D0%9B%D0%9E%D0%96%D0%AC&width=435&lines=HappyDogBot)](https://git.io/typing-svg) 
 
 Телеграмм-бот, который  отвечает на популярные вопросы людей о том, что нужно знать и уметь, чтобы забрать животное из приюта.
-## ##
+
+
 ## Команда разработчиков: <br>
 [Дмитрий Лунев](https://github.com/dvlunev)<br>
 [Максим Лисицин](https://github.com/Maximfsda)<br>
