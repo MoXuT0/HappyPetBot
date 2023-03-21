@@ -6,7 +6,7 @@ package com.team4.happydogbot.entity;
  * @see AdopterDog
  */
 public enum Status {
-
+    USER("Пользователь выбрал приют"),
     REGISTRATION("Пользователь оставил свои контактные данные"),
     ADOPTION_DENIED("Потенциальному родителю отказано в усыновлении животного"),
     PROBATION("Назначен испытательный срок - 30 календарных дней"),
