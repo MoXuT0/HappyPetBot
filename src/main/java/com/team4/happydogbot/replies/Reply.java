@@ -9,7 +9,11 @@ import java.util.function.Consumer;
 import static com.team4.happydogbot.constants.BotCommands.*;
 import static com.team4.happydogbot.constants.BotReplies.*;
 
-
+/**
+ * Класс содержит мапы, в которых командам соответствуют реакции бина на эти команды
+ * @see com.team4.happydogbot.constants.BotCommands
+ * @see com.team4.happydogbot.constants.BotReplies
+ */
 public class Reply {
 
     private Bot bot;

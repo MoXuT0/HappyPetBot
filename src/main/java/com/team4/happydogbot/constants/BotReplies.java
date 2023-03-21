@@ -1,7 +1,9 @@
 package com.team4.happydogbot.constants;
 
 
-
+/**
+ * Класс содержит константы с ответами на команды
+ */
 public class BotReplies {
 
     // Ответы этап 0. Входная точка общения бота с пользователем

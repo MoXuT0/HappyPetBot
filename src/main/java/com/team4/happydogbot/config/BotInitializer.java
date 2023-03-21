@@ -14,7 +14,6 @@ public class BotInitializer {
 
     private Bot bot;
 
-    @Autowired
     public BotInitializer(Bot bot) {
         this.bot = bot;
     }

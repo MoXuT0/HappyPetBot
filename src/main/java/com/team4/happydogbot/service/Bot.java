@@ -27,15 +27,20 @@ import java.util.Map;
 
 import static com.team4.happydogbot.constants.BotCommands.*;
 import static com.team4.happydogbot.constants.BotReplies.*;
-
+/**
+ * Класс, содержит логику работы бота
+ * @see Reply
+ */
 @Slf4j
 @Service
 public class Bot extends TelegramLongPollingBot {
+
+
     private final BotConfig config;
 
     private final AdopterDogRepository adopterDogRepository;
 
-    @Autowired
+    //  @Autowired
     public Bot(BotConfig config, AdopterDogRepository adopterDogRepository) {
         this.config = config;
         this.adopterDogRepository = adopterDogRepository;
@@ -44,7 +49,7 @@ public class Bot extends TelegramLongPollingBot {
     public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
     public boolean isDog = true;
 
-    Reply reply = new Reply(this);
+    private final Reply reply = new Reply(this);
 
 
     @Override
@@ -63,6 +68,7 @@ public class Bot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
+
             if (!isDog && reply.catReplies.containsKey(messageText)) {
                 reply.catReplies.get(messageText).accept(chatId);
             } else if (reply.dogReplies.containsKey(messageText)) {
@@ -182,7 +188,7 @@ public class Bot extends TelegramLongPollingBot {
      * @param buttons множество (массив или varargs) кнопок клавиатуры
      * @return клавиатура привязанная к сообщению
      */
-    public InlineKeyboardMarkup InlineKeyboardMaker(String... buttons) {
+    private InlineKeyboardMarkup InlineKeyboardMaker(String... buttons) {
         InlineKeyboardMarkup inlineKeyboardAbout = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
         //создаем кнопки
