@@ -105,7 +105,7 @@ public class BotCommands {
     public static final String[] KEYBOARD_DECISION = {
             FINISH_PROBATION,
             EXTEND_PROBATION_14,
-//            EXTEND_PROBATION_30,
+            EXTEND_PROBATION_30,
             REFUSE
     };
 

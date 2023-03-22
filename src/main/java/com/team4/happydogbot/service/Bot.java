@@ -1,10 +1,7 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.config.BotConfig;
-import com.team4.happydogbot.entity.AdopterCat;
-import com.team4.happydogbot.entity.AdopterDog;
-import com.team4.happydogbot.entity.ReportCat;
-import com.team4.happydogbot.entity.ReportDog;
+import com.team4.happydogbot.entity.*;
 import com.team4.happydogbot.replies.Reply;
 import com.team4.happydogbot.repository.AdopterCatRepository;
 import com.team4.happydogbot.repository.AdopterDogRepository;
@@ -19,6 +16,7 @@ import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
@@ -32,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.team4.happydogbot.constants.BotCommands.*;
 import static com.team4.happydogbot.constants.BotReplies.*;
@@ -118,6 +117,7 @@ public class Bot extends TelegramLongPollingBot {
             } else if (SEND_CONTACT_CMD.equals(messageData)) {
                 //метод для отправки отчет в таблица для кошек
             } else if (FINISH_PROBATION.equals(messageData)) {
+
                 //метод изменения статуса на Finished, метод информирования пользователя
             } else if (EXTEND_PROBATION_14.equals(messageData)) {
                 //метод изменения статуса на Additional_14, метод информирования пользователя
@@ -388,7 +388,7 @@ public class Bot extends TelegramLongPollingBot {
                 .filter(x -> (x.getState() == PROBATION)
                         || x.getState() == ADDITIONAL_PERIOD_14
                         || x.getState() == ADDITIONAL_PERIOD_30)
-                .toList();
+                .collect(Collectors.toList());
         List<ReportDog> reports = reportDogRepository.findAll();
         for (AdopterDog adopter : adoptersWithProbationPeriod) {
             ReportDog report = reports.stream().filter(x -> (x.getAdopterDog().equals(adopter))
@@ -411,7 +411,7 @@ public class Bot extends TelegramLongPollingBot {
                 .filter(x -> (x.getState() == PROBATION)
                         || x.getState() == ADDITIONAL_PERIOD_14
                         || x.getState() == ADDITIONAL_PERIOD_30)
-                .toList();
+                .collect(Collectors.toList());
         List<ReportCat> reports = reportCatRepository.findAll();
         for (AdopterCat adopter : adoptersWithProbationPeriod) {
             ReportCat report = reports.stream().filter(x -> (x.getAdopterCat().equals(adopter))
@@ -434,7 +434,7 @@ public class Bot extends TelegramLongPollingBot {
                         && (LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear() + 30 > 30)
                         || (x.getState() == ADDITIONAL_PERIOD_14
                         && LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear() + 30 > 14))
-                .toList();
+                .collect(Collectors.toList());
         for (AdopterCat adopter : adoptersWithFinishProbationPeriod) {
             sendMessageWithInlineKeyboard(config.getVolunteerChatId(), TAKE_DECISION + "у пользователя "
                     + adopter.getFirstName() + adopter.getLastName(), KEYBOARD_DECISION);
@@ -449,16 +449,24 @@ public class Bot extends TelegramLongPollingBot {
                         && (LocalDate.now().getDayOfYear() +30 - x.getStatusDate().getDayOfYear() > 30))
                         || (x.getState() == ADDITIONAL_PERIOD_14
                         && */(LocalDate.now().getDayOfYear() + 15 - x.getStatusDate().getDayOfYear()) > 14))
-                .toList();
+                .collect(Collectors.toList());
         for (AdopterDog adopter : adoptersWithFinishProbationPeriod) {
             int i = 1;
             int adopterPeriod = LocalDate.now().getDayOfYear() + 15 - adopter.getStatusDate().getDayOfYear();
             sendMessage(config.getVolunteerChatId(), adopter.getUserName() + " " + adopterPeriod);
-            sendMessageWithInlineKeyboard(config.getVolunteerChatId(), TAKE_DECISION, FINISH_PROBATION);
+            sendMessageWithInlineKeyboard(config.getVolunteerChatId(), TAKE_DECISION, REFUSE);
 //            sendMessageWithInlineKeyboard(config.getVolunteerChatId(), "", EXTEND_PROBATION_14);
 //            sendMessageWithInlineKeyboard(config.getVolunteerChatId(), "", EXTEND_PROBATION_30);
 //            sendMessageWithInlineKeyboard(config.getVolunteerChatId(), "", REFUSE);
             i++;
         }
+    }
+
+    private void changeStatus(Update update, String messageData, Status status){
+        AdopterDog adopterDog = adopterDogRepository.getReferenceById(update.getCallbackQuery().getMessage().getChatId());
+        adopterDog.setState(status);
+        adopterDogRepository.getReferenceById(adopterDog.getChatId()).setState(status);
+        AdopterDogService
+
     }
 }

@@ -97,7 +97,11 @@ public class Reply {
 
         // Этап 3
         dogReplies.put(REPORT_FORM, chatId -> bot.sendMessage(chatId, MESSAGE_TEXT_REPORT_FORM));
-        dogReplies.put(PET_HOUSE_CMD, chatId -> bot.sendMessageWithInlineKeyboard(257078762, TAKE_DECISION, KEYBOARD_DECISION));
+
+        dogReplies.put(FINISH_PROBATION, chatId -> bot.sendMessage(chatId, MESSAGE_DECISION_FINISH));
+        dogReplies.put(EXTEND_PROBATION_14, chatId -> bot.sendMessage(chatId, MESSAGE_DECISION_EXTEND_14));
+        dogReplies.put(EXTEND_PROBATION_30, chatId -> bot.sendMessage(chatId, MESSAGE_DECISION_EXTEND_30));
+        dogReplies.put(REFUSE, chatId -> bot.sendMessage(chatId, MESSAGE_DECISION_REFUSE));
     }
 
 }
