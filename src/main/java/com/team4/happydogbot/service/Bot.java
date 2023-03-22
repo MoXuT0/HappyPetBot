@@ -1,10 +1,17 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.config.BotConfig;
-import com.team4.happydogbot.repository.AdopterDogRepository;
+import com.team4.happydogbot.entity.AdopterCat;
+import com.team4.happydogbot.entity.AdopterDog;
+import com.team4.happydogbot.entity.ReportCat;
+import com.team4.happydogbot.entity.ReportDog;
 import com.team4.happydogbot.replies.Reply;
+import com.team4.happydogbot.repository.AdopterCatRepository;
+import com.team4.happydogbot.repository.AdopterDogRepository;
+import com.team4.happydogbot.repository.ReportCatRepository;
+import com.team4.happydogbot.repository.ReportDogRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
@@ -20,6 +27,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,15 +35,28 @@ import java.util.Map;
 
 import static com.team4.happydogbot.constants.BotCommands.*;
 import static com.team4.happydogbot.constants.BotReplies.*;
+import static com.team4.happydogbot.entity.Status.*;
+
 
 @Slf4j
 @Service
 public class Bot extends TelegramLongPollingBot {
     private final BotConfig config;
+    private AdopterDogRepository adopterDogRepository;
+    private AdopterCatRepository adopterCatRepository;
+    private ReportDogRepository reportDogRepository;
+    private ReportCatRepository reportCatRepository;
 
+//    public Bot(BotConfig config) {
+//        this.config = config;
+//    }
 
-    public Bot(BotConfig config) {
+    public Bot(BotConfig config, AdopterDogRepository adopterDogRepository, AdopterCatRepository adopterCatRepository, ReportDogRepository reportDogRepository, ReportCatRepository reportCatRepository) {
         this.config = config;
+        this.adopterDogRepository = adopterDogRepository;
+        this.adopterCatRepository = adopterCatRepository;
+        this.reportDogRepository = reportDogRepository;
+        this.reportCatRepository = reportCatRepository;
     }
 
     public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
@@ -96,6 +117,14 @@ public class Bot extends TelegramLongPollingBot {
                 //метод для отправки отчета в таблицу для собак
             } else if (SEND_CONTACT_CMD.equals(messageData)) {
                 //метод для отправки отчет в таблица для кошек
+            } else if (FINISH_PROBATION.equals(messageData)) {
+                //метод изменения статуса на Finished, метод информирования пользователя
+            } else if (EXTEND_PROBATION_14.equals(messageData)) {
+                //метод изменения статуса на Additional_14, метод информирования пользователя
+            } else if (EXTEND_PROBATION_30.equals(messageData)) {
+                //метод изменения статуса на Additional_30, метод информирования пользователя
+            } else if (REFUSE.equals(messageData)) {
+                //метод изменения статуса на Refuse, метод информирования пользователя
             } else sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
         }
 
@@ -347,25 +376,89 @@ public class Bot extends TelegramLongPollingBot {
      * дней от текущей даты по следующему алгоритму:<br>
      * - получение списка Adopter со статусом PROBATION;<br>
      * - получение для каждого adopter из списка отчетов последний отчет;<br>
-     * - отправка сообщения волонтеру по итогу проверки на разницу дня года текущей даты и дня года даты регистрации отчета
+     * - отправка сообщения волонтеру по итогу проверки на разницу дня года текущей даты и дня года даты регистрации отчета.<br>
+     * Аннотация @Sheduled (cron = "* * * * * *") актвирует метод по расписанию cron = "Секунда Минута Час День Месяц Год"
      */
+    //для проверки рабоспособности cron = "30 * * * * *"
     @Scheduled(cron = "30 30 8 * * *")
-    private void sendNoteForVolunteer() {
+    private void sendAttentionForDogVolunteer() {
 
-        List<Adopter> adopters = adopterRepository.findAll();
-        List<Adopter> adoptersWithProbationPeriod = adopters.stream().filter(x -> (x.getState() == PROBATION)||
-                (x.getState() == ADDITIONAL_PERIOD)).toList();
-        List<Report> reports = reportRepository.findAll();
-        for (Adopter adopter : adoptersWithProbationPeriod) {
-            Report report = reports.stream().filter(x -> (x.getAdopter().equals(adopter))
+        List<AdopterDog> adopters = adopterDogRepository.findAll();
+        List<AdopterDog> adoptersWithProbationPeriod = adopters.stream()
+                .filter(x -> (x.getState() == PROBATION)
+                        || x.getState() == ADDITIONAL_PERIOD_14
+                        || x.getState() == ADDITIONAL_PERIOD_30)
+                .toList();
+        List<ReportDog> reports = reportDogRepository.findAll();
+        for (AdopterDog adopter : adoptersWithProbationPeriod) {
+            ReportDog report = reports.stream().filter(x -> (x.getAdopterDog().equals(adopter))
                             && (x.getExamination()))
                     .reduce((first, last) -> last)
                     .orElseThrow();
             //для проверки рабоспособности в условии ниже добавить +3 после LocalDate.now().getDayOfYear()
-            if(LocalDate.now().getDayOfYear()  - report.getReportDate().getDayOfYear() >=2){
-                sendMessage(VOLUNTEER_ID, "Внимание! Усыновитель "+ adopter.getFirstName()
+            if (LocalDate.now().getDayOfYear() - report.getReportDate().getDayOfYear() >= 2) {
+                sendMessage(config.getVolunteerChatId(), "Внимание! Усыновитель " + adopter.getFirstName()
                         + " " + adopter.getLastName() + " уже больше 2 дней не присылает отчеты!");
             }
+        }
+    }
+
+    //для проверки рабоспособности cron = "30 * * * * *"
+    @Scheduled(cron = "30 30 8 * * *")
+    private void sendAttentionForCatVolunteer() {
+
+        List<AdopterCat> adoptersWithProbationPeriod = adopterCatRepository.findAll().stream()
+                .filter(x -> (x.getState() == PROBATION)
+                        || x.getState() == ADDITIONAL_PERIOD_14
+                        || x.getState() == ADDITIONAL_PERIOD_30)
+                .toList();
+        List<ReportCat> reports = reportCatRepository.findAll();
+        for (AdopterCat adopter : adoptersWithProbationPeriod) {
+            ReportCat report = reports.stream().filter(x -> (x.getAdopterCat().equals(adopter))
+                            && (x.getExamination()))
+                    .reduce((first, last) -> last)
+                    .orElseThrow();
+            //для проверки рабоспособности в условии ниже добавить +3 после LocalDate.now().getDayOfYear()
+            if (LocalDate.now().getDayOfYear() - report.getReportDate().getDayOfYear() >= 2) {
+                sendMessage(config.getVolunteerChatId(), "Внимание! Усыновитель " + adopter.getFirstName()
+                        + " " + adopter.getLastName() + " уже больше 2 дней не присылает отчеты!");
+            }
+        }
+    }
+
+
+    @Scheduled(cron = "30 * * * * *")
+    private void sendFinishListForCatVolunteer() {
+        List<AdopterCat> adoptersWithFinishProbationPeriod = adopterCatRepository.findAll().stream()
+                .filter(x -> (x.getState() == PROBATION || x.getState() == ADDITIONAL_PERIOD_30)
+                        && (LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear() + 30 > 30)
+                        || (x.getState() == ADDITIONAL_PERIOD_14
+                        && LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear() + 30 > 14))
+                .toList();
+        for (AdopterCat adopter : adoptersWithFinishProbationPeriod) {
+            sendMessageWithInlineKeyboard(config.getVolunteerChatId(), TAKE_DECISION + "у пользователя "
+                    + adopter.getFirstName() + adopter.getLastName(), KEYBOARD_DECISION);
+
+        }
+    }
+
+    @Scheduled(cron = "30 * * * * *")
+    private void sendFinishListForDogVolunteer() {
+        List<AdopterDog> adoptersWithFinishProbationPeriod = adopterDogRepository.findAll().stream()
+                .filter(x -> (/*(x.getState() == PROBATION ||  x.getState() == ADDITIONAL_PERIOD_30)
+                        && (LocalDate.now().getDayOfYear() +30 - x.getStatusDate().getDayOfYear() > 30))
+                        || (x.getState() == ADDITIONAL_PERIOD_14
+                        && */(LocalDate.now().getDayOfYear() + 15 - x.getStatusDate().getDayOfYear()) > 14))
+                .toList();
+        for (AdopterDog adopter : adoptersWithFinishProbationPeriod) {
+            int i = 1;
+            int adopterPeriod = LocalDate.now().getDayOfYear() + 15 - adopter.getStatusDate().getDayOfYear();
+            sendMessage(config.getVolunteerChatId(), adopter.getUserName() + " " + adopterPeriod);
+            sendMessageWithInlineKeyboard(config.getVolunteerChatId(), TAKE_DECISION, FINISH_PROBATION);
+//            sendMessageWithInlineKeyboard(config.getVolunteerChatId(), "", EXTEND_PROBATION_14);
+//            sendMessageWithInlineKeyboard(config.getVolunteerChatId(), "", EXTEND_PROBATION_30);
+//            sendMessageWithInlineKeyboard(config.getVolunteerChatId(), "", REFUSE);
+            i++;
         }
     }
 }

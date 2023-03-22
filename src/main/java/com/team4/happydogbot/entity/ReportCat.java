@@ -1,12 +1,12 @@
 package com.team4.happydogbot.entity;
 
-import javax.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.telegram.telegrambots.meta.api.objects.File;
+
+import javax.persistence.*;
 import java.time.LocalDate;
 
 /**
@@ -29,13 +29,13 @@ public class ReportCat {
     @CreationTimestamp
     @Column(name = "report_date")
     private LocalDate reportDate;
-    //поля для обработки фотографий
+ /*   //поля для обработки фотографий
     private byte[] picture;
     private File filePicture;
     private String filePath;
     //поле текста при добавлении фото
     @Column(name = "report_text")
-    private String caption;
+    private String caption;*/
     @Column(name = "examination")
     private Boolean examination = null;
     @ManyToOne

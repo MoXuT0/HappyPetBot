@@ -23,6 +23,7 @@ public class Reply {
      * */
     public Map<String, Consumer<Long>> catReplies = new HashMap<>();
     {
+
         //Этап 0
         catReplies.put(PET_INFO_CMD, chatId -> bot.sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_PET_INFO, KEYBOARD_CAT_ADOPT));
 
@@ -96,7 +97,7 @@ public class Reply {
 
         // Этап 3
         dogReplies.put(REPORT_FORM, chatId -> bot.sendMessage(chatId, MESSAGE_TEXT_REPORT_FORM));
-
+        dogReplies.put(PET_HOUSE_CMD, chatId -> bot.sendMessageWithInlineKeyboard(257078762, TAKE_DECISION, KEYBOARD_DECISION));
     }
 
 }

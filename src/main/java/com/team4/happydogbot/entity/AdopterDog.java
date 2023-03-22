@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -40,6 +42,10 @@ public class AdopterDog {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status state = Status.REGISTRATION;
+
+    @CreationTimestamp
+    @Column(name = "status_date")
+    private LocalDate statusDate;
 
     @OneToMany(mappedBy = "adopterDog", cascade = CascadeType.ALL)
     @JsonManagedReference
