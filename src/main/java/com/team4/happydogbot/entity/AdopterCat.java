@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 import java.util.List;
 import java.util.Objects;
@@ -39,15 +40,26 @@ public class AdopterCat {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status state = Status.USER;
-    @OneToMany(mappedBy = "adopterCat", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "adopterCat", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<ReportCat> reports;
-
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "cat_id")
     private Cat cat;
     @Column(name = "is_dog")
     private boolean isDog;
+
+    public void setCat(Cat cat) {
+        this.cat = cat;
+    }
+
+    public boolean isDog() {
+        return isDog;
+    }
+
+    public void setDog(boolean dog) {
+        isDog = dog;
+    }
 
     @Override
     public boolean equals(Object o) {

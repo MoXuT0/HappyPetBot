@@ -84,10 +84,12 @@ public class BotCommands {
 
     //Команды этапа 3. Ведение питомца
     public static final String REPORT_FORM = "Форма ежедневного отчета";
-    public static final String SEND_REPORT  = "Отправить отчет";
+    public static final String REPORT_EXAMPLE = "Образец отчета";
+    public static final String SEND_REPORT = "Отправить отчет";
 
     public static final String[] KEYBOARD_REPORT = {
             REPORT_FORM,
+            REPORT_EXAMPLE,
             SEND_REPORT,
             CALL_VOLUNTEER_CMD
     };

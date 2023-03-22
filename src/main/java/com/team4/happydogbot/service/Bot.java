@@ -3,6 +3,8 @@ package com.team4.happydogbot.service;
 import com.team4.happydogbot.config.BotConfig;
 import com.team4.happydogbot.entity.AdopterCat;
 import com.team4.happydogbot.entity.AdopterDog;
+import com.team4.happydogbot.entity.ReportCat;
+import com.team4.happydogbot.entity.ReportDog;
 import com.team4.happydogbot.repository.AdopterCatRepository;
 import com.team4.happydogbot.repository.AdopterDogRepository;
 import com.team4.happydogbot.replies.Reply;
@@ -14,7 +16,10 @@ import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
@@ -23,10 +28,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.team4.happydogbot.constants.BotCommands.*;
 import static com.team4.happydogbot.constants.BotReplies.*;
@@ -51,8 +56,9 @@ public class Bot extends TelegramLongPollingBot {
 
     public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
 
-    Reply reply = new Reply(this);
+    public static final HashSet<Long> REQUEST_GET_REPLY_FROM_USER = new HashSet<>();
 
+    Reply reply = new Reply(this);
 
     @Override
     public String getBotUsername() {
@@ -82,42 +88,169 @@ public class Bot extends TelegramLongPollingBot {
             } else if (CALL_VOLUNTEER_CMD.equals(messageText)) {
                 REQUEST_FROM_USER.put(messageText, chatId);
                 sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_WRITE_VOLUNTEER, FINISH_VOLUNTEER_CMD);
-                // Создаем мапу и кладем в нее сообщение в кач-ве ключа и chatId в кач-ве значения того, кто позвал волонтера,
-                // то есть пока в мапе лежит текст и chatId - это значит что юзер находится в состоянии разговора с волонтером,
+                // Кладем в HashMap сообщение в кач-ве ключа и chatId в кач-ве значения того, кто позвал волонтера,
+                // то есть пока в HashMap лежит текст и chatId - это значит что юзер находится в состоянии разговора с волонтером,
                 // отправляем сообщение пользователю
+            } else if (REQUEST_GET_REPLY_FROM_USER.contains(chatId)) {
+                sendMessageWithInlineKeyboard(update.getMessage().getChatId(), MESSAGE_TEXT_NO_REPORT_PHOTO, REPORT_EXAMPLE, SEND_REPORT);
             } else talkWithVolunteerOrNoSuchCommand(chatId, update);
 
         } else if (update.hasCallbackQuery()) {
             String messageData = update.getCallbackQuery().getData();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
-
             if (adopterCatRepository.findAdopterCatByChatId(chatId) != null &&
                     !adopterCatRepository.findAdopterCatByChatId(chatId).isDog() &&
                     reply.catReplies.containsKey(messageData)) {
                 reply.catReplies.get(messageData).accept(chatId);
             } else if (reply.dogReplies.containsKey(messageData)) {
                 reply.dogReplies.get(messageData).accept(chatId);
-
             } else if (CALL_VOLUNTEER_CMD.equals(messageData)) {
                 REQUEST_FROM_USER.put(messageData, chatId);
                 sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_WRITE_VOLUNTEER, FINISH_VOLUNTEER_CMD);
-            } else if (SEND_REPORT_CMD.equals(messageData) &&
-                    adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
-                //МЕТОД ОТПРАВКИ КОНТАКТНЫХ ДАННЫХ в таблицу для собак
-            } else if (SEND_REPORT_CMD.equals(messageData)) {
-                //МЕТОД ОТПРАВКИ КОНТАКТНЫХ ДАННЫХ в таблицу для кошек
+            } else if (SEND_REPORT.equals(messageData)) {
+                REQUEST_GET_REPLY_FROM_USER.add(chatId);
+                sendMessage(chatId, MESSAGE_TEXT_PRE_REPORT);
+                // Кладем в HashSet chatId пользователя, который нажал кнопку "Отправить отчет", то есть пока в HashMap
+                // лежит chatId - это значит что юзер находится в состоянии отправки отчета,
+                // отправляем сообщение пользователю
             } else if (SEND_CONTACT_CMD.equals(messageData) &&
                     adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
-                //метод для отправки отчета в таблицу для собак
+                //МЕТОД ОТПРАВКИ КОНТАКТНЫХ ДАННЫХ в таблицу для собак
             } else if (SEND_CONTACT_CMD.equals(messageData)) {
-                //метод для отправки отчет в таблица для кошек
+                //МЕТОД ОТПРАВКИ КОНТАКТНЫХ ДАННЫХ в таблицу для кошек
+            } else sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
+        } else if (update.hasMessage() && (update.getMessage().hasPhoto() || update.getMessage().hasDocument())) {
+            long chatId = update.getMessage().getChatId();
+            if (REQUEST_GET_REPLY_FROM_USER.contains(chatId) &&
+                    adopterDogRepository.findAdopterDogByChatId(chatId) != null &&
+                    adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
+                if (update.getMessage().getCaption() == null) {
+                    sendMessageWithInlineKeyboard(update.getMessage().getChatId(), MESSAGE_TEXT_NO_REPORT_TEXT, REPORT_EXAMPLE, SEND_REPORT);
+                } else {
+                    getReport(update, true);
+                }
+            } else if (REQUEST_GET_REPLY_FROM_USER.contains(chatId)) {
+                if (update.getMessage().getCaption() == null) {
+                    sendMessageWithInlineKeyboard(update.getMessage().getChatId(), MESSAGE_TEXT_NO_REPORT_TEXT, REPORT_EXAMPLE, SEND_REPORT);
+                } else {
+                    getReport(update, false);
+                }
+
             } else sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
         }
-
     }
 
     /**
-     * Отправляет пользователю документ
+     * Метод проверяет текстовую часть отчета на соответствие шаблону, если это фото, выбирает максимальный размер,
+     * если это файл, получает fileId и записывает данные отчета в базу кошек или собак, убирает состояние отправки
+     * отчета - удаляет chatId из HashSet где хранятся пользоватили нажавшие кнопку "Отправить отчет"
+     * Используются методы:<br>
+     * {@link #sendMessageWithInlineKeyboard(long chatId, String textToSend, String... buttons)}<br>
+     * {@link #sendMessage(long chatId, String textToSend)}
+     *
+     * @param update входящий апдейт бота с фото или файлом (файлом на случай отправки пользователем фото без сжатия)
+     * @param isDog  состояние выбранного приюта у Adopter
+     */
+    public void getReport(Update update, boolean isDog) {
+        Pattern reportPattern = Pattern.compile(REPORT_REGEX);
+        Matcher reportMatcher = reportPattern.matcher(update.getMessage().getCaption());
+        if (reportMatcher.matches()) {
+            String reportText = update.getMessage().getCaption();
+            String fileId;
+            if (update.getMessage().hasPhoto()) {
+                List<PhotoSize> photoSizes = update.getMessage().getPhoto();
+                PhotoSize photoSize = photoSizes.stream()
+                        .max(Comparator.comparing(PhotoSize::getFileSize)).orElse(null);
+                fileId = photoSize.getFileId();
+            } else {
+                Document document = update.getMessage().getDocument();
+                fileId = document.getFileId();
+            }
+            if (isDog) {
+                AdopterDog adopterDog = adopterDogRepository.findAdopterDogByChatId(update.getMessage().getChatId());
+                ReportDog reportDog = new ReportDog();
+                reportDog.setReportDate(LocalDate.now());
+                reportDog.setFileId(fileId);
+                reportDog.setCaption(reportText);
+                reportDog.setAdopterDog(adopterDog);
+                adopterDog.getReports().add(reportDog);
+                adopterDogRepository.save(adopterDog);
+            } else {
+                AdopterCat adopterCat = adopterCatRepository.findAdopterCatByChatId(update.getMessage().getChatId());
+                ReportCat reportCat = new ReportCat();
+                reportCat.setReportDate(LocalDate.now());
+                reportCat.setFileId(fileId);
+                reportCat.setCaption(reportText);
+                reportCat.setAdopterCat(adopterCat);
+                adopterCat.getReports().add(reportCat);
+                adopterCatRepository.save(adopterCat);
+            }
+            REQUEST_GET_REPLY_FROM_USER.remove(update.getMessage().getChatId());
+            sendMessage(update.getMessage().getChatId(), MESSAGE_THANKS_FOR_REPLY);
+        } else {
+            REQUEST_GET_REPLY_FROM_USER.remove(update.getMessage().getChatId());
+            sendMessageWithInlineKeyboard(update.getMessage().getChatId(), MESSAGE_TEXT_NOT_LIKE_EXAMPLE, REPORT_EXAMPLE, SEND_REPORT);
+        }
+    }
+
+    /**
+     * Метод отправляет пользователю фото с подписью
+     *
+     * @param chatId  идентификатор пользователя
+     * @param fileUrl URL фото, фото должно храниться на сервере
+     */
+    public void sendPhotoWithCaption(long chatId, String caption, String fileUrl) {
+        SendPhoto sendPhoto = new SendPhoto();
+        sendPhoto.setChatId(String.valueOf(chatId));
+        sendPhoto.setCaption(caption);
+        sendPhoto.setPhoto(new InputFile(fileUrl));
+        sendPhoto.setParseMode(ParseMode.HTML);
+        try {
+            execute(sendPhoto);
+        } catch (TelegramApiException e) {
+            log.error("Error occurred: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Метод отправляет пользователю фото с подписью
+     *
+     * @param chatId   идентификатор пользователя
+     * @param fileUrl  URL фото, фото должно храниться на сервере
+     * @param keyboard клавиатура
+     */
+    public void sendPhotoWithCaption(long chatId, String caption, String fileUrl, ReplyKeyboard keyboard) {
+        SendPhoto sendPhoto = new SendPhoto();
+        sendPhoto.setChatId(String.valueOf(chatId));
+        sendPhoto.setCaption(caption);
+        sendPhoto.setPhoto(new InputFile(fileUrl));
+        sendPhoto.setReplyMarkup(keyboard);
+        sendPhoto.setParseMode(ParseMode.HTML);
+        try {
+            execute(sendPhoto);
+        } catch (TelegramApiException e) {
+            log.error("Error occurred: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Метод отправляет пользователю фото с подписью с InlineKeyboard<br>
+     * Используется методы
+     * {@link #sendPhotoWithCaption(long, String, String, ReplyKeyboard)}
+     * {@link #InlineKeyboardMaker(String...)}
+     *
+     * @param chatId     идентификатор пользователя
+     * @param textToSend текст сообщения
+     * @param fileUrl    URL фото, фото должно храниться на сервере
+     * @param buttons    множество (массив или varargs) кнопок клавиатуры
+     */
+    public void sendPhotoWithCaptionWithInlineKeyboard(long chatId, String textToSend, String fileUrl, String... buttons) {
+        InlineKeyboardMarkup inlineKeyboard = InlineKeyboardMaker(buttons);
+        sendPhotoWithCaption(chatId, textToSend, fileUrl, inlineKeyboard);
+    }
+
+    /**
+     * Метод отправляет пользователю документ
      *
      * @param chatId  идентификатор пользователя
      * @param fileUrl URL документа, документ должен храниться на сервере
@@ -135,7 +268,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     /**
-     * Отправляет пользователю сообщение
+     * Метод отправляет пользователю сообщение
      *
      * @param chatId     идентификатор пользователя
      * @param textToSend текст сообщения
@@ -145,6 +278,7 @@ public class Bot extends TelegramLongPollingBot {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(String.valueOf(chatId));
         sendMessage.setText(textToSend);
+        sendMessage.setParseMode(ParseMode.HTML);
         try {
             execute(sendMessage);
         } catch (TelegramApiException e) {
@@ -153,7 +287,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     /**
-     * Отправляет сообщение c клавиатурой
+     * Метод отправляет сообщение c клавиатурой
      *
      * @param chatId     идентификатор пользователя
      * @param textToSend текст сообщения
@@ -174,7 +308,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     /**
-     * Отправляет сообщение с InlineKeyboard<br>
+     * Метод отправляет сообщение с InlineKeyboard<br>
      * Используется методы
      * {@link #sendMessage(long, String, ReplyKeyboard)}
      * {@link #InlineKeyboardMaker(String...)}
@@ -189,7 +323,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     /**
-     * Создает InlineKeyboard
+     * Метод создает InlineKeyboard
      *
      * @param buttons множество (массив или varargs) кнопок клавиатуры
      * @return клавиатура привязанная к сообщению
@@ -213,7 +347,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     /**
-     * Создает клавиатуру внизу экрана
+     * Метод создает клавиатуру внизу экрана
      * Эта клавиатура всегда доступна пользователю
      *
      * @return клавиатура с вариантами команд
@@ -253,7 +387,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     /**
-     * Создает клавиатуру для выбора приюта внизу экрана
+     * Метод создает клавиатуру для выбора приюта внизу экрана
      *
      * @return клавиатура с вариантами команд
      */
@@ -272,7 +406,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     /**
-     * Находит и удаляет последний запрос волонтеру от пользователя по chatId пользователя
+     * Метод находит и удаляет последний запрос волонтеру от пользователя по chatId пользователя
      *
      * @param chatId идентификатор чата пользователя, который позвал волонтера и написал сообщение волонтеру
      */
@@ -286,7 +420,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     /**
-     * Пересылает волонтеру сообщение с messageId от пользователя с chatId пользователя, позвавшего волонтера
+     * Метод пересылает волонтеру сообщение с messageId от пользователя с chatId пользователя, позвавшего волонтера
      *
      * @param chatId    идентификатор чата пользователя, который позвал волонтера и написал сообщение волонтеру
      * @param messageId идентификатор пересылаемого волонтеру сообщения
@@ -358,10 +492,11 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     /**
-     * Изменение состояния поля isDog - состоянеия выбранного приюта у Adopter
+     * Метод изменяет состояние поля isDog - состояние выбранного приюта у Adopter
      * Используются методы:<br>
-     * @param chatId
-     * @param isDog
+     *
+     * @param chatId идентификатор чата пользователя, который выбрал/сменил приют
+     * @param isDog  состояние выбранного приюта у Adopter
      */
     public void changeUserStatusOfShelter(Long chatId, boolean isDog) {
         AdopterDog adopterDog = adopterDogRepository.findAdopterDogByChatId(chatId);

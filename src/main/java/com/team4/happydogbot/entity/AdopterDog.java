@@ -40,16 +40,26 @@ public class AdopterDog {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status state = Status.USER;
-
-    @OneToMany(mappedBy = "adopterDog", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "adopterDog", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<ReportDog> reports;
-
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "dog_id")
     private Dog dog;
     @Column(name = "is_dog")
     private boolean isDog;
+
+    public void setDog(Dog dog) {
+        this.dog = dog;
+    }
+
+    public boolean isDog() {
+        return isDog;
+    }
+
+    public void setDog(boolean dog) {
+        isDog = dog;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -65,17 +75,5 @@ public class AdopterDog {
     @Override
     public int hashCode() {
         return Objects.hash(chatId, firstName, lastName, userName, age, address, telephoneNumber, state);
-    }
-
-    public void setDog(Dog dog) {
-        this.dog = dog;
-    }
-
-    public boolean isDog() {
-        return isDog;
-    }
-
-    public void setDog(boolean dog) {
-        isDog = dog;
     }
 }
