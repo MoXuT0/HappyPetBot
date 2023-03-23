@@ -48,7 +48,7 @@ public class AdopterCat {
     private LocalDate statusDate;
 
 
-    @OneToMany(mappedBy = "adopterCat", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "adopterCat", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<ReportCat> reports;
 
