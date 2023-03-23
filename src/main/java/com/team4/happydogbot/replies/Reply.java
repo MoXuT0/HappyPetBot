@@ -23,6 +23,7 @@ public class Reply {
      * */
     public Map<String, Consumer<Long>> catReplies = new HashMap<>();
     {
+
         //Этап 0
         catReplies.put(PET_INFO_CMD, chatId -> bot.sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_PET_INFO, KEYBOARD_CAT_ADOPT));
 
