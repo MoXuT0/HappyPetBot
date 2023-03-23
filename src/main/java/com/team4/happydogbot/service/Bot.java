@@ -575,7 +575,8 @@ public class Bot extends TelegramLongPollingBot {
                 .getChatId();
         AdopterDog adopterDog = adopterDogService.get(chatId);
         adopterDog.setState(status);
-        adopterDog.setStatusDate(LocalDate.now().minusDays(5));
+        //для тестирования изменения даты использовать параметр LocalDate.now().minusDays(5)
+        adopterDog.setStatusDate(LocalDate.now());
         sendMessage(chatId, botReplies);
         adopterDogRepository.save(adopterDog);
         adopterDogService.update(adopterDog);
@@ -604,7 +605,8 @@ public class Bot extends TelegramLongPollingBot {
                 .getChatId();
         AdopterCat adopterCat = adopterCatService.get(chatId);
         adopterCat.setState(status);
-        adopterCat.setStatusDate(LocalDate.now().minusDays(5));
+        //для тестирования изменения даты использовать параметр LocalDate.now().minusDays(5)
+        adopterCat.setStatusDate(LocalDate.now());
         sendMessage(chatId, botReplies);
         adopterCatRepository.save(adopterCat);
         adopterCatService.update(adopterCat);
