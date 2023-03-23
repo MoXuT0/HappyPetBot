@@ -95,10 +95,10 @@ public class BotCommands {
 
     // Решения по испытательному сроку
 
-    public static final String TAKE_DECISION = "Примите решение по итогу прохождения испытательного срока";
-    public static final String FINISH_PROBATION = "Испытательный срок успешной пройден";
-    public static final String EXTEND_PROBATION_14  = "Продлить испытательный срок на 14 дней";
-    public static final String EXTEND_PROBATION_30  = "Продлить испытательный срок на 14 дней";
+    public static final String TAKE_DECISION = "Примите решение по итогу прохождения испытательного срока: ";
+    public static final String FINISH_PROBATION = "Испытательный срок пройден";
+    public static final String EXTEND_PROBATION_14 = "Продлить на 14 дней";
+    public static final String EXTEND_PROBATION_30  = "Продлить на 30 дней";
     public static final String REFUSE  = "Отказать в усыновлении";
 
 

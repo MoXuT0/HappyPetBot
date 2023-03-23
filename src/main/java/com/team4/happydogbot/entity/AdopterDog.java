@@ -47,7 +47,7 @@ public class AdopterDog {
     @Column(name = "status_date")
     private LocalDate statusDate;
 
-    @OneToMany(mappedBy = "adopterDog", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "adopterDog", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<ReportDog> reports;
 
