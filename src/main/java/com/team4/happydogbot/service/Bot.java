@@ -41,22 +41,23 @@ import static com.team4.happydogbot.entity.Status.*;
 @Service
 public class Bot extends TelegramLongPollingBot {
     private final BotConfig config;
-    private AdopterDogRepository adopterDogRepository;
-    private AdopterCatRepository adopterCatRepository;
-    private ReportDogRepository reportDogRepository;
-    private ReportCatRepository reportCatRepository;
-    private AdopterDogService adopterDogService;
-    private AdopterCatService adopterCatService;
+    private final AdopterDogRepository adopterDogRepository;
+    private final AdopterCatRepository adopterCatRepository;
+    private final ReportDogRepository reportDogRepository;
+    private final ReportCatRepository reportCatRepository;
+    private final AdopterDogService adopterDogService;
+    private final AdopterCatService adopterCatService;
 
-
-    @Autowired
-    public Bot(BotConfig config, AdopterDogRepository adopterDogRepository) {
+    public Bot(BotConfig config, AdopterDogRepository adopterDogRepository, AdopterCatRepository adopterCatRepository,
+               ReportDogRepository reportDogRepository, ReportCatRepository reportCatRepository,
+               AdopterDogService adopterDogService, AdopterCatService adopterCatService) {
         this.config = config;
         this.adopterDogRepository = adopterDogRepository;
         this.adopterCatRepository = adopterCatRepository;
         this.reportDogRepository = reportDogRepository;
         this.reportCatRepository = reportCatRepository;
         this.adopterDogService = adopterDogService;
+        this.adopterCatService = adopterCatService;
     }
 
     public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
@@ -99,6 +100,7 @@ public class Bot extends TelegramLongPollingBot {
 
         } else if (update.hasCallbackQuery()) {
             String messageData = update.getCallbackQuery().getData();
+            String messageText = update.getCallbackQuery().getMessage().getText();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
 
             if (adopterCatRepository.findAdopterCatByChatId(chatId) != null &&
@@ -121,25 +123,29 @@ public class Bot extends TelegramLongPollingBot {
                 //метод для отправки отчета в таблицу для собак
             } else if (SEND_CONTACT_CMD.equals(messageData)) {
                 //метод для отправки отчет в таблица для кошек
-            } else if (FINISH_PROBATION.equals(messageData) && isDog) {
+            } else if (FINISH_PROBATION.equals(messageData)
+                    && adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
                 //метод изменения статуса на Finished и информирования пользователя для собак
                 changeDogAdopterStatus(MESSAGE_DECISION_FINISH, messageText, FINISHED_PROBATION_PERIOD);
             } else if (FINISH_PROBATION.equals(messageData)) {
                 //метод изменения статуса на Finished и информирования пользователя для кошек
                 changeCatAdopterStatus(MESSAGE_DECISION_FINISH, messageText, FINISHED_PROBATION_PERIOD);
-            } else if (EXTEND_PROBATION_14.equals(messageData) && isDog) {
+            } else if (EXTEND_PROBATION_14.equals(messageData)
+                    && adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
                 //метод изменения статуса на Additional_14 и информирования пользователя для собак
                 changeDogAdopterStatus(MESSAGE_DECISION_EXTEND_14, messageText, ADDITIONAL_PERIOD_14);
             } else if (EXTEND_PROBATION_14.equals(messageData)) {
                 //метод изменения статуса на Additional_14 и информирования пользователя для кошек
                 changeCatAdopterStatus(MESSAGE_DECISION_EXTEND_14, messageText, ADDITIONAL_PERIOD_14);
-            } else if (EXTEND_PROBATION_30.equals(messageData) && isDog) {
+            } else if (EXTEND_PROBATION_30.equals(messageData)
+                    && adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
                 //метод изменения статуса на Additional_30 и информирования пользователя для собак
                 changeDogAdopterStatus(MESSAGE_DECISION_EXTEND_30, messageText, ADDITIONAL_PERIOD_30);
             } else if (EXTEND_PROBATION_30.equals(messageData)) {
                 //метод изменения статуса на Additional_30 и информирования пользователя для кошек
                 changeCatAdopterStatus(MESSAGE_DECISION_EXTEND_30, messageText, ADDITIONAL_PERIOD_30);
-            } else if (REFUSE.equals(messageData) && isDog) {
+            } else if (REFUSE.equals(messageData)
+                    && adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
                 //метод изменения статуса на Refuse и информирования пользователя для собак
                 changeDogAdopterStatus(MESSAGE_DECISION_REFUSE, messageText, ADOPTION_DENIED);
             } else if (REFUSE.equals(messageData)) {
@@ -561,7 +567,12 @@ public class Bot extends TelegramLongPollingBot {
     private void changeDogAdopterStatus(String botReplies, String messageText, Status status) {
 
         String userName = messageText.split(": ")[1];
-        Long chatId = adopterDogRepository.findAll().stream().filter(x -> x.getUserName().equals(userName)).findFirst().get().getChatId();
+        Long chatId = adopterDogRepository.findAll()
+                .stream()
+                .filter(x -> x.getUserName().equals(userName))
+                .findFirst()
+                .get()
+                .getChatId();
         AdopterDog adopterDog = adopterDogService.get(chatId);
         adopterDog.setState(status);
         adopterDog.setStatusDate(LocalDate.now().minusDays(5));
@@ -585,7 +596,12 @@ public class Bot extends TelegramLongPollingBot {
     private void changeCatAdopterStatus(String botReplies, String messageText, Status status) {
 
         String userName = messageText.split(": ")[1];
-        Long chatId = adopterCatRepository.findAll().stream().filter(x -> x.getUserName().equals(userName)).findFirst().get().getChatId();
+        Long chatId = adopterCatRepository.findAll()
+                .stream()
+                .filter(x -> x.getUserName().equals(userName))
+                .findFirst()
+                .get()
+                .getChatId();
         AdopterCat adopterCat = adopterCatService.get(chatId);
         adopterCat.setState(status);
         adopterCat.setStatusDate(LocalDate.now().minusDays(5));
