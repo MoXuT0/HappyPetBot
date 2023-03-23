@@ -1,6 +1,7 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.config.BotConfig;
+import com.team4.happydogbot.constants.BotCommands;
 import com.team4.happydogbot.entity.*;
 import com.team4.happydogbot.replies.Reply;
 import com.team4.happydogbot.repository.AdopterCatRepository;
@@ -45,6 +46,7 @@ public class Bot extends TelegramLongPollingBot {
     private ReportDogRepository reportDogRepository;
     private ReportCatRepository reportCatRepository;
     private AdopterDogService adopterDogService;
+    private AdopterCatService adopterCatService;
 
 
 //    public Bot(BotConfig config) {
@@ -121,19 +123,31 @@ public class Bot extends TelegramLongPollingBot {
             } else if (SEND_CONTACT_CMD.equals(messageData) && isDog) {
                 //метод для отправки отчета в таблицу для собак
             } else if (SEND_CONTACT_CMD.equals(messageData)) {
-//                метод для отправки отчет в таблица для кошек
+                //метод для отправки отчет в таблица для кошек
+            } else if (FINISH_PROBATION.equals(messageData) && isDog) {
+                //метод изменения статуса на Finished и информирования пользователя для собак
+                changeDogAdopterStatus(MESSAGE_DECISION_FINISH, messageText, FINISHED_PROBATION_PERIOD);
             } else if (FINISH_PROBATION.equals(messageData)) {
-                //метод изменения статуса на Finished, метод информирования пользователя
-                changeStatus(MESSAGE_DECISION_FINISH, messageText, FINISHED_PROBATION_PERIOD);
+                //метод изменения статуса на Finished и информирования пользователя для кошек
+                changeCatAdopterStatus(MESSAGE_DECISION_FINISH, messageText, FINISHED_PROBATION_PERIOD);
+            } else if (EXTEND_PROBATION_14.equals(messageData) && isDog) {
+                //метод изменения статуса на Additional_14 и информирования пользователя для собак
+                changeDogAdopterStatus(MESSAGE_DECISION_EXTEND_14, messageText, ADDITIONAL_PERIOD_14);
             } else if (EXTEND_PROBATION_14.equals(messageData)) {
-                //метод изменения статуса на Additional_14, метод информирования пользователя
-                changeStatus(MESSAGE_DECISION_EXTEND_14,messageText,  ADDITIONAL_PERIOD_14);
+                //метод изменения статуса на Additional_14 и информирования пользователя для кошек
+                changeCatAdopterStatus(MESSAGE_DECISION_EXTEND_14, messageText, ADDITIONAL_PERIOD_14);
+            } else if (EXTEND_PROBATION_30.equals(messageData) && isDog) {
+                //метод изменения статуса на Additional_30 и информирования пользователя для собак
+                changeDogAdopterStatus(MESSAGE_DECISION_EXTEND_30, messageText, ADDITIONAL_PERIOD_30);
             } else if (EXTEND_PROBATION_30.equals(messageData)) {
-                //метод изменения статуса на Additional_30, метод информирования пользователя
-                changeStatus(MESSAGE_DECISION_EXTEND_30,messageText,  ADDITIONAL_PERIOD_30);
+                //метод изменения статуса на Additional_30 и информирования пользователя для кошек
+                changeCatAdopterStatus(MESSAGE_DECISION_EXTEND_30, messageText, ADDITIONAL_PERIOD_30);
+            } else if (REFUSE.equals(messageData) && isDog) {
+                //метод изменения статуса на Refuse и информирования пользователя для собак
+                changeDogAdopterStatus(MESSAGE_DECISION_REFUSE, messageText, ADOPTION_DENIED);
             } else if (REFUSE.equals(messageData)) {
-                //метод изменения статуса на Refuse, метод информирования пользователя
-                changeStatus(MESSAGE_DECISION_REFUSE, messageText, ADOPTION_DENIED);
+                //метод изменения статуса на Refuse и информирования пользователя для кошек
+                changeCatAdopterStatus(MESSAGE_DECISION_REFUSE, messageText, ADOPTION_DENIED);
             } else sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
         }
 
@@ -386,7 +400,9 @@ public class Bot extends TelegramLongPollingBot {
      * - получение списка Adopter со статусом PROBATION;<br>
      * - получение для каждого adopter из списка отчетов последний отчет;<br>
      * - отправка сообщения волонтеру по итогу проверки на разницу дня года текущей даты и дня года даты регистрации отчета.<br>
-     * Аннотация @Sheduled (cron = "* * * * * *") актвирует метод по расписанию cron = "Секунда Минута Час День Месяц Год"
+     * Аннотация @Scheduled с параметром (cron = "* * * * * *") актвирует метод по расписанию cron = "Секунда Минута Час День Месяц Год"
+     *
+     * @see Scheduled
      */
     //для проверки рабоспособности cron = "30 * * * * *"
     @Scheduled(cron = "30 30 8 * * *")
@@ -411,7 +427,16 @@ public class Bot extends TelegramLongPollingBot {
             }
         }
     }
-
+    /**
+     * Метод организует по расписанию автоматическую проверку наличия отчетов со сроком регистрации равным 2 и более
+     * дней от текущей даты по следующему алгоритму:<br>
+     * - получение списка Adopter со статусом PROBATION;<br>
+     * - получение для каждого adopter из списка отчетов последний отчет;<br>
+     * - отправка сообщения волонтеру по итогу проверки на разницу дня года текущей даты и дня года даты регистрации отчета.<br>
+     * Аннотация @Scheduled с параметром (cron = "* * * * * *") актвирует метод по расписанию cron = "Секунда Минута Час День Месяц Год"
+     *
+     * @see Scheduled
+     */
     //для проверки рабоспособности cron = "30 * * * * *"
     @Scheduled(cron = "30 30 8 * * *")
     private void sendAttentionForCatVolunteer() {
@@ -435,8 +460,17 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-
-    @Scheduled(cron = "30 * * * * *")
+    /**
+     * Метод организует по расписанию автоматическую проверку наличия отчетов со сроком регистрации превышающим:<br>
+     * 30 дней для усыновителей со статусами PROBATION или ADDITIONAL_PERIOD_30;<br>
+     * 14 дней для усыновителей со статусом ADDITIONAL_PERIOD_30  :<br>
+     * Аннотация @Scheduled с параметром (cron = "* * * * * *") актвирует метод по расписанию cron = "Секунда Минута Час День Месяц Год"
+     *
+     * @see Status
+     * @see Scheduled
+     */
+    //для проверки рабоспособности cron = "30 * * * * *"
+    @Scheduled(cron = "30 30 8 * * *")
     private void sendFinishListForCatVolunteer() {
         List<AdopterCat> adoptersWithFinishProbationPeriod = adopterCatRepository.findAll().stream()
                 .filter(x -> (x.getState() == PROBATION || x.getState() == ADDITIONAL_PERIOD_30)
@@ -451,13 +485,30 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    @Scheduled(cron = "30 * * * * *")
+    /**
+     * Метод организует по расписанию автоматическую проверку наличия отчетов со сроком регистрации превышающим:<br>
+     * 30 дней для усыновителей со статусами PROBATION или ADDITIONAL_PERIOD_30;<br>
+     * 14 дней для усыновителей со статусом ADDITIONAL_PERIOD_30.<br>
+     * Согласно выбранному списку усыновителей бот осуществляет отправку волонтеру сообщения с текстом<br>
+     * "{@value BotCommands#TAKE_DECISION} userName" и с кнопками  для выбора действия для каждого усыновителя<br>
+     * Аннотация @Scheduled с параметром (cron = "* * * * * *") актвирует метод по расписанию cron = "Секунда Минута Час День Месяц Год"
+     *
+     * @see Status
+     * @see Scheduled
+     * @see Bot#sendMessageWithInlineKeyboard(long, String, String...)
+     * @see BotCommands#KEYBOARD_DECISION
+     */
+
+    //для проверки рабоспособности cron = "30 * * * * *"
+    @Scheduled(cron = "30 30 8 * * *")
     private void sendFinishListForDogVolunteer() {
         List<AdopterDog> adoptersWithFinishProbationPeriod = adopterDogRepository.findAll().stream()
-                .filter(x -> ((x.getState() == PROBATION ||  x.getState() == ADDITIONAL_PERIOD_30)
-                        && (LocalDate.now().getDayOfYear() +30 - x.getStatusDate().getDayOfYear() > 30))
+                .filter(x -> ((x.getState() == PROBATION || x.getState() == ADDITIONAL_PERIOD_30)
+                        //для проверки рабоспособности в условии ниже добавить +31 после LocalDate.now().getDayOfYear()
+                        && (LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear() > 30))
                         || (x.getState() == ADDITIONAL_PERIOD_14
-                        && (LocalDate.now().getDayOfYear() + 15 - x.getStatusDate().getDayOfYear()) > 14)).toList();
+                        //для проверки рабоспособности в условии ниже добавить +15 после LocalDate.now().getDayOfYear()
+                        && (LocalDate.now().getDayOfYear()  - x.getStatusDate().getDayOfYear()) > 14)).toList();
         for (AdopterDog adopter : adoptersWithFinishProbationPeriod) {
             sendMessageWithInlineKeyboard(config.getVolunteerChatId(),
                     TAKE_DECISION + adopter.getUserName(),
@@ -465,9 +516,20 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
-    private void changeStatus( String botReplies, String messageData, Status status) {
+    /**
+     * Метод разбивает текст сообщения, направленного волонтеру на 2 составляющих, получает userName, находит chatId для
+     * данного пользователя и обновляет у него статус и дату статуса на дату обращения к методу <br>
+     *
+     * @param botReplies  сообщение уведомление для пользователя об изменении статуса
+     * @param messageText текст сообщения из которого волонтер нажал кнопку в формате<br>
+     *                    "{@value BotCommands#TAKE_DECISION} userName" для получения userName
+     * @param status      значение статуса на который будет замена
+     * @see AdopterDog#setState(Status)
+     * @see AdopterDog#setStatusDate(LocalDate)
+     */
+    private void changeDogAdopterStatus(String botReplies, String messageText, Status status) {
 
-        String userName = messageData.split(": ")[1];
+        String userName = messageText.split(": ")[1];
         Long chatId = adopterDogRepository.findAll().stream().filter(x -> x.getUserName().equals(userName)).findFirst().get().getChatId();
         AdopterDog adopterDog = adopterDogService.get(chatId);
         adopterDog.setState(status);
@@ -475,6 +537,30 @@ public class Bot extends TelegramLongPollingBot {
         sendMessage(chatId, botReplies);
         adopterDogRepository.save(adopterDog);
         adopterDogService.update(adopterDog);
-        sendMessage(config.getVolunteerChatId(), botReplies);
+        sendMessage(config.getVolunteerChatId(), "Для пользователя" + chatId + "выполнено:" + botReplies);
+    }
+
+    /**
+     * Метод разбивает текст сообщения, направленного волонтеру на 2 составляющих, получает userName, находит chatId для
+     * данного пользователя и обновляет у него статус и дату статуса на дату обращения к методу <br>
+     *
+     * @param botReplies  сообщение уведомление для пользователя об изменении статуса
+     * @param messageText текст сообщения из которого волонтер нажал кнопку в формате<br>
+     *                    "{@value BotCommands#TAKE_DECISION} userName" для получения userName
+     * @param status      значение статуса на который будет замена
+     * @see AdopterCat#setState(Status)
+     * @see AdopterCat#setStatusDate(LocalDate)
+     */
+    private void changeCatAdopterStatus(String botReplies, String messageText, Status status) {
+
+        String userName = messageText.split(": ")[1];
+        Long chatId = adopterCatRepository.findAll().stream().filter(x -> x.getUserName().equals(userName)).findFirst().get().getChatId();
+        AdopterCat adopterCat = adopterCatService.get(chatId);
+        adopterCat.setState(status);
+        adopterCat.setStatusDate(LocalDate.now().minusDays(5));
+        sendMessage(chatId, botReplies);
+        adopterCatRepository.save(adopterCat);
+        adopterCatService.update(adopterCat);
+        sendMessage(config.getVolunteerChatId(), "Для пользователя" + chatId + "выполнено:" + botReplies);
     }
 }
