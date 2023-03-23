@@ -27,17 +27,17 @@ public class AdopterCat {
     @Id
     @Column(name = "chat_id", nullable = false)
     private Long chatId;
-    @Column(name = "first_name", nullable = false, length = 25)
+    @Column(name = "first_name", length = 25)
     private String firstName;
     @Column(name = "last_name", length = 25)
     private String lastName;
-    @Column(name = "user_name", nullable = false, length = 25)
+    @Column(name = "user_name", length = 25)
     private String userName;
     @Column(name = "age")
     private int age;
     @Column(name = "address", length = 50)
     private String address;
-    @Column(name = "phone_number", nullable = false, length = 15)
+    @Column(name = "phone_number", length = 15)
     private String telephoneNumber;
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
@@ -55,6 +55,8 @@ public class AdopterCat {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "cat_id")
     private Cat cat;
+    @Column(name = "is_dog")
+    private boolean isDog;
 
     @Override
     public boolean equals(Object o) {

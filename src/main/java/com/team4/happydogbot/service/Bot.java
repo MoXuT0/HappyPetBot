@@ -49,13 +49,8 @@ public class Bot extends TelegramLongPollingBot {
     private AdopterCatService adopterCatService;
 
 
-//    public Bot(BotConfig config) {
-//        this.config = config;
-//    }
-
-    public Bot(BotConfig config, AdopterDogRepository adopterDogRepository, AdopterCatRepository adopterCatRepository,
-               ReportDogRepository reportDogRepository, ReportCatRepository reportCatRepository,
-               AdopterDogService adopterDogService) {
+    @Autowired
+    public Bot(BotConfig config, AdopterDogRepository adopterDogRepository) {
         this.config = config;
         this.adopterDogRepository = adopterDogRepository;
         this.adopterCatRepository = adopterCatRepository;
@@ -64,9 +59,7 @@ public class Bot extends TelegramLongPollingBot {
         this.adopterDogService = adopterDogService;
     }
 
-    private static HashMap<Long, Integer> changeProbationChatId = new HashMap<>();
     public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
-    public boolean isDog = true;
 
     Reply reply = new Reply(this);
 
@@ -87,14 +80,15 @@ public class Bot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
-            if (!isDog && reply.catReplies.containsKey(messageText)) {
+            if (START_CMD.equals(messageText)) {
+                sendMessage(chatId, update.getMessage().getChat().getFirstName() + MESSAGE_TEXT_GREETINGS);
+                sendMessage(chatId, MESSAGE_TEXT_CHOOSE_SHELTER, replyKeyboardShelter());
+            } else if ((adopterCatRepository.findAdopterCatByChatId(chatId) != null &&
+                    !adopterCatRepository.findAdopterCatByChatId(chatId).isDog()) &&
+                    reply.catReplies.containsKey(messageText)) {
                 reply.catReplies.get(messageText).accept(chatId);
             } else if (reply.dogReplies.containsKey(messageText)) {
                 reply.dogReplies.get(messageText).accept(chatId);
-
-            } else if (START_CMD.equals(messageText)) {
-                sendMessage(chatId, update.getMessage().getChat().getFirstName() + MESSAGE_TEXT_GREETINGS);
-                sendMessage(chatId, MESSAGE_TEXT_CHOOSE_SHELTER, replyKeyboardShelter());
             } else if (CALL_VOLUNTEER_CMD.equals(messageText)) {
                 REQUEST_FROM_USER.put(messageText, chatId);
                 sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_WRITE_VOLUNTEER, FINISH_VOLUNTEER_CMD);
@@ -106,9 +100,10 @@ public class Bot extends TelegramLongPollingBot {
         } else if (update.hasCallbackQuery()) {
             String messageData = update.getCallbackQuery().getData();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
-            String messageText = update.getCallbackQuery().getMessage().getText();
 
-            if (!isDog && reply.catReplies.containsKey(messageData)) {
+            if (adopterCatRepository.findAdopterCatByChatId(chatId) != null &&
+                    !adopterCatRepository.findAdopterCatByChatId(chatId).isDog() &&
+                    reply.catReplies.containsKey(messageData)) {
                 reply.catReplies.get(messageData).accept(chatId);
             } else if (reply.dogReplies.containsKey(messageData)) {
                 reply.dogReplies.get(messageData).accept(chatId);
@@ -116,11 +111,13 @@ public class Bot extends TelegramLongPollingBot {
             } else if (CALL_VOLUNTEER_CMD.equals(messageData)) {
                 REQUEST_FROM_USER.put(messageData, chatId);
                 sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_WRITE_VOLUNTEER, FINISH_VOLUNTEER_CMD);
-            } else if (SEND_REPORT_CMD.equals(messageData) && isDog) {
+            } else if (SEND_REPORT_CMD.equals(messageData) &&
+                    adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
                 //МЕТОД ОТПРАВКИ КОНТАКТНЫХ ДАННЫХ в таблицу для собак
             } else if (SEND_REPORT_CMD.equals(messageData)) {
                 //МЕТОД ОТПРАВКИ КОНТАКТНЫХ ДАННЫХ в таблицу для кошек
-            } else if (SEND_CONTACT_CMD.equals(messageData) && isDog) {
+            } else if (SEND_CONTACT_CMD.equals(messageData) &&
+                    adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
                 //метод для отправки отчета в таблицу для собак
             } else if (SEND_CONTACT_CMD.equals(messageData)) {
                 //метод для отправки отчет в таблица для кошек
@@ -391,6 +388,40 @@ public class Bot extends TelegramLongPollingBot {
             // Если сообщение не подходит не под одну команду и волонтер и юзер не находятся в состоянии
             // разговора, то выводим сообщение нет такой команды
             sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
+        }
+    }
+
+    /**
+     * Изменение состояния поля isDog - состоянеия выбранного приюта у Adopter
+     * Используются методы:<br>
+     * @param chatId
+     * @param isDog
+     */
+    public void changeUserStatusOfShelter(Long chatId, boolean isDog) {
+        AdopterDog adopterDog = adopterDogRepository.findAdopterDogByChatId(chatId);
+        AdopterCat adopterCat = adopterCatRepository.findAdopterCatByChatId(chatId);
+        if (isDog) {
+            if (adopterDog == null) {
+                adopterDog = new AdopterDog();
+                adopterDog.setChatId(chatId);
+            }
+            adopterDog.setDog(true);
+            adopterDogRepository.save(adopterDog);
+            if (adopterCat != null) {
+                adopterCat.setDog(true);
+                adopterCatRepository.save(adopterCat);
+            }
+        } else {
+            if (adopterCat == null) {
+                adopterCat = new AdopterCat();
+                adopterCat.setChatId(chatId);
+            }
+            adopterCat.setDog(false);
+            adopterCatRepository.save(adopterCat);
+            if (adopterDog != null) {
+                adopterDog.setDog(false);
+                adopterDogRepository.save(adopterDog);
+            }
         }
     }
 
