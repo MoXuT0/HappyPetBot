@@ -45,7 +45,6 @@ public class Bot extends TelegramLongPollingBot {
     private ReportDogRepository reportDogRepository;
     private ReportCatRepository reportCatRepository;
     private AdopterDogService adopterDogService;
-    private Update update;
 
 
 //    public Bot(BotConfig config) {
@@ -62,7 +61,8 @@ public class Bot extends TelegramLongPollingBot {
         this.reportCatRepository = reportCatRepository;
         this.adopterDogService = adopterDogService;
     }
-    private static HashMap<Long,HashMap<Integer,Status>> changeProbationChatId = new HashMap<>();
+
+    private static HashMap<Long, Integer> changeProbationChatId = new HashMap<>();
     public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
     public boolean isDog = true;
 
@@ -81,7 +81,6 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        this.update = update;
 
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
@@ -105,6 +104,7 @@ public class Bot extends TelegramLongPollingBot {
         } else if (update.hasCallbackQuery()) {
             String messageData = update.getCallbackQuery().getData();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
+            String messageText = update.getCallbackQuery().getMessage().getText();
 
             if (!isDog && reply.catReplies.containsKey(messageData)) {
                 reply.catReplies.get(messageData).accept(chatId);
@@ -124,17 +124,16 @@ public class Bot extends TelegramLongPollingBot {
 //                метод для отправки отчет в таблица для кошек
             } else if (FINISH_PROBATION.equals(messageData)) {
                 //метод изменения статуса на Finished, метод информирования пользователя
-//                changeStatus(MESSAGE_DECISION_FINISH,update.getMessage().getText(),  FINISHED_PROBATION_PERIOD);
+                changeStatus(MESSAGE_DECISION_FINISH, messageText, FINISHED_PROBATION_PERIOD);
             } else if (EXTEND_PROBATION_14.equals(messageData)) {
                 //метод изменения статуса на Additional_14, метод информирования пользователя
-//                changeStatus(MESSAGE_DECISION_EXTEND_14,messageData,  ADDITIONAL_PERIOD_14);
+                changeStatus(MESSAGE_DECISION_EXTEND_14,messageText,  ADDITIONAL_PERIOD_14);
             } else if (EXTEND_PROBATION_30.equals(messageData)) {
                 //метод изменения статуса на Additional_30, метод информирования пользователя
-//                changeStatus(MESSAGE_DECISION_EXTEND_30,messageData,  ADDITIONAL_PERIOD_30);
+                changeStatus(MESSAGE_DECISION_EXTEND_30,messageText,  ADDITIONAL_PERIOD_30);
             } else if (REFUSE.equals(messageData)) {
-                update.getMessage().getMessageId();
-                changeStatus(update.getMessage().getMessageId(),MESSAGE_DECISION_REFUSE,messageData,  ADOPTION_DENIED);
                 //метод изменения статуса на Refuse, метод информирования пользователя
+                changeStatus(MESSAGE_DECISION_REFUSE, messageText, ADOPTION_DENIED);
             } else sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
         }
 
@@ -210,12 +209,6 @@ public class Bot extends TelegramLongPollingBot {
     public void sendMessageWithInlineKeyboard(long chatId, String textToSend, String... buttons) {
         InlineKeyboardMarkup inlineKeyboard = InlineKeyboardMaker(buttons);
         sendMessage(chatId, textToSend, inlineKeyboard);
-    }
-
-    public Integer sendMessageWithInlineKeyboardWithMessageId(Update update, long chatId, String textToSend, String... buttons) {
-        InlineKeyboardMarkup inlineKeyboard = InlineKeyboardMaker(buttons);
-        sendMessage(chatId, textToSend, inlineKeyboard);
-        return update.getUpdateId();
     }
 
     /**
@@ -457,35 +450,31 @@ public class Bot extends TelegramLongPollingBot {
 
         }
     }
-    private Update getUpdate(Update update){
-        return update;
-    }
+
     @Scheduled(cron = "30 * * * * *")
     private void sendFinishListForDogVolunteer() {
-
         List<AdopterDog> adoptersWithFinishProbationPeriod = adopterDogRepository.findAll().stream()
-                .filter(x -> (/*(x.getState() == PROBATION ||  x.getState() == ADDITIONAL_PERIOD_30)
+                .filter(x -> ((x.getState() == PROBATION ||  x.getState() == ADDITIONAL_PERIOD_30)
                         && (LocalDate.now().getDayOfYear() +30 - x.getStatusDate().getDayOfYear() > 30))
                         || (x.getState() == ADDITIONAL_PERIOD_14
-                        && */(LocalDate.now().getDayOfYear() + 15 - x.getStatusDate().getDayOfYear()) > 14)).toList();
+                        && (LocalDate.now().getDayOfYear() + 15 - x.getStatusDate().getDayOfYear()) > 14)).toList();
         for (AdopterDog adopter : adoptersWithFinishProbationPeriod) {
-            int updateId = sendMessageWithInlineKeyboardWithMessageId(update,config.getVolunteerChatId(),
+            sendMessageWithInlineKeyboard(config.getVolunteerChatId(),
                     TAKE_DECISION + adopter.getUserName(),
                     KEYBOARD_DECISION);
-            changeProbationChatId.put(adopter.getChatId(),new HashMap<>(updateId, adopter.getState().ordinal()));
         }
     }
 
-    private void changeStatus(int messageId,String botReplies, String messageData, Status status){
-        Long chatId = changeProbationChatId.entrySet().stream().filter(x->x.getValue().get(messageId).equals(status)).findFirst().get().getKey();
-//        String userName = messageData.split(": ")[1];
-//        Long chatId = adopterDogRepository.findAll().stream().filter(x -> x.getUserName().equals(userName)).findFirst().get().getChatId();
+    private void changeStatus( String botReplies, String messageData, Status status) {
+
+        String userName = messageData.split(": ")[1];
+        Long chatId = adopterDogRepository.findAll().stream().filter(x -> x.getUserName().equals(userName)).findFirst().get().getChatId();
         AdopterDog adopterDog = adopterDogService.get(chatId);
         adopterDog.setState(status);
-//        adopterDog.setStatusDate(LocalDate.now());
-        sendMessage(chatId,botReplies);
+        adopterDog.setStatusDate(LocalDate.now().minusDays(5));
+        sendMessage(chatId, botReplies);
         adopterDogRepository.save(adopterDog);
         adopterDogService.update(adopterDog);
-        sendMessage(config.getVolunteerChatId(),botReplies);
+        sendMessage(config.getVolunteerChatId(), botReplies);
     }
 }
