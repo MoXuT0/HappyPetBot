@@ -2,13 +2,11 @@ package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.entity.ReportCat;
 import com.team4.happydogbot.exception.ReportCatNotFoundException;
-import com.team4.happydogbot.exception.ReportDogNotFoundException;
 import com.team4.happydogbot.repository.ReportCatRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.Collection;
-import java.util.Optional;
 
 /**
  *Класс - сервис, содержащий набор CRUD операций над объектом ReportCat
@@ -72,13 +70,17 @@ public class ReportCatService {
      * @throws ReportCatNotFoundException если отчет с указанным id не найден
      * @see ReportCatService
      */
-    public Optional<ReportCat> update(ReportCat reportCat) {
+    public ReportCat update(ReportCat reportCat) {
         log.info("Was invoked method to upload a reportCat");
-
-        if (reportCatRepository.existsById(reportCat.getId())) {
-            return Optional.ofNullable(reportCatRepository.save(reportCat));
+        if (reportCat.getId() != null && get(reportCat.getId()) != null) {
+            ReportCat findCat = get(reportCat.getId());
+            findCat.setReportDate(reportCat.getReportDate());
+            findCat.setFileId(reportCat.getFileId());
+            findCat.setCaption(reportCat.getCaption());
+            findCat.setExamination(reportCat.getExamination());
+            return this.reportCatRepository.save(findCat);
         }
-        throw new ReportDogNotFoundException();
+        throw new ReportCatNotFoundException();
     }
 
     /**

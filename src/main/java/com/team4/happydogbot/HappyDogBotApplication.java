@@ -11,7 +11,6 @@ public class HappyDogBotApplication {
 
         SpringApplication.run(HappyDogBotApplication.class, args);
 
-
     }
 }
 

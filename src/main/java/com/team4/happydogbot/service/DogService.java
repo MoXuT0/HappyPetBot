@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Optional;
 
 /**
  *Класс - сервис, содержащий набор CRUD операций над объектом Dog
@@ -76,17 +75,22 @@ public class DogService {
      * @throws DogNotFoundException если собака с указанным id не найдена
      * @see DogService
      */
-    public Optional<Dog> update(Dog dog) {
+    public Dog update(Dog dog) {
         log.info("Was invoked method to update a dog");
 
-        if (dogRepository.existsById(dog.getId())) {
-            return Optional.ofNullable(dogRepository.save(dog));
+        if (dog.getId() != null && get(dog.getId()) != null) {
+            Dog findDog = get(dog.getId());
+            findDog.setName(dog.getName());
+            findDog.setBreed(dog.getBreed());
+            findDog.setYearOfBirth(dog.getYearOfBirth());
+            findDog.setDescription(dog.getDescription());
+            return this.dogRepository.save(findDog);
         }
         throw new DogNotFoundException();
     }
 
     /**
-     * Метод находит всех собак
+     * Метод находит и возвращает всех собак
      * @return {@link DogRepository#findById(Object)}
      * @see DogService
      */

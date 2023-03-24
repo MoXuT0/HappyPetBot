@@ -179,7 +179,8 @@ public class ReportDogController {
     )
     @PutMapping
     public ResponseEntity<ReportDog> update(@RequestBody ReportDog reportDog) {
-        return ResponseEntity.of(reportService.update(reportDog));
+        reportService.update(reportDog);
+        return ResponseEntity.ok(reportDog);
     }
 
     @Operation(summary = "Просмотр всех отчетов",

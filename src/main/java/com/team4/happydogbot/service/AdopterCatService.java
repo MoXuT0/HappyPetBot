@@ -6,7 +6,6 @@ import com.team4.happydogbot.repository.AdopterCatRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.util.Collection;
-import java.util.Optional;
 
 /**
  *Класс - сервис, содержащий набор CRUD операций над объектом AdopterCat
@@ -69,10 +68,18 @@ public class AdopterCatService {
      * @throws AdopterCatNotFoundException если пользователь с указанным id не найден
      * @see AdopterCatService
      */
-    public Optional<AdopterCat> update(AdopterCat adopterCat) {
+    public AdopterCat update(AdopterCat adopterCat) {
         log.info("Was invoked method to update a adopterCat");
-        if (adopterCatRepository.existsById(adopterCat.getChatId())) {
-            return Optional.of(adopterCatRepository.save(adopterCat));
+        if (adopterCat.getChatId() != null && get(adopterCat.getChatId()) != null) {
+            AdopterCat findAdopterCat = get(adopterCat.getChatId());
+            findAdopterCat.setFirstName(adopterCat.getFirstName());
+            findAdopterCat.setLastName(adopterCat.getLastName());
+            findAdopterCat.setUserName(adopterCat.getUserName());
+            findAdopterCat.setAge(adopterCat.getAge());
+            findAdopterCat.setAddress(adopterCat.getAddress());
+            findAdopterCat.setTelephoneNumber(adopterCat.getTelephoneNumber());
+            findAdopterCat.setState(adopterCat.getState());
+            return this.adopterCatRepository.save(findAdopterCat);
         }
         throw new AdopterCatNotFoundException();
     }

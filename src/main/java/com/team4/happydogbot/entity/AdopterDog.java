@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,9 +41,13 @@ public class AdopterDog {
     private String telephoneNumber;
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private Status state = Status.USER;
+    private Status state = Status.REGISTRATION;
 
-    @OneToMany(mappedBy = "adopterDog", cascade = CascadeType.ALL)
+    @CreationTimestamp
+    @Column(name = "status_date")
+    private LocalDate statusDate;
+
+    @OneToMany(mappedBy = "adopterDog", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<ReportDog> reports;
 
@@ -50,6 +56,18 @@ public class AdopterDog {
     private Dog dog;
     @Column(name = "is_dog")
     private boolean isDog;
+
+    public AdopterDog(Long chatId, String firstName, String lastName, String userName, int age, String address,
+                      String telephoneNumber, Status state) {
+        this.chatId = chatId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.userName = userName;
+        this.age = age;
+        this.address = address;
+        this.telephoneNumber = telephoneNumber;
+        this.state = state;
+    }
 
     @Override
     public boolean equals(Object o) {

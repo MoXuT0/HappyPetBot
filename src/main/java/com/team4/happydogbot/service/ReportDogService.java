@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Collection;
-import java.util.Optional;
 
 /**
  *Класс - сервис, содержащий набор CRUD операций над объектом ReportDog
@@ -47,7 +46,6 @@ public class ReportDogService {
     public ReportDog get(Long id) {
         log.info("Was invoked method to get a report by id={}", id);
 
-
         return this.reportRepository.findById(id)
                 .orElseThrow(ReportDogNotFoundException::new);
     }
@@ -76,11 +74,16 @@ public class ReportDogService {
      * @throws ReportDogNotFoundException если отчет с указанным id не найден
      * @see ReportDogService
      */
-    public Optional<ReportDog> update(ReportDog reportDog) {
+    public ReportDog update(ReportDog reportDog) {
         log.info("Was invoked method to upload a reportDog");
 
-        if (reportRepository.existsById(reportDog.getId())) {
-            return Optional.ofNullable(reportRepository.save(reportDog));
+        if (reportDog.getId() != null && get(reportDog.getId()) != null) {
+            ReportDog findDog = get(reportDog.getId());
+            findDog.setReportDate(reportDog.getReportDate());
+            findDog.setFileId(reportDog.getFileId());
+            findDog.setCaption(reportDog.getCaption());
+            findDog.setExamination(reportDog.getExamination());
+            return this.reportRepository.save(findDog);
         }
         throw new ReportDogNotFoundException();
     }
