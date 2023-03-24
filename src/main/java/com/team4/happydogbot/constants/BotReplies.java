@@ -16,6 +16,8 @@ public class BotReplies {
     // Ответы этап 1. Вводная информация о приюте: где он находится, как и когда работает,
     // какие правила пропуска на территорию приюта, правила нахождения внутри и общения с животными.
     public static final String MESSAGE_TEXT_SHELTER_INFO = "Что именно вы хотите узнать о приюте?";
+    public static final String MESSAGE_TEXT_SEND_CONTACT_CHOOSE = "Выберите что хотите отправить";
+    public static final String MESSAGE_TEXT_SEND_CONTACT_SUCCESS = "Данные успешно отправлены";
 
     //Приют для собак
     public static final String MESSAGE_DOG_SHELTER_ABOUT = "Приют для бездомных животных «HappyDog» создан Городским " +
@@ -167,6 +169,14 @@ public class BotReplies {
             "- Изменение в поведении: отказ от старых привычек, приобретение новых.";
 
 
-
+    //Этап 3. Ответы пользователям по принятым решениям об усыновлении
+    public static final String MESSAGE_DECISION_FINISH =
+            "Вы успешно прошли испытательный срок! Поздравляем с пополнением в семье!";
+    public static final String MESSAGE_DECISION_EXTEND_14 =
+            "Уведомляем, что по результатам Ваших отчетов продлен испытательный срок на 14 дней";
+    public static final String MESSAGE_DECISION_EXTEND_30 =
+            "Уведомляем, что по результатам Ваших отчетов продлен испытательный срок на 30 дней";
+    public static final String MESSAGE_DECISION_REFUSE =
+            "К сожалению, вынуждены сообщить, что Вам отказано в усыновлении";
 
 }
