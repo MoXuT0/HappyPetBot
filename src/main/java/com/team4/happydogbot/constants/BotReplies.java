@@ -1,6 +1,7 @@
 package com.team4.happydogbot.constants;
 
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BotReplies {
 
@@ -160,14 +161,45 @@ public class BotReplies {
 
 
     //Этап 3. Ведение питомца. Ответы и сообщения
-    public static final String MESSAGE_TEXT_REPORT = "После того как вы забрали животное из приюта, " +
+    public static final String MESSAGE_TEXT_REPORT = "После того, как вы забрали животное из приюта, " +
             "вы обязаны в течение месяца присылать информацию о том, как оно чувствует себя на новом месте.";
-    public static final String MESSAGE_TEXT_REPORT_FORM = "В ежедневный отчет входит следующая информация: \n" +
-            "- Фото животного.\n" +
-            "- Рацион животного.\n" +
-            "- Общее самочувствие и привыкание к новому месту.\n" +
-            "- Изменение в поведении: отказ от старых привычек, приобретение новых.";
+    public static final String MESSAGE_TEXT_REPORT_FORM = "В ежедневный отчет входит следующая информация:\n" +
+            "Необходимо отправить фото животного, а к нему, в подписи к фото, добавить следующую информацию по шаблону:\n" +
+            "\n<i>Рацион: <b>ваш текст о рационе животного</b>" +
+            "; Самочувствие: <b>ваш текст об общем самочувствии и привыкание к новому месту</b>" +
+            "; Поведение: <b>ваш текст о повидении и об изменении поведения животного, отказ от старых привычек, приобретение новых</b></i>\n" +
+            "\nОбращаем Ваше внимание на требования к отчету:\n" +
+            "- необходимо написать \"Рацион:\", после него поставить пробел и написать текст, после текста рациона поставить ; и пробел\n" +
+            "- необходимо написать \"Самочувствие:\", после него поставить пробел и написать текст, после текста самочувствия поставить ; и пробел\n+" +
+            "- необходимо написать \"Поведение:\", после него поставить пробел и написать текст\n" +
+            "- Ваш отчет не должен быть слишком коротким, но и расписывать подробности до мелочей тоже не нужно, " +
+            "длина текста каждого блока должна составлять от 50 до 300 символов.";
 
+    public static final String URL_DOG_REPORT_EXAMPLE_PHOTO = "https://images.app.goo.gl/FZnFVwMjAQVAJfjq9";
+//    public static final String URL_DOG_REPORT_EXAMPLE_PHOTO = "https://github.com/TamaraZolotovskaya/HappyDogBot/raw/dev/src/main/resources/static/Dog_report_example_photo.jpeg";
+
+    public static final String MESSAGE_DOG_REPORT_EXAMPLE =
+            "Рацион: Шарик кушает прекрасно, утром чаппи из пакетика, днем сухой корм, вечером лакомство, налитую водичку за день выпивает полностью" +
+            "; Самочувствие: Шарик очень активно бегает, прыгает, просит с ним поиграть, к новому месту адаптировался быстро, занет где его место" +
+            "; Поведение: Шарик изучил дом, знает где свое место, ночью спит там, перестал лаять на членов семьи";
+
+    public static final String URL_CAT_REPORT_EXAMPLE_PHOTO = "https://images.app.goo.gl/YJsNy2wAZ5XKKAyH7";
+//    public static final String URL_CAT_REPORT_EXAMPLE_PHOTO = "https://github.com/TamaraZolotovskaya/HappyDogBot/raw/dev/src/main/resources/static/Dog_report_example_photo.jpeg";
+
+    public static final String MESSAGE_CAT_REPORT_EXAMPLE =
+            "Рацион: <i>Мурзик кушает прекрасно, утром вискас из пакетика, днем сухой корм, вечером лакомство, налитую водичку за день выпивает полностью</i>" +
+                    "; Самочувствие: <i>Мурзик очень активно бегает, прыгает, просит с ним поиграть, к новой обстановке адаптировался быстро</i>" +
+                    "; Поведение: <i>Мурзик изучил дом, знает где его лежанка, ночью спит там, перестал пугаться членов семьи</i>";
+    public static final String MESSAGE_TEXT_PRE_REPORT = "Загрузите фото и напишите к нему в подпись текст отчета:";
+
+    public static final String MESSAGE_TEXT_NO_REPORT_TEXT = "Вы отправили только фото, необходимо добавить подпись к фото с текстом отчета по шаблону";
+
+    public static final String MESSAGE_TEXT_NO_REPORT_PHOTO = "Вы отправили только текст, необходимо добавить фото с подписью - текстом отчета по шаблону";
+
+    public static final String MESSAGE_TEXT_NOT_LIKE_EXAMPLE = "Текст отчета не соответствует шаблону, пожалуйста заполните текст отчета по образцу";
+
+    public static final String MESSAGE_THANKS_FOR_REPLY = "Благодарим за отчет, волонтер проверит его и " +
+            "если что-то будет не так, даст Вам обратную связь";
 
     //Этап 3. Ответы пользователям по принятым решениям об усыновлении
     public static final String MESSAGE_DECISION_FINISH =
@@ -178,5 +210,4 @@ public class BotReplies {
             "Уведомляем, что по результатам Ваших отчетов продлен испытательный срок на 30 дней";
     public static final String MESSAGE_DECISION_REFUSE =
             "К сожалению, вынуждены сообщить, что Вам отказано в усыновлении";
-
 }

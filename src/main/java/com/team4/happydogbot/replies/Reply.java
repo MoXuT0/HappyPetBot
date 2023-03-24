@@ -45,6 +45,9 @@ public class Reply {
         catReplies.put(PET_HOUSE_FOR_ADULT_CMD, chatId -> bot.sendDocument(chatId, URL_CAT_HOUSE_ADULT));
         catReplies.put(PET_HOUSE_FOR_SICK_CMD, chatId -> bot.sendDocument(chatId, URL_CAT_HOUSE_SICK));
 
+        // Этап 3
+        catReplies.put(REPORT_FORM, chatId -> bot.sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_REPORT_FORM, REPORT_EXAMPLE, SEND_REPORT));
+        catReplies.put(REPORT_EXAMPLE, chatId -> bot.sendPhotoWithCaptionWithInlineKeyboard(chatId, MESSAGE_CAT_REPORT_EXAMPLE, URL_CAT_REPORT_EXAMPLE_PHOTO, SEND_REPORT));
     }
 
     /**
@@ -99,8 +102,7 @@ public class Reply {
         dogReplies.put(PET_HOUSE_FOR_SICK_CMD, chatId -> bot.sendDocument(chatId, URL_DOG_HOUSE_SICK));
 
         // Этап 3
-        dogReplies.put(REPORT_FORM, chatId -> bot.sendMessage(chatId, MESSAGE_TEXT_REPORT_FORM));
-
+        dogReplies.put(REPORT_FORM, chatId -> bot.sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_REPORT_FORM, REPORT_EXAMPLE, SEND_REPORT));
+        dogReplies.put(REPORT_EXAMPLE, chatId -> bot.sendPhotoWithCaptionWithInlineKeyboard(chatId, MESSAGE_DOG_REPORT_EXAMPLE, URL_DOG_REPORT_EXAMPLE_PHOTO, SEND_REPORT));
     }
-
 }

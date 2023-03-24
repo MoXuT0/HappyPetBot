@@ -45,16 +45,26 @@ public class AdopterCat {
     @CreationTimestamp
     @Column(name = "status_date")
     private LocalDate statusDate;
-
     @OneToMany(mappedBy = "adopterCat", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<ReportCat> reports;
-
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "cat_id")
     private Cat cat;
     @Column(name = "is_dog")
     private boolean isDog;
+
+    public void setCat(Cat cat) {
+        this.cat = cat;
+    }
+
+    public boolean isDog() {
+        return isDog;
+    }
+
+    public void setDog(boolean dog) {
+        isDog = dog;
+    }
 
     @Override
     public boolean equals(Object o) {
