@@ -1,15 +1,18 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.config.BotConfig;
-import com.team4.happydogbot.entity.AdopterCat;
-import com.team4.happydogbot.entity.AdopterDog;
-import com.team4.happydogbot.entity.ReportCat;
-import com.team4.happydogbot.entity.ReportDog;
+import com.team4.happydogbot.constants.BotCommands;
+import com.team4.happydogbot.entity.*;
+import com.team4.happydogbot.replies.Reply;
 import com.team4.happydogbot.repository.AdopterCatRepository;
 import com.team4.happydogbot.repository.AdopterDogRepository;
-import com.team4.happydogbot.replies.Reply;
+import com.team4.happydogbot.repository.ReportCatRepository;
+import com.team4.happydogbot.repository.ReportDogRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.scheduling.annotation.Scheduled;
+
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
@@ -21,20 +24,28 @@ import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.team4.happydogbot.constants.BotCommands.*;
 import static com.team4.happydogbot.constants.BotReplies.*;
+import static com.team4.happydogbot.entity.Status.*;
 
 @Slf4j
 @Service
@@ -45,13 +56,24 @@ public class Bot extends TelegramLongPollingBot {
 
     private final AdopterCatRepository adopterCatRepository;
 
+
+    private final ReportDogRepository reportDogRepository;
+    private final ReportCatRepository reportCatRepository;
+    private final AdopterDogService adopterDogService;
+    private final AdopterCatService adopterCatService;
+
     @Autowired
-    public Bot(BotConfig config,
-               AdopterDogRepository adopterDogRepository,
-               AdopterCatRepository adopterCatRepository) {
+    public Bot(BotConfig config, AdopterDogRepository adopterDogRepository, AdopterCatRepository adopterCatRepository,
+               ReportDogRepository reportDogRepository, ReportCatRepository reportCatRepository,
+               AdopterDogService adopterDogService, AdopterCatService adopterCatService) {
+
         this.config = config;
         this.adopterDogRepository = adopterDogRepository;
         this.adopterCatRepository = adopterCatRepository;
+        this.reportDogRepository = reportDogRepository;
+        this.reportCatRepository = reportCatRepository;
+        this.adopterDogService = adopterDogService;
+        this.adopterCatService = adopterCatService;
     }
 
     public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
@@ -97,6 +119,7 @@ public class Bot extends TelegramLongPollingBot {
 
         } else if (update.hasCallbackQuery()) {
             String messageData = update.getCallbackQuery().getData();
+            String messageText = update.getCallbackQuery().getMessage().getText();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
             if (adopterCatRepository.findAdopterCatByChatId(chatId) != null &&
                     !adopterCatRepository.findAdopterCatByChatId(chatId).isDog() &&
@@ -113,12 +136,36 @@ public class Bot extends TelegramLongPollingBot {
                 // Кладем в HashSet chatId пользователя, который нажал кнопку "Отправить отчет", то есть пока в HashMap
                 // лежит chatId - это значит что юзер находится в состоянии отправки отчета,
                 // отправляем сообщение пользователю
-            } else if (SEND_CONTACT_CMD.equals(messageData) &&
-                    adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
-                //МЕТОД ОТПРАВКИ КОНТАКТНЫХ ДАННЫХ в таблицу для собак
-            } else if (SEND_CONTACT_CMD.equals(messageData)) {
-                //МЕТОД ОТПРАВКИ КОНТАКТНЫХ ДАННЫХ в таблицу для кошек
+            } else if (FINISH_PROBATION.equals(messageData)
+                    && adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
+                //метод изменения статуса на Finished и информирования пользователя для собак
+                changeDogAdopterStatus(MESSAGE_DECISION_FINISH, messageText, FINISHED_PROBATION_PERIOD);
+            } else if (FINISH_PROBATION.equals(messageData)) {
+                //метод изменения статуса на Finished и информирования пользователя для кошек
+                changeCatAdopterStatus(MESSAGE_DECISION_FINISH, messageText, FINISHED_PROBATION_PERIOD);
+            } else if (EXTEND_PROBATION_14.equals(messageData)
+                    && adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
+                //метод изменения статуса на Additional_14 и информирования пользователя для собак
+                changeDogAdopterStatus(MESSAGE_DECISION_EXTEND_14, messageText, ADDITIONAL_PERIOD_14);
+            } else if (EXTEND_PROBATION_14.equals(messageData)) {
+                //метод изменения статуса на Additional_14 и информирования пользователя для кошек
+                changeCatAdopterStatus(MESSAGE_DECISION_EXTEND_14, messageText, ADDITIONAL_PERIOD_14);
+            } else if (EXTEND_PROBATION_30.equals(messageData)
+                    && adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
+                //метод изменения статуса на Additional_30 и информирования пользователя для собак
+                changeDogAdopterStatus(MESSAGE_DECISION_EXTEND_30, messageText, ADDITIONAL_PERIOD_30);
+            } else if (EXTEND_PROBATION_30.equals(messageData)) {
+                //метод изменения статуса на Additional_30 и информирования пользователя для кошек
+                changeCatAdopterStatus(MESSAGE_DECISION_EXTEND_30, messageText, ADDITIONAL_PERIOD_30);
+            } else if (REFUSE.equals(messageData)
+                    && adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
+                //метод изменения статуса на Refuse и информирования пользователя для собак
+                changeDogAdopterStatus(MESSAGE_DECISION_REFUSE, messageText, ADOPTION_DENIED);
+            } else if (REFUSE.equals(messageData)) {
+                //метод изменения статуса на Refuse и информирования пользователя для кошек
+                changeCatAdopterStatus(MESSAGE_DECISION_REFUSE, messageText, ADOPTION_DENIED);
             } else sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
+
         } else if (update.hasMessage() && (update.getMessage().hasPhoto() || update.getMessage().hasDocument())) {
             long chatId = update.getMessage().getChatId();
             if (REQUEST_GET_REPLY_FROM_USER.contains(chatId) &&
@@ -137,6 +184,11 @@ public class Bot extends TelegramLongPollingBot {
                 }
 
             } else sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
+
+        } else if (update.hasMessage() && update.getMessage().hasContact()) {
+            long chatId = update.getMessage().getChatId();
+            processContact(update);
+            sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT_SUCCESS);
         }
     }
 
@@ -524,5 +576,245 @@ public class Bot extends TelegramLongPollingBot {
                 adopterDogRepository.save(adopterDog);
             }
         }
+    }
+
+    /**
+     * Создает клавиатуру и отсылает сообщение с ней для получения контактных данных пользователя
+     * @param chatId идентификатор чата пользователя
+     */
+    public void sendMessageWithContactKeyboard(long chatId) {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(false);
+
+        KeyboardRow keyboardRow1 = new KeyboardRow();
+        KeyboardButton contact = new KeyboardButton(SEND_CONTACT_CMD);
+        contact.setRequestContact(true);
+        keyboardRow1.add(contact);
+
+        KeyboardRow keyboardRow2 = new KeyboardRow();
+        keyboardRow2.add(BACK_CMD);
+
+        List<KeyboardRow> keyboard = new ArrayList<>();
+        keyboard.add(keyboardRow1);
+        keyboard.add(keyboardRow2);
+
+        replyKeyboardMarkup.setKeyboard(keyboard);
+
+        sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT_CHOOSE, replyKeyboardMarkup);
+    }
+
+    /**
+     * Обрабатывает присланные пользователем контактные данные и записывает их базу данных
+     * @param update принятый контакт пользователя
+     */
+    private void processContact(Update update) {
+        User user = update.getMessage().getFrom();
+        long chatId = update.getMessage().getChatId();
+        if (adopterCatRepository.findAdopterCatByChatId(chatId) != null
+                && !adopterCatRepository.findAdopterCatByChatId(chatId).isDog()) {
+            AdopterCat adopterCat = adopterCatRepository.findAdopterCatByChatId(chatId);
+            adopterCat.setChatId(user.getId());
+            adopterCat.setFirstName(user.getFirstName());
+            adopterCat.setLastName(user.getLastName());
+            adopterCat.setUserName(user.getUserName());
+            adopterCat.setTelephoneNumber(update.getMessage().getContact().getPhoneNumber());
+            adopterCat.setState(REGISTRATION);
+            adopterCatRepository.save(adopterCat);
+        } else if (adopterDogRepository.findAdopterDogByChatId(chatId) != null
+                && adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
+            AdopterDog adopterDog = adopterDogRepository.findAdopterDogByChatId(chatId);
+            adopterDog.setChatId(user.getId());
+            adopterDog.setFirstName(user.getFirstName());
+            adopterDog.setLastName(user.getLastName());
+            adopterDog.setUserName(user.getUserName());
+            adopterDog.setTelephoneNumber(update.getMessage().getContact().getPhoneNumber());
+            adopterDog.setState(REGISTRATION);
+            adopterDogRepository.save(adopterDog);
+        }
+    }
+
+    /**
+     * Метод организует по расписанию автоматическую проверку наличия отчетов со сроком регистрации равным 2 и более
+     * дней от текущей даты по следующему алгоритму:<br>
+     * - получение списка Adopter со статусом PROBATION;<br>
+     * - получение для каждого adopter из списка отчетов последний отчет;<br>
+     * - отправка сообщения волонтеру по итогу проверки на разницу дня года текущей даты и дня года даты регистрации отчета.<br>
+     * Аннотация @Scheduled с параметром (cron = "* * * * * *") актвирует метод по расписанию cron = "Секунда Минута Час День Месяц Год"
+     *
+     * @see Scheduled
+     */
+    //для проверки рабоспособности cron = "30 * * * * *"
+    @Scheduled(cron = "30 30 8 * * *")
+    private void sendAttentionForDogVolunteer() {
+
+        List<AdopterDog> adopters = adopterDogRepository.findAll();
+        List<AdopterDog> adoptersWithProbationPeriod = adopters.stream()
+                .filter(x -> (x.getState() == PROBATION)
+                        || x.getState() == ADDITIONAL_PERIOD_14
+                        || x.getState() == ADDITIONAL_PERIOD_30)
+                .collect(Collectors.toList());
+        List<ReportDog> reports = reportDogRepository.findAll();
+        for (AdopterDog adopter : adoptersWithProbationPeriod) {
+            ReportDog report = reports.stream().filter(x -> (x.getAdopterDog().equals(adopter))
+                            && (x.getExamination()))
+                    .reduce((first, last) -> last)
+                    .orElseThrow();
+            //для проверки рабоспособности в условии ниже добавить +3 после LocalDate.now().getDayOfYear()
+            if (LocalDate.now().getDayOfYear() - report.getReportDate().getDayOfYear() >= 2) {
+                sendMessage(config.getVolunteerChatId(), "Внимание! Усыновитель " + adopter.getFirstName()
+                        + " " + adopter.getLastName() + " уже больше 2 дней не присылает отчеты!");
+            }
+        }
+    }
+
+    /**
+     * Метод организует по расписанию автоматическую проверку наличия отчетов со сроком регистрации равным 2 и более
+     * дней от текущей даты по следующему алгоритму:<br>
+     * - получение списка Adopter со статусом PROBATION;<br>
+     * - получение для каждого adopter из списка отчетов последний отчет;<br>
+     * - отправка сообщения волонтеру по итогу проверки на разницу дня года текущей даты и дня года даты регистрации отчета.<br>
+     * Аннотация @Scheduled с параметром (cron = "* * * * * *") актвирует метод по расписанию cron = "Секунда Минута Час День Месяц Год"
+     *
+     * @see Scheduled
+     */
+    //для проверки рабоспособности cron = "30 * * * * *"
+    @Scheduled(cron = "30 30 8 * * *")
+    private void sendAttentionForCatVolunteer() {
+
+        List<AdopterCat> adoptersWithProbationPeriod = adopterCatRepository.findAll().stream()
+                .filter(x -> (x.getState() == PROBATION)
+                        || x.getState() == ADDITIONAL_PERIOD_14
+                        || x.getState() == ADDITIONAL_PERIOD_30)
+                .collect(Collectors.toList());
+        List<ReportCat> reports = reportCatRepository.findAll();
+        for (AdopterCat adopter : adoptersWithProbationPeriod) {
+            ReportCat report = reports.stream().filter(x -> (x.getAdopterCat().equals(adopter))
+                            && (x.getExamination()))
+                    .reduce((first, last) -> last)
+                    .orElseThrow();
+            //для проверки рабоспособности в условии ниже добавить +3 после LocalDate.now().getDayOfYear()
+            if (LocalDate.now().getDayOfYear() - report.getReportDate().getDayOfYear() >= 2) {
+                sendMessage(config.getVolunteerChatId(), "Внимание! Усыновитель " + adopter.getFirstName()
+                        + " " + adopter.getLastName() + " уже больше 2 дней не присылает отчеты!");
+            }
+        }
+    }
+
+    /**
+     * Метод организует по расписанию автоматическую проверку наличия отчетов со сроком регистрации превышающим:<br>
+     * 30 дней для усыновителей со статусами PROBATION или ADDITIONAL_PERIOD_30;<br>
+     * 14 дней для усыновителей со статусом ADDITIONAL_PERIOD_30  :<br>
+     * Аннотация @Scheduled с параметром (cron = "* * * * * *") актвирует метод по расписанию cron = "Секунда Минута Час День Месяц Год"
+     *
+     * @see Status
+     * @see Scheduled
+     */
+    //для проверки рабоспособности cron = "30 * * * * *"
+    @Scheduled(cron = "30 30 8 * * *")
+    private void sendFinishListForCatVolunteer() {
+        List<AdopterCat> adoptersWithFinishProbationPeriod = adopterCatRepository.findAll().stream()
+                .filter(x -> (x.getState() == PROBATION || x.getState() == ADDITIONAL_PERIOD_30)
+                        && (LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear() + 30 > 30)
+                        || (x.getState() == ADDITIONAL_PERIOD_14
+                        && LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear() + 30 > 14))
+                .collect(Collectors.toList());
+        for (AdopterCat adopter : adoptersWithFinishProbationPeriod) {
+            sendMessageWithInlineKeyboard(config.getVolunteerChatId(), TAKE_DECISION + "у пользователя "
+                    + adopter.getFirstName() + adopter.getLastName(), KEYBOARD_DECISION);
+
+        }
+    }
+
+    /**
+     * Метод организует по расписанию автоматическую проверку наличия отчетов со сроком регистрации превышающим:<br>
+     * 30 дней для усыновителей со статусами PROBATION или ADDITIONAL_PERIOD_30;<br>
+     * 14 дней для усыновителей со статусом ADDITIONAL_PERIOD_30.<br>
+     * Согласно выбранному списку усыновителей бот осуществляет отправку волонтеру сообщения с текстом<br>
+     * "{@value BotCommands#TAKE_DECISION} userName" и с кнопками  для выбора действия для каждого усыновителя<br>
+     * Аннотация @Scheduled с параметром (cron = "* * * * * *") актвирует метод по расписанию cron = "Секунда Минута Час День Месяц Год"
+     *
+     * @see Status
+     * @see Scheduled
+     * @see Bot#sendMessageWithInlineKeyboard(long, String, String...)
+     * @see BotCommands#KEYBOARD_DECISION
+     */
+
+    //для проверки рабоспособности cron = "30 * * * * *"
+    @Scheduled(cron = "30 30 8 * * *")
+    private void sendFinishListForDogVolunteer() {
+        List<AdopterDog> adoptersWithFinishProbationPeriod = adopterDogRepository.findAll().stream()
+                .filter(x -> ((x.getState() == PROBATION || x.getState() == ADDITIONAL_PERIOD_30)
+                        //для проверки рабоспособности в условии ниже добавить +31 после LocalDate.now().getDayOfYear()
+                        && (LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear() > 30))
+                        || (x.getState() == ADDITIONAL_PERIOD_14
+                        //для проверки рабоспособности в условии ниже добавить +15 после LocalDate.now().getDayOfYear()
+                        && (LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear()) > 14)).toList();
+        for (AdopterDog adopter : adoptersWithFinishProbationPeriod) {
+            sendMessageWithInlineKeyboard(config.getVolunteerChatId(),
+                    TAKE_DECISION + adopter.getUserName(),
+                    KEYBOARD_DECISION);
+        }
+    }
+
+    /**
+     * Метод разбивает текст сообщения, направленного волонтеру на 2 составляющих, получает userName, находит chatId для
+     * данного пользователя и обновляет у него статус и дату статуса на дату обращения к методу <br>
+     *
+     * @param botReplies  сообщение уведомление для пользователя об изменении статуса
+     * @param messageText текст сообщения из которого волонтер нажал кнопку в формате<br>
+     *                    "{@value BotCommands#TAKE_DECISION} userName" для получения userName
+     * @param status      значение статуса на который будет замена
+     * @see AdopterDog#setState(Status)
+     * @see AdopterDog#setStatusDate(LocalDate)
+     */
+    private void changeDogAdopterStatus(String botReplies, String messageText, Status status) {
+
+        String userName = messageText.split(": ")[1];
+        Long chatId = adopterDogRepository.findAll()
+                .stream()
+                .filter(x -> x.getUserName().equals(userName))
+                .findFirst()
+                .get()
+                .getChatId();
+        AdopterDog adopterDog = adopterDogService.get(chatId);
+        adopterDog.setState(status);
+        //для тестирования изменения даты использовать параметр LocalDate.now().minusDays(5)
+        adopterDog.setStatusDate(LocalDate.now());
+        sendMessage(chatId, botReplies);
+        adopterDogRepository.save(adopterDog);
+        adopterDogService.update(adopterDog);
+        sendMessage(config.getVolunteerChatId(), "Для пользователя" + chatId + "выполнено:" + botReplies);
+    }
+
+    /**
+     * Метод разбивает текст сообщения, направленного волонтеру на 2 составляющих, получает userName, находит chatId для
+     * данного пользователя и обновляет у него статус и дату статуса на дату обращения к методу <br>
+     *
+     * @param botReplies  сообщение уведомление для пользователя об изменении статуса
+     * @param messageText текст сообщения из которого волонтер нажал кнопку в формате<br>
+     *                    "{@value BotCommands#TAKE_DECISION} userName" для получения userName
+     * @param status      значение статуса на который будет замена
+     * @see AdopterCat#setState(Status)
+     * @see AdopterCat#setStatusDate(LocalDate)
+     */
+    private void changeCatAdopterStatus(String botReplies, String messageText, Status status) {
+
+        String userName = messageText.split(": ")[1];
+        Long chatId = adopterCatRepository.findAll()
+                .stream()
+                .filter(x -> x.getUserName().equals(userName))
+                .findFirst()
+                .get()
+                .getChatId();
+        AdopterCat adopterCat = adopterCatService.get(chatId);
+        adopterCat.setState(status);
+        //для тестирования изменения даты использовать параметр LocalDate.now().minusDays(5)
+        adopterCat.setStatusDate(LocalDate.now());
+        sendMessage(chatId, botReplies);
+        adopterCatRepository.save(adopterCat);
+        adopterCatService.update(adopterCat);
+        sendMessage(config.getVolunteerChatId(), "Для пользователя" + chatId + "выполнено:" + botReplies);
     }
 }

@@ -1,5 +1,7 @@
 package com.team4.happydogbot.constants;
 
+
+
 public class BotReplies {
 
     // Ответы этап 0. Входная точка общения бота с пользователем
@@ -14,6 +16,8 @@ public class BotReplies {
     // Ответы этап 1. Вводная информация о приюте: где он находится, как и когда работает,
     // какие правила пропуска на территорию приюта, правила нахождения внутри и общения с животными.
     public static final String MESSAGE_TEXT_SHELTER_INFO = "Что именно вы хотите узнать о приюте?";
+    public static final String MESSAGE_TEXT_SEND_CONTACT_CHOOSE = "Выберите что хотите отправить";
+    public static final String MESSAGE_TEXT_SEND_CONTACT_SUCCESS = "Данные успешно отправлены";
 
     //Приют для собак
     public static final String MESSAGE_DOG_SHELTER_ABOUT = "Приют для бездомных животных «HappyDog» создан Городским " +
@@ -190,7 +194,6 @@ public class BotReplies {
             "Рацион: <i>Мурзик кушает прекрасно, утром вискас из пакетика, днем сухой корм, вечером лакомство, налитую водичку за день выпивает полностью</i>" +
                     "; Самочувствие: <i>Мурзик очень активно бегает, прыгает, просит с ним поиграть, к новой обстановке адаптировался быстро</i>" +
                     "; Поведение: <i>Мурзик изучил дом, знает где его лежанка, ночью спит там, перестал пугаться членов семьи</i>";
-
     public static final String MESSAGE_TEXT_PRE_REPORT = "Загрузите фото и напишите к нему в подпись текст отчета:";
 
     public static final String MESSAGE_TEXT_NO_REPORT_TEXT = "Вы отправили только фото, необходимо добавить подпись к фото с текстом отчета по шаблону";
@@ -201,4 +204,14 @@ public class BotReplies {
 
     public static final String MESSAGE_THANKS_FOR_REPLY = "Благодарим за отчет, волонтер проверит его и " +
             "если что-то будет не так, даст Вам обратную связь";
+
+    //Этап 3. Ответы пользователям по принятым решениям об усыновлении
+    public static final String MESSAGE_DECISION_FINISH =
+            "Вы успешно прошли испытательный срок! Поздравляем с пополнением в семье!";
+    public static final String MESSAGE_DECISION_EXTEND_14 =
+            "Уведомляем, что по результатам Ваших отчетов продлен испытательный срок на 14 дней";
+    public static final String MESSAGE_DECISION_EXTEND_30 =
+            "Уведомляем, что по результатам Ваших отчетов продлен испытательный срок на 30 дней";
+    public static final String MESSAGE_DECISION_REFUSE =
+            "К сожалению, вынуждены сообщить, что Вам отказано в усыновлении";
 }

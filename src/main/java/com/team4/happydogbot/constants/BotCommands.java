@@ -21,6 +21,7 @@ public class BotCommands {
     public static final String SHELTER_SAFETY_CMD = "Техника безопасности";
     public static final String CAR_PASS_CMD ="Пропуск на машину";
     public static final String SEND_CONTACT_CMD = "Отправить свои контакты";
+    public static final String BACK_CMD = "Назад";
 
     public static final String[] KEYBOARD_SHELTER_ABOUT = {
             SHELTER_ABOUT_CMD,
@@ -92,6 +93,22 @@ public class BotCommands {
             REPORT_EXAMPLE,
             SEND_REPORT,
             CALL_VOLUNTEER_CMD
+    };
+
+    // Решения по испытательному сроку
+
+    public static final String TAKE_DECISION = "Примите решение по итогу прохождения испытательного срока: ";
+    public static final String FINISH_PROBATION = "Испытательный срок пройден";
+    public static final String EXTEND_PROBATION_14 = "Продлить на 14 дней";
+    public static final String EXTEND_PROBATION_30  = "Продлить на 30 дней";
+    public static final String REFUSE  = "Отказать в усыновлении";
+
+
+    public static final String[] KEYBOARD_DECISION = {
+            FINISH_PROBATION,
+            EXTEND_PROBATION_14,
+            EXTEND_PROBATION_30,
+            REFUSE
     };
 
 

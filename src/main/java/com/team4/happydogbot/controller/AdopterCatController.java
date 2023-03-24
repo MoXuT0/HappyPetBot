@@ -178,7 +178,7 @@ public class AdopterCatController {
     )
     @PutMapping
     public ResponseEntity<AdopterCat> update(@RequestBody AdopterCat adopterCat) {
-        return ResponseEntity.of(adopterCatService.update(adopterCat));
+        return ResponseEntity.ok(adopterCatService.update(adopterCat));
     }
 
     @Operation(summary = "Просмотр всех усыновителей",
