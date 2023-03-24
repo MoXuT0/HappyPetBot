@@ -1,12 +1,25 @@
 package com.team4.happydogbot.service;
 
+import com.team4.happydogbot.config.BotConfig;
 import com.team4.happydogbot.entity.ReportDog;
 import com.team4.happydogbot.exception.ReportDogNotFoundException;
 import com.team4.happydogbot.repository.ReportDogRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.objects.File;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -19,10 +32,13 @@ import java.util.Optional;
 @Service
 @Transactional
 public class ReportDogService {
-    private final ReportDogRepository reportRepository;
+    private final ReportDogRepository reportDogRepository;
 
-    public ReportDogService(ReportDogRepository reportRepository) {
-        this.reportRepository = reportRepository;
+    private final BotConfig config;
+
+    public ReportDogService(ReportDogRepository reportRepository, BotConfig config) {
+        this.reportDogRepository = reportRepository;
+        this.config = config;
     }
 
     /**
@@ -34,7 +50,7 @@ public class ReportDogService {
     public ReportDog add(ReportDog reportDog) {
         log.info("Was invoked method to add a report");
 
-        return this.reportRepository.save(reportDog);
+        return this.reportDogRepository.save(reportDog);
     }
 
     /**
@@ -47,8 +63,7 @@ public class ReportDogService {
     public ReportDog get(Long id) {
         log.info("Was invoked method to get a report by id={}", id);
 
-
-        return this.reportRepository.findById(id)
+        return this.reportDogRepository.findById(id)
                 .orElseThrow(ReportDogNotFoundException::new);
     }
 
@@ -62,8 +77,8 @@ public class ReportDogService {
     public boolean remove(Long id) {
         log.info("Was invoked method to remove a report by id={}", id);
 
-        if (reportRepository.existsById(id)) {
-            reportRepository.deleteById(id);
+        if (reportDogRepository.existsById(id)) {
+            reportDogRepository.deleteById(id);
             return true;
         }
         throw new ReportDogNotFoundException();
@@ -79,8 +94,8 @@ public class ReportDogService {
     public Optional<ReportDog> update(ReportDog reportDog) {
         log.info("Was invoked method to upload a reportDog");
 
-        if (reportRepository.existsById(reportDog.getId())) {
-            return Optional.ofNullable(reportRepository.save(reportDog));
+        if (reportDogRepository.existsById(reportDog.getId())) {
+            return Optional.ofNullable(reportDogRepository.save(reportDog));
         }
         throw new ReportDogNotFoundException();
     }
@@ -93,6 +108,50 @@ public class ReportDogService {
     public Collection<ReportDog> getAll() {
         log.info("Was invoked method to get all reportsDog");
 
-        return this.reportRepository.findAll();
+        return this.reportDogRepository.findAll();
+    }
+
+    public byte[] getFile(Long id) {
+        String fileId = reportDogRepository.getReferenceById(id).getFileId();
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<String> request = new HttpEntity<>(headers);
+
+        ResponseEntity<String> filePath = restTemplate.exchange(
+                config.getFileInfoUri(),
+                HttpMethod.GET,
+                request,
+                String.class,
+                config.getToken(), fileId
+        );
+
+        String fullUri = config.getFileStorageUri()
+                .replace("{token}", config.getToken())
+                .replace("{filePath}", "photos/file_1.jpg");
+
+        URL urlObj = null;
+        try {
+            urlObj = new URL(fullUri);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Файл не скачен");
+        }
+
+        try (InputStream is = urlObj.openStream()) {
+            return is.readAllBytes();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+//        GetFile getFileMethod = new GetFile();
+//        getFileMethod.setFileId(fileId);
+//        try {
+//            File file = execute(getFileMethod);
+//            return downloadFile(file.getFilePath());
+////            byte[] image = bot.getBaseUrl()
+//        } catch (TelegramApiException e) {
+//            e.printStackTrace();
+//        }
+//        throw new ReportDogNotFoundException();
     }
 }
