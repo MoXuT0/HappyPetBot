@@ -31,7 +31,8 @@ public class Reply {
         catReplies.put(SHELTER_SAFETY_CMD, chatId -> bot.sendMessage(chatId, MESSAGE_CAT_SHELTER_SAFETY));
         catReplies.put(SHELTER_SCHEDULE_ADDRESS_CMD, chatId -> bot.sendMessage(chatId, MESSAGE_CAT_SHELTER_SCHEDULE_ADDRESS));
         catReplies.put(CAR_PASS_CMD, chatId -> bot.sendMessage(chatId, MESSAGE_CAT_CAR_PASS));
-        catReplies.put(SEND_CONTACT_CMD, chatId -> bot.sendMessage(chatId, MESSAGE_CAT_SEND_CONTACT));
+        catReplies.put(SEND_CONTACT_CMD, chatId -> bot.sendMessageWithContactKeyboard(chatId));
+        catReplies.put(BACK_CMD, chatId -> bot.sendMessage(chatId, MESSAGE_TEXT_CHOOSE_ACTION, bot.replyKeyboardBottom()));
 
         //Этап 2
         catReplies.put(PET_RULES_CMD, chatId -> bot.sendMessage(chatId, MESSAGE_CAT_RULES));
@@ -81,7 +82,8 @@ public class Reply {
         dogReplies.put(SHELTER_SAFETY_CMD, chatId -> bot.sendMessage(chatId, MESSAGE_DOG_SHELTER_SAFETY));
         dogReplies.put(SHELTER_SCHEDULE_ADDRESS_CMD, chatId -> bot.sendMessage(chatId, MESSAGE_DOG_SHELTER_SCHEDULE_ADDRESS));
         dogReplies.put(CAR_PASS_CMD, chatId -> bot.sendMessage(chatId, MESSAGE_DOG_CAR_PASS));
-        dogReplies.put(SEND_CONTACT_CMD, chatId -> bot.sendMessage(chatId, MESSAGE_DOG_SEND_CONTACT));
+        dogReplies.put(SEND_CONTACT_CMD, chatId -> bot.sendMessageWithContactKeyboard(chatId));
+        dogReplies.put(BACK_CMD, chatId -> bot.sendMessage(chatId, MESSAGE_TEXT_CHOOSE_ACTION, bot.replyKeyboardBottom()));
 
         //Этап 2
         dogReplies.put(PET_RULES_CMD, chatId -> bot.sendMessage(chatId, MESSAGE_DOG_RULES));
