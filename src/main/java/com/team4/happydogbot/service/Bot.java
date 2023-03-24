@@ -21,10 +21,12 @@ import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -123,14 +125,9 @@ public class Bot extends TelegramLongPollingBot {
                 sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_WRITE_VOLUNTEER, FINISH_VOLUNTEER_CMD);
             } else if (SEND_REPORT_CMD.equals(messageData) &&
                     adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
-                //МЕТОД ОТПРАВКИ КОНТАКТНЫХ ДАННЫХ в таблицу для собак
+                ///метод для отправки отчета в таблицу для собак
             } else if (SEND_REPORT_CMD.equals(messageData)) {
-                //МЕТОД ОТПРАВКИ КОНТАКТНЫХ ДАННЫХ в таблицу для кошек
-            } else if (SEND_CONTACT_CMD.equals(messageData) &&
-                    adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
-                //метод для отправки отчета в таблицу для собак
-            } else if (SEND_CONTACT_CMD.equals(messageData)) {
-                //метод для отправки отчет в таблица для кошек
+                //метод для отправки отчет в таблицу для кошек
             } else if (FINISH_PROBATION.equals(messageData)
                     && adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
                 //метод изменения статуса на Finished и информирования пользователя для собак
@@ -160,6 +157,10 @@ public class Bot extends TelegramLongPollingBot {
                 //метод изменения статуса на Refuse и информирования пользователя для кошек
                 changeCatAdopterStatus(MESSAGE_DECISION_REFUSE, messageText, ADOPTION_DENIED);
             } else sendMessage(chatId, MESSAGE_TEXT_NO_COMMAND);
+        } else if (update.hasMessage() && update.getMessage().hasContact()) {
+            long chatId = update.getMessage().getChatId();
+            processContact(update);
+            sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT_SUCCESS);
         }
 
     }
@@ -437,6 +438,67 @@ public class Bot extends TelegramLongPollingBot {
                 adopterDog.setDog(false);
                 adopterDogRepository.save(adopterDog);
             }
+        }
+    }
+
+    /**
+     * Создает клавиатуру и отсылает сообщение с ней для получения контактных данных пользователя
+     * @param chatId идентификатор чата пользователя
+     */
+    public void sendMessageWithContactKeyboard(long chatId) {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(false);
+
+        KeyboardRow keyboardRow1 = new KeyboardRow();
+        KeyboardButton contact = new KeyboardButton(SEND_CONTACT_CMD);
+        contact.setRequestContact(true);
+        keyboardRow1.add(contact);
+
+        KeyboardRow keyboardRow2 = new KeyboardRow();
+        keyboardRow2.add(BACK_CMD);
+
+        List<KeyboardRow> keyboard = new ArrayList<>();
+        keyboard.add(keyboardRow1);
+        keyboard.add(keyboardRow2);
+
+        replyKeyboardMarkup.setKeyboard(keyboard);
+
+        sendMessage(chatId, MESSAGE_TEXT_SEND_CONTACT_CHOOSE, replyKeyboardMarkup);
+    }
+
+    /**
+     * Обрабатывает присланные пользователем контактные данные и записывает их базу данных
+     * @param update принятый контакт пользователя
+     */
+    private void processContact(Update update) {
+        User user = update.getMessage().getFrom();
+        long chatId = update.getMessage().getChatId();
+        if (!adopterCatRepository.findAdopterCatByChatId(chatId).isDog()) {
+            AdopterCat adopterCat = adopterCatRepository.findAdopterCatByChatId(chatId);
+            if (adopterCat == null) {
+                adopterCat = new AdopterCat();
+            }
+            adopterCat.setChatId(user.getId());
+            adopterCat.setFirstName(user.getFirstName());
+            adopterCat.setLastName(user.getLastName());
+            adopterCat.setUserName(user.getUserName());
+            adopterCat.setTelephoneNumber(update.getMessage().getContact().getPhoneNumber());
+            adopterCat.setState(REGISTRATION);
+            adopterCatRepository.save(adopterCat);
+        } else if (adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
+            AdopterDog adopterDog = adopterDogRepository.findAdopterDogByChatId(chatId);
+            if (adopterDog == null) {
+                adopterDog = new AdopterDog();
+            }
+            adopterDog.setChatId(user.getId());
+            adopterDog.setFirstName(user.getFirstName());
+            adopterDog.setLastName(user.getLastName());
+            adopterDog.setUserName(user.getUserName());
+            adopterDog.setTelephoneNumber(update.getMessage().getContact().getPhoneNumber());
+            adopterDog.setState(REGISTRATION);
+            adopterDogRepository.save(adopterDog);
         }
     }
 
