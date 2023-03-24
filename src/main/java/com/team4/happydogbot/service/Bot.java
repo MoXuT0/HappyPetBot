@@ -30,11 +30,11 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.team4.happydogbot.constants.BotCommands.*;
 import static com.team4.happydogbot.constants.BotReplies.*;
+import static com.team4.happydogbot.constants.PatternValidation.REPORT_REGEX;
+import static com.team4.happydogbot.constants.PatternValidation.validationPatternReport;
 
 @Slf4j
 @Service
@@ -152,9 +152,7 @@ public class Bot extends TelegramLongPollingBot {
      * @param isDog  состояние выбранного приюта у Adopter
      */
     public void getReport(Update update, boolean isDog) {
-        Pattern reportPattern = Pattern.compile(REPORT_REGEX);
-        Matcher reportMatcher = reportPattern.matcher(update.getMessage().getCaption());
-        if (reportMatcher.matches()) {
+        if (validationPatternReport(update.getMessage().getCaption())) {
             String reportText = update.getMessage().getCaption();
             String fileId;
             if (update.getMessage().hasPhoto()) {

@@ -1,5 +1,8 @@
 package com.team4.happydogbot.constants;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class BotReplies {
 
     // Ответы этап 0. Входная точка общения бота с пользователем
@@ -169,11 +172,6 @@ public class BotReplies {
             "- необходимо написать \"Поведение:\", после него поставить пробел и написать текст\n" +
             "- Ваш отчет не должен быть слишком коротким, но и расписывать подробности до мелочей тоже не нужно, " +
             "длина текста каждого блока должна составлять от 50 до 300 символов.";
-
-    public static final String REPORT_REGEX =
-            "(Рацион:)(\\s)[А-Яа-я0-9\\s\\W;\\-]{50,300}(;)(\\s)" +
-                    "(Самочувствие:)(\\s)[А-Яа-я0-9\\s\\W;\\-]{50,300}(;)(\\s)" +
-                    "(Поведение:)(\\s)[А-Яа-я0-9\\s\\W]{50,300}";
 
     public static final String URL_DOG_REPORT_EXAMPLE_PHOTO = "https://images.app.goo.gl/FZnFVwMjAQVAJfjq9";
 //    public static final String URL_DOG_REPORT_EXAMPLE_PHOTO = "https://github.com/TamaraZolotovskaya/HappyDogBot/raw/dev/src/main/resources/static/Dog_report_example_photo.jpeg";
