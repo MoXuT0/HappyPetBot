@@ -475,11 +475,9 @@ public class Bot extends TelegramLongPollingBot {
     private void processContact(Update update) {
         User user = update.getMessage().getFrom();
         long chatId = update.getMessage().getChatId();
-        if (!adopterCatRepository.findAdopterCatByChatId(chatId).isDog()) {
+        if (adopterCatRepository.findAdopterCatByChatId(chatId) != null
+                && !adopterCatRepository.findAdopterCatByChatId(chatId).isDog()) {
             AdopterCat adopterCat = adopterCatRepository.findAdopterCatByChatId(chatId);
-            if (adopterCat == null) {
-                adopterCat = new AdopterCat();
-            }
             adopterCat.setChatId(user.getId());
             adopterCat.setFirstName(user.getFirstName());
             adopterCat.setLastName(user.getLastName());
@@ -487,11 +485,9 @@ public class Bot extends TelegramLongPollingBot {
             adopterCat.setTelephoneNumber(update.getMessage().getContact().getPhoneNumber());
             adopterCat.setState(REGISTRATION);
             adopterCatRepository.save(adopterCat);
-        } else if (adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
+        } else if (adopterDogRepository.findAdopterDogByChatId(chatId) != null
+                && adopterDogRepository.findAdopterDogByChatId(chatId).isDog()) {
             AdopterDog adopterDog = adopterDogRepository.findAdopterDogByChatId(chatId);
-            if (adopterDog == null) {
-                adopterDog = new AdopterDog();
-            }
             adopterDog.setChatId(user.getId());
             adopterDog.setFirstName(user.getFirstName());
             adopterDog.setLastName(user.getLastName());
