@@ -10,7 +10,9 @@ import com.team4.happydogbot.repository.ReportCatRepository;
 import com.team4.happydogbot.repository.ReportDogRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.scheduling.annotation.Scheduled;
+
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
@@ -46,6 +48,7 @@ public class Bot extends TelegramLongPollingBot {
 
     private final AdopterCatRepository adopterCatRepository;
 
+
     private final ReportDogRepository reportDogRepository;
     private final ReportCatRepository reportCatRepository;
     private final AdopterDogService adopterDogService;
@@ -55,6 +58,7 @@ public class Bot extends TelegramLongPollingBot {
     public Bot(BotConfig config, AdopterDogRepository adopterDogRepository, AdopterCatRepository adopterCatRepository,
                ReportDogRepository reportDogRepository, ReportCatRepository reportCatRepository,
                AdopterDogService adopterDogService, AdopterCatService adopterCatService) {
+
         this.config = config;
         this.adopterDogRepository = adopterDogRepository;
         this.adopterCatRepository = adopterCatRepository;
