@@ -83,7 +83,7 @@ public class AdopterCatService {
             findAdopterCat.setState(adopterCat.getState());
             return this.adopterCatRepository.save(findAdopterCat);
         }
-        throw new CatNotFoundException();
+        throw new AdopterCatNotFoundException();
     }
 
     /**
