@@ -99,7 +99,7 @@ public class ReportDogService {
             findDog.setFileId(reportDog.getFileId());
             findDog.setCaption(reportDog.getCaption());
             findDog.setExamination(reportDog.getExamination());
-            return this.reportRepository.save(findDog);
+            return this.reportDogRepository.save(findDog);
         }
         throw new ReportDogNotFoundException();
     }
