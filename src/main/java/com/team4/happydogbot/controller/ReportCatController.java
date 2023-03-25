@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,8 @@ import java.util.Collection;
 public class ReportCatController {
 
     private final ReportCatService reportCatService;
+
+    private static final String FILE_TYPE = "image/jpeg";
 
     public ReportCatController(ReportCatService reportCatService) {
         this.reportCatService = reportCatService;
@@ -113,6 +116,40 @@ public class ReportCatController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(reportCat);
+    }
+
+    @Operation(summary = "Получение фото отчета по id отчета",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Фото по id отчета"
+                    )
+            }
+    )
+    @Parameters(value = {
+            @Parameter(name = "id", example = "1")
+    }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Фото к отчету было найдено"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Фото к отчету не было найдено"
+            )
+    }
+    )
+    @GetMapping("/photo/{id}")
+    public ResponseEntity<byte[]> getPhoto(@Parameter (description = "report id") @PathVariable Long id) {
+        ReportCat reportCat = this.reportCatService.get(id);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(FILE_TYPE));
+        headers.setContentLength(reportCat.getFileId().length());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\"ReportPhoto.jpg\"")
+                .body(reportCatService.getFile(id));
     }
 
     @Operation(summary = "Удаление отчета по id",

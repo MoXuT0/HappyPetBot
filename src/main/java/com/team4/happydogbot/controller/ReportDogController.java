@@ -12,11 +12,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.telegram.telegrambots.meta.api.objects.File;
 
 import java.util.Collection;
 
@@ -34,7 +32,7 @@ public class ReportDogController {
 
     private final ReportDogService reportDogService;
 
-    private final String fileType = "image/jpeg";
+    private static final String FILE_TYPE = "image/jpeg";
 
     public ReportDogController(ReportDogService reportDogService) {
         this.reportDogService = reportDogService;
@@ -147,18 +145,11 @@ public class ReportDogController {
     @GetMapping("/photo/{id}")
     public ResponseEntity<byte[]> getPhoto(@Parameter (description = "report id") @PathVariable Long id) {
         ReportDog reportDog = this.reportDogService.get(id);
-
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType(fileType));
+        headers.setContentType(MediaType.parseMediaType(FILE_TYPE));
         headers.setContentLength(reportDog.getFileId().length());
-//
-//        return ResponseEntity.status(HttpStatus.OK)
-//                .headers(headers)
-//                .body(reportDogService.getFile(id));
-
         return ResponseEntity.ok()
-                .contentLength(reportDog.getFileId().length())
-                .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\"reportPhoto.jpg\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\"ReportPhoto.jpg\"")
                 .body(reportDogService.getFile(id));
     }
 
