@@ -5,15 +5,13 @@ import com.team4.happydogbot.entity.ReportDog;
 import com.team4.happydogbot.exception.ReportDogNotFoundException;
 import com.team4.happydogbot.repository.ReportDogRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.telegram.telegrambots.meta.api.methods.GetFile;
-import org.telegram.telegrambots.meta.api.objects.File;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
@@ -111,47 +109,40 @@ public class ReportDogService {
         return this.reportDogRepository.findAll();
     }
 
+    /**
+     * Метод находит в базе данных fileId фотографии к отчету, делает запрос Telegram на получение filePath фотографии,
+     * получает фотографию, получает byte фотографии
+     * @param id
+     * @return byte фотографии
+     */
     public byte[] getFile(Long id) {
         String fileId = reportDogRepository.getReferenceById(id).getFileId();
-
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<String> request = new HttpEntity<>(headers);
-
-        ResponseEntity<String> filePath = restTemplate.exchange(
+        ResponseEntity<String> response = restTemplate.exchange(
                 config.getFileInfoUri(),
                 HttpMethod.GET,
                 request,
                 String.class,
                 config.getToken(), fileId
         );
-
+        JSONObject responseJson = new JSONObject(response.getBody());
+        JSONObject pathJson = responseJson.getJSONObject("result");
+        String filePath = pathJson.getString("file_path");
         String fullUri = config.getFileStorageUri()
                 .replace("{token}", config.getToken())
-                .replace("{filePath}", "photos/file_1.jpg");
-
-        URL urlObj = null;
+                .replace("{filePath}", filePath);
+        URL urlObj;
         try {
             urlObj = new URL(fullUri);
         } catch (MalformedURLException e) {
-            throw new RuntimeException("Файл не скачен");
+            throw new RuntimeException(e);
         }
-
         try (InputStream is = urlObj.openStream()) {
             return is.readAllBytes();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-//        GetFile getFileMethod = new GetFile();
-//        getFileMethod.setFileId(fileId);
-//        try {
-//            File file = execute(getFileMethod);
-//            return downloadFile(file.getFilePath());
-////            byte[] image = bot.getBaseUrl()
-//        } catch (TelegramApiException e) {
-//            e.printStackTrace();
-//        }
-//        throw new ReportDogNotFoundException();
     }
 }
