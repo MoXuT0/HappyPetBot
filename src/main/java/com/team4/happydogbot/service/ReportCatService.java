@@ -1,11 +1,23 @@
 package com.team4.happydogbot.service;
 
+import com.team4.happydogbot.config.BotConfig;
 import com.team4.happydogbot.entity.ReportCat;
 import com.team4.happydogbot.exception.ReportCatNotFoundException;
 import com.team4.happydogbot.repository.ReportCatRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
 import javax.transaction.Transactional;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collection;
 
 /**
@@ -20,8 +32,11 @@ public class ReportCatService {
 
     private final ReportCatRepository reportCatRepository;
 
-    public ReportCatService(ReportCatRepository reportRepository) {
+    private final BotConfig config;
+
+    public ReportCatService(ReportCatRepository reportRepository, BotConfig config) {
         this.reportCatRepository = reportRepository;
+        this.config = config;
     }
 
     /**
@@ -91,5 +106,42 @@ public class ReportCatService {
     public Collection<ReportCat> getAll() {
         log.info("Was invoked method to get all reportsCat");
         return this.reportCatRepository.findAll();
+    }
+
+    /**
+     * Метод находит в базе данных fileId фотографии к отчету, делает запрос Telegram на получение filePath фотографии,
+     * получает фотографию, получает byte фотографии
+     * @param id
+     * @return byte фотографии
+     */
+    public byte[] getFile(Long id) {
+        String fileId = reportCatRepository.getReferenceById(id).getFileId();
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(
+                config.getFileInfoUri(),
+                HttpMethod.GET,
+                request,
+                String.class,
+                config.getToken(), fileId
+        );
+        JSONObject responseJson = new JSONObject(response.getBody());
+        JSONObject pathJson = responseJson.getJSONObject("result");
+        String filePath = pathJson.getString("file_path");
+        String fullUri = config.getFileStorageUri()
+                .replace("{token}", config.getToken())
+                .replace("{filePath}", filePath);
+        URL urlObj;
+        try {
+            urlObj = new URL(fullUri);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+        try (InputStream is = urlObj.openStream()) {
+            return is.readAllBytes();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
