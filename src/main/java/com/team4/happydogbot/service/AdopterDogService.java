@@ -2,7 +2,6 @@ package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.entity.AdopterDog;
 import com.team4.happydogbot.exception.AdopterDogNotFoundException;
-import com.team4.happydogbot.exception.DogNotFoundException;
 import com.team4.happydogbot.repository.AdopterDogRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -73,7 +72,8 @@ public class AdopterDogService {
      * @see AdopterDogService
      */
     public AdopterDog update(AdopterDog adopterDog) {
-        log.info("Was invoked method to update a adopterCat");
+        log.info("Was invoked method to update a adopterDog");
+
         if (adopterDog.getChatId() != null && get(adopterDog.getChatId()) != null) {
             AdopterDog findAdopterDog = get(adopterDog.getChatId());
             findAdopterDog.setFirstName(adopterDog.getFirstName());
@@ -85,7 +85,7 @@ public class AdopterDogService {
             findAdopterDog.setState(adopterDog.getState());
             return this.adopterDogRepository.save(findAdopterDog);
         }
-        throw new DogNotFoundException();
+        throw new AdopterDogNotFoundException();
     }
 
     /**

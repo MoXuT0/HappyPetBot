@@ -226,6 +226,8 @@ public class ReportDogController {
     )
     @PutMapping
     public ResponseEntity<ReportDog> update(@RequestBody ReportDog reportDog) {
+        reportService.update(reportDog);
+        return ResponseEntity.ok(reportDog);
         return ResponseEntity.of(reportDogService.update(reportDog));
     }
 

@@ -28,12 +28,8 @@ public class ReportCat {
     @CreationTimestamp
     @Column(name = "report_date")
     private LocalDate reportDate;
-    //поля для обработки фотографий
     @Column(name = "file_id")
     private String fileId;
-//    private File filePicture;
-//    private String filePath;
-    //поле текста при добавлении фото
     @Column(name = "report_text", length = 1024)
     private String caption;
     @Column(name = "examination")
@@ -42,4 +38,11 @@ public class ReportCat {
     @JoinColumn(name = "chat_id")
     @JsonBackReference
     private AdopterCat adopterCat;
+
+    public ReportCat(Long id, LocalDate reportDate, String fileId, String caption) {
+        this.id = id;
+        this.reportDate = reportDate;
+        this.fileId = fileId;
+        this.caption = caption;
+    }
 }

@@ -54,6 +54,18 @@ public class AdopterCat {
     @Column(name = "is_dog")
     private boolean isDog;
 
+    public AdopterCat(Long chatId, String firstName, String lastName, String userName, int age, String address,
+                      String telephoneNumber, Status state) {
+        this.chatId = chatId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.userName = userName;
+        this.age = age;
+        this.address = address;
+        this.telephoneNumber = telephoneNumber;
+        this.state = state;
+    }
+
     public void setCat(Cat cat) {
         this.cat = cat;
     }

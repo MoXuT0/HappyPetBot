@@ -5,11 +5,12 @@ import com.team4.happydogbot.exception.CatNotFoundException;
 import com.team4.happydogbot.repository.CatRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+
 import java.util.Collection;
-import java.util.Optional;
 
 /**
- *Класс - сервис, содержащий набор CRUD операций над объектом Cat
+ * Класс - сервис, содержащий набор CRUD операций над объектом Cat
  * @see Cat
  * @see CatRepository
  */
@@ -38,7 +39,7 @@ public class CatService {
      * Метод находит и возвращает кота по id
      * @param id
      * @return {@link CatRepository#findById(Object)}
-     * @throws CatNotFoundException если кот с указанным id не найдена
+     * @throws CatNotFoundException если кот с указанным id не найден
      * @see CatService
      */
     public Cat get(Long id) {
@@ -50,15 +51,15 @@ public class CatService {
     /**
      * Метод находит и удаляет кота по id
      * @param id
-     * @throws CatNotFoundException если кот с указанным id не найдена
+     * @throws CatNotFoundException если кот с указанным id не найден
      * @see CatService
      */
     public boolean remove(Long id) {
         log.info("Was invoked method to remove a cat by id={}", id);
         if (catRepository.existsById(id)) {
-        if (catRepository.getReferenceById(id).getAdopterCat() != null) {
-            catRepository.getReferenceById(id).getAdopterCat().setCat(null);
-        }
+            if (catRepository.getReferenceById(id).getAdopterCat() != null) {
+                catRepository.getReferenceById(id).getAdopterCat().setCat(null);
+            }
             catRepository.deleteById(id);
             return true;
         }
@@ -69,19 +70,24 @@ public class CatService {
      * Метод обновляет и возвращает кота
      * @param cat
      * @return {@link CatRepository#save(Object)}
-     * @throws CatNotFoundException если кот с указанным id не найдена
+     * @throws CatNotFoundException если кот с указанным id не найден
      * @see CatService
      */
-    public Optional<Cat> update(Cat cat) {
+    public Cat update(Cat cat) {
         log.info("Was invoked method to update a cat");
-        if (catRepository.existsById(cat.getId())) {
-            return Optional.of(catRepository.save(cat));
+        if (cat.getId() != null && get(cat.getId()) != null) {
+            Cat findCat = get(cat.getId());
+            findCat.setName(cat.getName());
+            findCat.setBreed(cat.getBreed());
+            findCat.setYearOfBirth(cat.getYearOfBirth());
+            findCat.setDescription(cat.getDescription());
+            return this.catRepository.save(findCat);
         }
         throw new CatNotFoundException();
     }
 
     /**
-     * Method to get all cats.
+     * Метод находит и возвращает всех котов
      * @return {@link CatRepository#findAll()}
      * @see CatService
      */

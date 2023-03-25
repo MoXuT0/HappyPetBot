@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 
 /**
@@ -29,7 +30,16 @@ public class Cat {
     private int yearOfBirth;
     @Column(name = "description")
     private String description;
+
     @OneToOne(mappedBy = "cat")
     @JsonBackReference
     private AdopterCat adopterCat;
+
+    public Cat(Long id, String name, String breed, int yearOfBirth, String description) {
+        this.id = id;
+        this.name = name;
+        this.breed = breed;
+        this.yearOfBirth = yearOfBirth;
+        this.description = description;
+    }
 }

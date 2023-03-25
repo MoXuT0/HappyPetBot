@@ -180,7 +180,8 @@ public class DogController {
     )
     @PutMapping
     public ResponseEntity<Dog> update(@RequestBody Dog dog) {
-        return ResponseEntity.of(dogService.update(dog));
+        dogService.update(dog);
+        return ResponseEntity.ok(dog);
     }
 
     @Operation(summary = "Просмотр всех собак",

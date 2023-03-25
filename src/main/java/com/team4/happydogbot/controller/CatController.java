@@ -14,11 +14,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.Collection;
 
 /**
  * Класс - контроллер для объекта Cat, содержащий набор API endpoints
  * для обращения к маршрутам отдельными HTTP методами
+ *
  * @see Cat
  * @see CatService
  * @see CatController
@@ -28,7 +30,7 @@ import java.util.Collection;
 @Tag(name = "Коты", description = "CRUD-операции и другие эндпоинты для работы с собаками")
 public class CatController {
 
-   private final CatService catService;
+    private final CatService catService;
 
     public CatController(CatService catService) {
         this.catService = catService;
@@ -179,7 +181,8 @@ public class CatController {
     )
     @PutMapping
     public ResponseEntity<Cat> update(@RequestBody Cat cat) {
-        return ResponseEntity.of(catService.update(cat));
+        catService.update(cat);
+        return ResponseEntity.ok(cat);
     }
 
     @Operation(summary = "Просмотр всех котов",

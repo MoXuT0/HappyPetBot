@@ -30,7 +30,16 @@ public class Dog {
     private int yearOfBirth;
     @Column(name = "description")
     private String description;
+
     @OneToOne(mappedBy = "dog")
     @JsonBackReference
     private AdopterDog adopterDog;
+
+    public Dog(Long id, String name, String breed, int yearOfBirth, String description) {
+        this.id = id;
+        this.name = name;
+        this.breed = breed;
+        this.yearOfBirth = yearOfBirth;
+        this.description = description;
+    }
 }

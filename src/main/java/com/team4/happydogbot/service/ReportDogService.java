@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
-import java.util.Optional;
 
 /**
  *Класс - сервис, содержащий набор CRUD операций над объектом ReportDog
@@ -91,11 +90,16 @@ public class ReportDogService {
      * @throws ReportDogNotFoundException если отчет с указанным id не найден
      * @see ReportDogService
      */
-    public Optional<ReportDog> update(ReportDog reportDog) {
+    public ReportDog update(ReportDog reportDog) {
         log.info("Was invoked method to upload a reportDog");
 
-        if (reportDogRepository.existsById(reportDog.getId())) {
-            return Optional.ofNullable(reportDogRepository.save(reportDog));
+        if (reportDog.getId() != null && get(reportDog.getId()) != null) {
+            ReportDog findDog = get(reportDog.getId());
+            findDog.setReportDate(reportDog.getReportDate());
+            findDog.setFileId(reportDog.getFileId());
+            findDog.setCaption(reportDog.getCaption());
+            findDog.setExamination(reportDog.getExamination());
+            return this.reportRepository.save(findDog);
         }
         throw new ReportDogNotFoundException();
     }
