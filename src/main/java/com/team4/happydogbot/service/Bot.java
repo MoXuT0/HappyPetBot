@@ -10,9 +10,7 @@ import com.team4.happydogbot.repository.ReportCatRepository;
 import com.team4.happydogbot.repository.ReportDogRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.scheduling.annotation.Scheduled;
-
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
@@ -20,11 +18,7 @@ import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.objects.Document;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.PhotoSize;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -34,16 +28,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.team4.happydogbot.constants.BotCommands.*;
 import static com.team4.happydogbot.constants.BotReplies.*;
-import static com.team4.happydogbot.constants.PatternValidation.REPORT_REGEX;
 import static com.team4.happydogbot.constants.PatternValidation.validationPatternReport;
 import static com.team4.happydogbot.entity.Status.*;
 
@@ -644,7 +633,7 @@ public class Bot extends TelegramLongPollingBot {
      * @see Scheduled
      */
     //для проверки рабоспособности cron = "30 * * * * *"
-    @Scheduled(cron = "30 30 8 * * *")
+    @Scheduled(cron = "30 * * * * *")
     private void sendAttentionForDogVolunteer() {
 
         List<AdopterDog> adopters = adopterDogRepository.findAll();
@@ -655,14 +644,18 @@ public class Bot extends TelegramLongPollingBot {
                 .collect(Collectors.toList());
         List<ReportDog> reports = reportDogRepository.findAll();
         for (AdopterDog adopter : adoptersWithProbationPeriod) {
-            ReportDog report = reports.stream().filter(x -> (x.getAdopterDog().equals(adopter))
-                            && (x.getExamination()))
+            ReportDog report = reports.stream()
+                    .filter(x -> (x.getAdopterDog().equals(adopter))
+                            && (x.getExamination()||x.getExamination()==null ))
                     .reduce((first, last) -> last)
-                    .orElseThrow();
-            //для проверки рабоспособности в условии ниже добавить +3 после LocalDate.now().getDayOfYear()
-            if (LocalDate.now().getDayOfYear() - report.getReportDate().getDayOfYear() >= 2) {
-                sendMessage(config.getVolunteerChatId(), "Внимание! Усыновитель " + adopter.getFirstName()
-                        + " " + adopter.getLastName() + " уже больше 2 дней не присылает отчеты!");
+                    .orElse(new ReportDog(0L,LocalDate.now(),"","There aren`t reports"));
+            if (LocalDate.now().getDayOfYear() - report.getReportDate().getDayOfYear() >= 0) {
+                //для проверки рабоспособности в условии ниже добавить +3 после LocalDate.now().getDayOfYear()
+                if (LocalDate.now().getDayOfYear()+3 - report.getReportDate().getDayOfYear() > 2) {
+                    sendMessage(config.getVolunteerChatId(), "Внимание! Усыновитель " + adopter.getFirstName()
+                            + " " + adopter.getLastName() + " уже больше 2 дней не присылает отчеты!");
+                }
+                sendMessage(adopter.getChatId(),MESSAGE_ATTENTION_REPORT);
             }
         }
     }

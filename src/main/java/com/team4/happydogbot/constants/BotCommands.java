@@ -88,6 +88,10 @@ public class BotCommands {
     public static final String REPORT_EXAMPLE = "Образец отчета";
     public static final String SEND_REPORT = "Отправить отчет";
 
+    public static final String SEND_ATTENTION  = "”Дорогой усыновитель, мы заметили, что ты заполняешь " +
+            "отчет не так подробно, как необходимо. Пожалуйста, подойди ответственнее к этому занятию. " +
+            "В противном случае, волонтеры приюта будут обязаны самолично проверять условия содержания собаки”";
+
     public static final String[] KEYBOARD_REPORT = {
             REPORT_FORM,
             REPORT_EXAMPLE,

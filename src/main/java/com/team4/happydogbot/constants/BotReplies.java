@@ -1,7 +1,6 @@
 package com.team4.happydogbot.constants;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 public class BotReplies {
 
@@ -195,6 +194,7 @@ public class BotReplies {
     public static final String MESSAGE_TEXT_NO_REPORT_TEXT = "Вы отправили только фото, необходимо добавить подпись к фото с текстом отчета по шаблону";
 
     public static final String MESSAGE_TEXT_NO_REPORT_PHOTO = "Вы отправили только текст, необходимо добавить фото с подписью - текстом отчета по шаблону";
+    public static final String MESSAGE_ATTENTION_REPORT = "Не забудьте сегодня направить отчет";
 
     public static final String MESSAGE_TEXT_NOT_LIKE_EXAMPLE = "Текст отчета не соответствует шаблону, пожалуйста заполните текст отчета по образцу";
 
