@@ -178,7 +178,8 @@ public class AdopterDogController {
     )
     @PutMapping
     public ResponseEntity<AdopterDog> update(@RequestBody AdopterDog adopterDog) {
-        return ResponseEntity.of(adopterDogService.update(adopterDog));
+        adopterDogService.update(adopterDog);
+        return ResponseEntity.ok(adopterDog);
     }
 
     @Operation(summary = "Просмотр всех усыновителей",

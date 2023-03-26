@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Optional;
 
 /**
  *Класс - сервис, содержащий набор CRUD операций над объектом AdopterDog
@@ -72,11 +71,19 @@ public class AdopterDogService {
      * @throws AdopterDogNotFoundException если пользователь с указанным id не найден
      * @see AdopterDogService
      */
-    public Optional<AdopterDog> update(AdopterDog adopterDog) {
+    public AdopterDog update(AdopterDog adopterDog) {
         log.info("Was invoked method to update a adopterDog");
 
-        if (adopterDogRepository.existsById(adopterDog.getChatId())) {
-            return Optional.ofNullable(adopterDogRepository.save(adopterDog));
+        if (adopterDog.getChatId() != null && get(adopterDog.getChatId()) != null) {
+            AdopterDog findAdopterDog = get(adopterDog.getChatId());
+            findAdopterDog.setFirstName(adopterDog.getFirstName());
+            findAdopterDog.setLastName(adopterDog.getLastName());
+            findAdopterDog.setUserName(adopterDog.getUserName());
+            findAdopterDog.setAge(adopterDog.getAge());
+            findAdopterDog.setAddress(adopterDog.getAddress());
+            findAdopterDog.setTelephoneNumber(adopterDog.getTelephoneNumber());
+            findAdopterDog.setState(adopterDog.getState());
+            return this.adopterDogRepository.save(findAdopterDog);
         }
         throw new AdopterDogNotFoundException();
     }

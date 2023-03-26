@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -40,16 +42,41 @@ public class AdopterDog {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status state = Status.USER;
-
-    @OneToMany(mappedBy = "adopterDog", cascade = CascadeType.ALL)
+    @CreationTimestamp
+    @Column(name = "status_date")
+    private LocalDate statusDate;
+    @OneToMany(mappedBy = "adopterDog", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<ReportDog> reports;
-
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "dog_id")
     private Dog dog;
     @Column(name = "is_dog")
     private boolean isDog;
+
+    public AdopterDog(Long chatId, String firstName, String lastName, String userName, int age, String address,
+                      String telephoneNumber, Status state) {
+        this.chatId = chatId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.userName = userName;
+        this.age = age;
+        this.address = address;
+        this.telephoneNumber = telephoneNumber;
+        this.state = state;
+    }
+
+    public void setDog(Dog dog) {
+        this.dog = dog;
+    }
+
+    public boolean isDog() {
+        return isDog;
+    }
+
+    public void setDog(boolean dog) {
+        isDog = dog;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -65,17 +92,5 @@ public class AdopterDog {
     @Override
     public int hashCode() {
         return Objects.hash(chatId, firstName, lastName, userName, age, address, telephoneNumber, state);
-    }
-
-    public void setDog(Dog dog) {
-        this.dog = dog;
-    }
-
-    public boolean isDog() {
-        return isDog;
-    }
-
-    public void setDog(boolean dog) {
-        isDog = dog;
     }
 }

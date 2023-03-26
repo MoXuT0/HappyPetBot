@@ -11,9 +11,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.Collection;
 
 /**
@@ -28,10 +30,12 @@ import java.util.Collection;
 @Tag(name = "Отчеты", description = "CRUD-операции и другие эндпоинты для работы с отчетами")
 public class ReportDogController {
 
-    private final ReportDogService reportService;
+    private final ReportDogService reportDogService;
 
-    public ReportDogController(ReportDogService reportService) {
-        this.reportService = reportService;
+    private static final String FILE_TYPE = "image/jpeg";
+
+    public ReportDogController(ReportDogService reportDogService) {
+        this.reportDogService = reportDogService;
     }
 
     @Operation(
@@ -63,7 +67,7 @@ public class ReportDogController {
     )
     @PostMapping
     public ResponseEntity<ReportDog> add(@RequestBody ReportDog reportDog) {
-        reportService.add(reportDog);
+        reportDogService.add(reportDog);
         return ResponseEntity.ok(reportDog);
     }
 
@@ -108,11 +112,45 @@ public class ReportDogController {
     )
     @GetMapping("/{id}")
     public ResponseEntity<ReportDog> get(@PathVariable Long id) {
-        ReportDog reportDog = reportService.get(id);
+        ReportDog reportDog = reportDogService.get(id);
         if (reportDog == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(reportDog);
+    }
+
+    @Operation(summary = "Получение фото отчета по id отчета",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Фото по id отчета"
+                    )
+            }
+    )
+    @Parameters(value = {
+            @Parameter(name = "id", example = "1")
+    }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Фото к отчету было найдено"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Фото к отчету не было найдено"
+            )
+    }
+    )
+    @GetMapping("/photo/{id}")
+    public ResponseEntity<byte[]> getPhoto(@Parameter (description = "report id") @PathVariable Long id) {
+        ReportDog reportDog = this.reportDogService.get(id);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(FILE_TYPE));
+        headers.setContentLength(reportDog.getFileId().length());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\"ReportPhoto.jpg\"")
+                .body(reportDogService.getFile(id));
     }
 
     @Operation(summary = "Удаление отчета по id",
@@ -144,7 +182,7 @@ public class ReportDogController {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (reportService.remove(id)) {
+        if (reportDogService.remove(id)) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
@@ -179,7 +217,8 @@ public class ReportDogController {
     )
     @PutMapping
     public ResponseEntity<ReportDog> update(@RequestBody ReportDog reportDog) {
-        return ResponseEntity.of(reportService.update(reportDog));
+        reportDogService.update(reportDog);
+        return ResponseEntity.ok(reportDog);
     }
 
     @Operation(summary = "Просмотр всех отчетов",
@@ -196,6 +235,6 @@ public class ReportDogController {
     )
     @GetMapping("/all")
     public Collection<ReportDog> getAll() {
-        return this.reportService.getAll();
+        return this.reportDogService.getAll();
     }
 }
