@@ -567,6 +567,7 @@ public class Bot extends TelegramLongPollingBot {
 
     /**
      * Создает клавиатуру и отсылает сообщение с ней для получения контактных данных пользователя
+     *
      * @param chatId идентификатор чата пользователя
      */
     public void sendMessageWithContactKeyboard(long chatId) {
@@ -594,6 +595,7 @@ public class Bot extends TelegramLongPollingBot {
 
     /**
      * Обрабатывает присланные пользователем контактные данные и записывает их базу данных
+     *
      * @param update принятый контакт пользователя
      */
     private void processContact(Update update) {
@@ -623,18 +625,27 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     /**
-     * Метод организует по расписанию автоматическую проверку наличия отчетов со сроком регистрации равным 2 и более
-     * дней от текущей даты по следующему алгоритму:<br>
-     * - получение списка Adopter со статусом PROBATION;<br>
-     * - получение для каждого adopter из списка отчетов последний отчет;<br>
-     * - отправка сообщения волонтеру по итогу проверки на разницу дня года текущей даты и дня года даты регистрации отчета.<br>
-     * Аннотация @Scheduled с параметром (cron = "* * * * * *") актвирует метод по расписанию cron = "Секунда Минута Час День Месяц Год"
+     * Метод организует по расписанию автоматическую проверку наличия отчетов по сроку регистрации
+     * по следующему алгоритму:<br>
+     * - получение списка Adopter со статусом PROBATION, ADDITIONAL_PERIOD_14, ADDITIONAL_PERIOD_30;<br>
+     * - получение для каждого Adopter из списка его отчетов последний отчет со статусом ACCEPTED или UNCHECKED;<br>
+     * - при отсуствии отчета генерируется отчет (без регистрации в БД) для фиксации StatusDate;<br>
+     * - отправка сообщения-уведомления волонтеру по итогу проверки на разницу 2 дня года между
+     * текущей датой и дня года даты регистрации отчета со статусом ACCEPTED.<br>
+     * - отправка сообщения-напоминания волонтеру по итогу проверки на разницу 1 день года между
+     * текущей датой и дня года даты регистрации отчета со статусом UNCHEKED.<br>
+     * - отправка сообщения-напоминания Adopter`у по итогу проверки на разницу 1 день года между
+     * текущей датой и дня года даты регистрации отчета со статусом ACCEPTED.<br>
+     * Аннотация @Scheduled с параметром (cron = "* * * * * *") актвирует метод по расписанию в момент,
+     * указанный в параметре cron = "Секунда Минута Час День Месяц Год"
      *
      * @see Scheduled
+     * @see ExaminationStatus
+     * @see Status
      */
     //для проверки рабоспособности cron = "30 * * * * *"
     @Scheduled(cron = "30 * * * * *")
-    private void sendAttentionForDogVolunteer() {
+    private void sendAttentionForDogVolunteerAndAdopterDog() {
 
         List<AdopterDog> adopters = adopterDogRepository.findAll();
         List<AdopterDog> adoptersWithProbationPeriod = adopters.stream()
@@ -646,33 +657,50 @@ public class Bot extends TelegramLongPollingBot {
         for (AdopterDog adopter : adoptersWithProbationPeriod) {
             ReportDog report = reports.stream()
                     .filter(x -> (x.getAdopterDog().equals(adopter))
-                            && (x.getExamination()||x.getExamination()==null ))
+                            && (x.getExamination().equals(ExaminationStatus.ACCEPTED)
+                            || x.getExamination() == ExaminationStatus.UNCHECKED))
                     .reduce((first, last) -> last)
-                    .orElse(new ReportDog(0L,LocalDate.now(),"","There aren`t reports"));
-            if (LocalDate.now().getDayOfYear() - report.getReportDate().getDayOfYear() >= 0) {
+                    .orElse(new ReportDog(0L,
+                            adopter.getStatusDate(),
+                            "",
+                            "There aren`t reports",
+                            ExaminationStatus.REJECTED));
+            if (LocalDate.now().getDayOfYear() - report.getReportDate().getDayOfYear() >= 1) {
                 //для проверки рабоспособности в условии ниже добавить +3 после LocalDate.now().getDayOfYear()
-                if (LocalDate.now().getDayOfYear()+3 - report.getReportDate().getDayOfYear() > 2) {
+                if (report.getExamination().equals(ExaminationStatus.UNCHECKED)) {
+                    sendMessage(config.getVolunteerChatId(), "Внимание! Необходимо проверить отчет у "
+                            + adopter.getFirstName() + " " + adopter.getLastName() + " chatID: " + adopter.getChatId());
+                } else if (LocalDate.now().getDayOfYear() - report.getReportDate().getDayOfYear() > 2) {
                     sendMessage(config.getVolunteerChatId(), "Внимание! Усыновитель " + adopter.getFirstName()
                             + " " + adopter.getLastName() + " уже больше 2 дней не присылает отчеты!");
                 }
-                sendMessage(adopter.getChatId(),MESSAGE_ATTENTION_REPORT);
+                sendMessage(adopter.getChatId(), MESSAGE_ATTENTION_REPORT);
             }
         }
     }
 
     /**
-     * Метод организует по расписанию автоматическую проверку наличия отчетов со сроком регистрации равным 2 и более
-     * дней от текущей даты по следующему алгоритму:<br>
-     * - получение списка Adopter со статусом PROBATION;<br>
-     * - получение для каждого adopter из списка отчетов последний отчет;<br>
-     * - отправка сообщения волонтеру по итогу проверки на разницу дня года текущей даты и дня года даты регистрации отчета.<br>
-     * Аннотация @Scheduled с параметром (cron = "* * * * * *") актвирует метод по расписанию cron = "Секунда Минута Час День Месяц Год"
+     * Метод организует по расписанию автоматическую проверку наличия отчетов по сроку регистрации
+     * по следующему алгоритму:<br>
+     * - получение списка Adopter со статусом PROBATION, ADDITIONAL_PERIOD_14, ADDITIONAL_PERIOD_30;<br>
+     * - получение для каждого Adopter из списка его отчетов последний отчет со статусом ACCEPTED или UNCHECKED;<br>
+     * - при отсуствии отчета генерируется отчет (без регистрации в БД) для фиксации StatusDate;<br>
+     * - отправка сообщения-уведомления волонтеру по итогу проверки на разницу 2 дня года между
+     * текущей датой и дня года даты регистрации отчета со статусом ACCEPTED.<br>
+     * - отправка сообщения-напоминания волонтеру по итогу проверки на разницу 1 день года между
+     * текущей датой и дня года даты регистрации отчета со статусом UNCHEKED.<br>
+     * - отправка сообщения-напоминания Adopter`у по итогу проверки на разницу 1 день года между
+     * текущей датой и дня года даты регистрации отчета со статусом ACCEPTED.<br>
+     * Аннотация @Scheduled с параметром (cron = "* * * * * *") актвирует метод по расписанию в момент,
+     * указанный в параметре cron = "Секунда Минута Час День Месяц Год"
      *
      * @see Scheduled
+     * @see ExaminationStatus
+     * @see Status
      */
     //для проверки рабоспособности cron = "30 * * * * *"
     @Scheduled(cron = "30 30 8 * * *")
-    private void sendAttentionForCatVolunteer() {
+    private void sendAttentionForCatVolunteerAndAdopterCat() {
 
         List<AdopterCat> adoptersWithProbationPeriod = adopterCatRepository.findAll().stream()
                 .filter(x -> (x.getState() == PROBATION)
@@ -681,40 +709,28 @@ public class Bot extends TelegramLongPollingBot {
                 .collect(Collectors.toList());
         List<ReportCat> reports = reportCatRepository.findAll();
         for (AdopterCat adopter : adoptersWithProbationPeriod) {
-            ReportCat report = reports.stream().filter(x -> (x.getAdopterCat().equals(adopter))
-                            && (x.getExamination()))
+            ReportCat report = reports.stream()
+                    .filter(x -> (x.getAdopterCat().equals(adopter))
+                            && (x.getExamination().equals(ExaminationStatus.ACCEPTED)
+                            || x.getExamination() == ExaminationStatus.UNCHECKED))
                     .reduce((first, last) -> last)
-                    .orElseThrow();
+                    .orElse(new ReportCat(0L,
+                            adopter.getStatusDate(),
+                            "",
+                            "There aren`t reports",
+                            ExaminationStatus.REJECTED));
             //для проверки рабоспособности в условии ниже добавить +3 после LocalDate.now().getDayOfYear()
-            if (LocalDate.now().getDayOfYear() - report.getReportDate().getDayOfYear() >= 2) {
-                sendMessage(config.getVolunteerChatId(), "Внимание! Усыновитель " + adopter.getFirstName()
-                        + " " + adopter.getLastName() + " уже больше 2 дней не присылает отчеты!");
+            if (LocalDate.now().getDayOfYear() - report.getReportDate().getDayOfYear() >= 1) {
+                //для проверки рабоспособности в условии ниже добавить +3 после LocalDate.now().getDayOfYear()
+                if (report.getExamination().equals(ExaminationStatus.UNCHECKED)) {
+                    sendMessage(config.getVolunteerChatId(), "Внимание! Необходимо проверить отчет у "
+                            + adopter.getFirstName() + " " + adopter.getLastName() + " chatID: " + adopter.getChatId());
+                } else if (LocalDate.now().getDayOfYear() - report.getReportDate().getDayOfYear() > 2) {
+                    sendMessage(config.getVolunteerChatId(), "Внимание! Усыновитель " + adopter.getFirstName()
+                            + " " + adopter.getLastName() + " уже больше 2 дней не присылает отчеты!");
+                }
+                sendMessage(adopter.getChatId(), MESSAGE_ATTENTION_REPORT);
             }
-        }
-    }
-
-    /**
-     * Метод организует по расписанию автоматическую проверку наличия отчетов со сроком регистрации превышающим:<br>
-     * 30 дней для усыновителей со статусами PROBATION или ADDITIONAL_PERIOD_30;<br>
-     * 14 дней для усыновителей со статусом ADDITIONAL_PERIOD_30  :<br>
-     * Аннотация @Scheduled с параметром (cron = "* * * * * *") актвирует метод по расписанию cron = "Секунда Минута Час День Месяц Год"
-     *
-     * @see Status
-     * @see Scheduled
-     */
-    //для проверки рабоспособности cron = "30 * * * * *"
-    @Scheduled(cron = "30 30 8 * * *")
-    private void sendFinishListForCatVolunteer() {
-        List<AdopterCat> adoptersWithFinishProbationPeriod = adopterCatRepository.findAll().stream()
-                .filter(x -> (x.getState() == PROBATION || x.getState() == ADDITIONAL_PERIOD_30)
-                        && (LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear() + 30 > 30)
-                        || (x.getState() == ADDITIONAL_PERIOD_14
-                        && LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear() + 30 > 14))
-                .collect(Collectors.toList());
-        for (AdopterCat adopter : adoptersWithFinishProbationPeriod) {
-            sendMessageWithInlineKeyboard(config.getVolunteerChatId(), TAKE_DECISION + "у пользователя "
-                    + adopter.getFirstName() + adopter.getLastName(), KEYBOARD_DECISION);
-
         }
     }
 
@@ -746,6 +762,31 @@ public class Bot extends TelegramLongPollingBot {
             sendMessageWithInlineKeyboard(config.getVolunteerChatId(),
                     TAKE_DECISION + adopter.getUserName(),
                     KEYBOARD_DECISION);
+        }
+    }
+
+    /**
+     * Метод организует по расписанию автоматическую проверку наличия отчетов со сроком регистрации превышающим:<br>
+     * 30 дней для усыновителей со статусами PROBATION или ADDITIONAL_PERIOD_30;<br>
+     * 14 дней для усыновителей со статусом ADDITIONAL_PERIOD_30  :<br>
+     * Аннотация @Scheduled с параметром (cron = "* * * * * *") актвирует метод по расписанию cron = "Секунда Минута Час День Месяц Год"
+     *
+     * @see Status
+     * @see Scheduled
+     */
+    //для проверки рабоспособности cron = "30 * * * * *"
+    @Scheduled(cron = "30 30 8 * * *")
+    private void sendFinishListForCatVolunteer() {
+        List<AdopterCat> adoptersWithFinishProbationPeriod = adopterCatRepository.findAll().stream()
+                .filter(x -> (x.getState() == PROBATION || x.getState() == ADDITIONAL_PERIOD_30)
+                        && (LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear() + 30 > 30)
+                        || (x.getState() == ADDITIONAL_PERIOD_14
+                        && LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear() + 30 > 14))
+                .collect(Collectors.toList());
+        for (AdopterCat adopter : adoptersWithFinishProbationPeriod) {
+            sendMessageWithInlineKeyboard(config.getVolunteerChatId(), TAKE_DECISION + "у пользователя "
+                    + adopter.getFirstName() + adopter.getLastName(), KEYBOARD_DECISION);
+
         }
     }
 

@@ -1,11 +1,12 @@
 package com.team4.happydogbot.entity;
 
-import javax.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+
+import javax.persistence.*;
 import java.time.LocalDate;
 
 /**
@@ -33,16 +34,18 @@ public class ReportCat {
     @Column(name = "report_text", length = 1024)
     private String caption;
     @Column(name = "examination")
-    private Boolean examination = null;
+    @Enumerated(EnumType.STRING)
+    private ExaminationStatus examination = ExaminationStatus.UNCHECKED;
     @ManyToOne
     @JoinColumn(name = "chat_id")
     @JsonBackReference
     private AdopterCat adopterCat;
 
-    public ReportCat(Long id, LocalDate reportDate, String fileId, String caption) {
+    public ReportCat(Long id, LocalDate reportDate, String fileId, String caption, ExaminationStatus examination) {
         this.id = id;
         this.reportDate = reportDate;
         this.fileId = fileId;
         this.caption = caption;
+        this.examination = examination;
     }
 }
