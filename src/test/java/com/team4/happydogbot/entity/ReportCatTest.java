@@ -44,11 +44,12 @@ public class ReportCatTest {
         LocalDate reportDateCat = reportCatTest.getReportDate();
         String reportFileId = reportCatTest.getFileId();
         String reportCaption = reportCatTest.getCaption();
-
+        ExaminationStatus reportExamination = reportCatTest.getExamination();
 
         Assertions.assertNull(reportId);
         Assertions.assertNull(reportDateCat);
         Assertions.assertNull(reportFileId);
         Assertions.assertNull(reportCaption);
+        Assertions.assertEquals(reportExamination, ExaminationStatus.UNCHECKED);
     }
 }
