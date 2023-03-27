@@ -652,7 +652,7 @@ public class Bot extends TelegramLongPollingBot {
                 .filter(x -> (x.getState() == PROBATION)
                         || x.getState() == ADDITIONAL_PERIOD_14
                         || x.getState() == ADDITIONAL_PERIOD_30)
-                .collect(Collectors.toList());
+                .toList();
         List<ReportDog> reports = reportDogRepository.findAll();
         for (AdopterDog adopter : adoptersWithProbationPeriod) {
             ReportDog report = reports.stream()
@@ -706,7 +706,7 @@ public class Bot extends TelegramLongPollingBot {
                 .filter(x -> (x.getState() == PROBATION)
                         || x.getState() == ADDITIONAL_PERIOD_14
                         || x.getState() == ADDITIONAL_PERIOD_30)
-                .collect(Collectors.toList());
+                .toList();
         List<ReportCat> reports = reportCatRepository.findAll();
         for (AdopterCat adopter : adoptersWithProbationPeriod) {
             ReportCat report = reports.stream()
@@ -757,7 +757,8 @@ public class Bot extends TelegramLongPollingBot {
                         && (LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear() > 30))
                         || (x.getState() == ADDITIONAL_PERIOD_14
                         //для проверки рабоспособности в условии ниже добавить +15 после LocalDate.now().getDayOfYear()
-                        && (LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear()) > 14)).toList();
+                        && (LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear()) > 14))
+                .toList();
         for (AdopterDog adopter : adoptersWithFinishProbationPeriod) {
             sendMessageWithInlineKeyboard(config.getVolunteerChatId(),
                     TAKE_DECISION + adopter.getUserName(),
@@ -782,7 +783,7 @@ public class Bot extends TelegramLongPollingBot {
                         && (LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear() + 30 > 30)
                         || (x.getState() == ADDITIONAL_PERIOD_14
                         && LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear() + 30 > 14))
-                .collect(Collectors.toList());
+                .toList();
         for (AdopterCat adopter : adoptersWithFinishProbationPeriod) {
             sendMessageWithInlineKeyboard(config.getVolunteerChatId(), TAKE_DECISION + "у пользователя "
                     + adopter.getFirstName() + adopter.getLastName(), KEYBOARD_DECISION);

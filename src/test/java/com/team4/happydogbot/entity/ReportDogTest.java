@@ -17,8 +17,8 @@ public class ReportDogTest {
     private final LocalDate reportDate = LocalDate.of(2023, 3, 24);
     private final String fileId = "Test124578";
     private final String caption = "Рацион: гуд; Самочувствие: гуд; Поведение: гуд";
-
-    ReportDog reportDog = new ReportDog(id, reportDate, fileId, caption);
+    private final ExaminationStatus examinationStatus = ExaminationStatus.UNCHECKED;
+    ReportDog reportDog = new ReportDog(id, reportDate, fileId, caption, examinationStatus);
 
     @Test
     @DisplayName("Проверка на наличие данных при создании отчета о коте")

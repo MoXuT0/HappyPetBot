@@ -1,9 +1,6 @@
 package com.team4.happydogbot.service;
 
-import com.team4.happydogbot.entity.AdopterCat;
-import com.team4.happydogbot.entity.Cat;
-import com.team4.happydogbot.entity.ReportCat;
-import com.team4.happydogbot.entity.Status;
+import com.team4.happydogbot.entity.*;
 import com.team4.happydogbot.exception.AdopterCatNotFoundException;
 import com.team4.happydogbot.repository.AdopterCatRepository;
 import org.assertj.core.api.Assertions;
@@ -230,14 +227,14 @@ public class AdopterCatServiceTest {
         expectedTest1.setReportDate(LocalDate.of(2023, 3, 24));
         expectedTest1.setFileId("Test124578");
         expectedTest1.setCaption("Рацион: гуд; Самочувствие: гуд; Поведение: гуд");
-        expectedTest1.setExamination(null);
+        expectedTest1.setExamination(ExaminationStatus.UNCHECKED);
 
         ReportCat expectedTest2 = new ReportCat();
         expectedTest2.setId(2L);
         expectedTest2.setReportDate(LocalDate.of(2023, 3, 24));
         expectedTest2.setFileId("Test986532");
         expectedTest2.setCaption("Рацион: гуд; Самочувствие: гуд; Поведение: гуд");
-        expectedTest2.setExamination(true);
+        expectedTest2.setExamination(ExaminationStatus.ACCEPTED);
 
         List<ReportCat> reportCats = new ArrayList<>();
         reportCats.add(expectedTest1);
