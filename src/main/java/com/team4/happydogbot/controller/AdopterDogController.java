@@ -2,7 +2,7 @@ package com.team4.happydogbot.controller;
 
 import com.team4.happydogbot.entity.AdopterDog;
 import com.team4.happydogbot.service.AdopterDogService;
-import com.team4.happydogbot.service.SendMessage;
+import com.team4.happydogbot.service.Bot;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -211,7 +211,7 @@ public class AdopterDogController {
     })
     public ResponseEntity<Void> sendMessage(Long chatId, String textToSend) {
         if (adopterDogService.get(chatId) != null) {
-            SendMessage.sendToTelegram(chatId, textToSend);
+            Bot.sendToTelegram(chatId, textToSend);
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
