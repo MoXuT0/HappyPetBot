@@ -11,6 +11,12 @@ public class SendMessage {
 
     private static final ResourceBundle resource = ResourceBundle.getBundle("application");
 
+    /**
+     * Метод для отправки сообщения пользователю бота с использованием Telegram API
+     * @param chatId идентификатор пользователя
+     * @param textToSend отправляемый текст
+     * @throws IOException
+     */
     public static void sendToTelegram(Long chatId, String textToSend) {
 
         String urlString = "https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s";
