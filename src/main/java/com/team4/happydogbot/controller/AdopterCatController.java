@@ -2,6 +2,7 @@ package com.team4.happydogbot.controller;
 
 import com.team4.happydogbot.entity.AdopterCat;
 import com.team4.happydogbot.service.AdopterCatService;
+import com.team4.happydogbot.service.SendMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -197,6 +198,21 @@ public class AdopterCatController {
     @GetMapping("/all")
     public Collection<AdopterCat> getAll() {
         return this.adopterCatService.getAll();
+    }
+
+    @GetMapping("/send_message")
+    @Operation(summary = "Отправка сообщения пользователю",
+            description = "Отправляет сообщение пользователю приюта через бота")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Сообщение отправлено"),
+            @ApiResponse(responseCode = "404", description = "Пользователь с таким chatId не найден"),
+    })
+    public ResponseEntity<Void> sendMessage(Long chatId, String textToSend) {
+        if (adopterCatService.get(chatId) != null) {
+            SendMessage.sendToTelegram(chatId, textToSend);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }
 
