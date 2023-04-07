@@ -43,24 +43,22 @@ import java.util.*;
 
 import static com.team4.happydogbot.constants.BotCommands.*;
 import static com.team4.happydogbot.constants.BotReplies.*;
-import static com.team4.happydogbot.constants.PatternValidation.REPORT_REGEX;
 import static com.team4.happydogbot.constants.PatternValidation.validationPatternReport;
 import static com.team4.happydogbot.entity.Status.*;
 
 @Slf4j
 @Service
 public class Bot extends TelegramLongPollingBot {
-    private final BotConfig config;
+    private BotConfig config;
 
-    private final AdopterDogRepository adopterDogRepository;
+    private AdopterDogRepository adopterDogRepository;
 
-    private final AdopterCatRepository adopterCatRepository;
+    private AdopterCatRepository adopterCatRepository;
 
-
-    private final ReportDogRepository reportDogRepository;
-    private final ReportCatRepository reportCatRepository;
-    private final AdopterDogService adopterDogService;
-    private final AdopterCatService adopterCatService;
+    private ReportDogRepository reportDogRepository;
+    private ReportCatRepository reportCatRepository;
+    private AdopterDogService adopterDogService;
+    private AdopterCatService adopterCatService;
 
     @Autowired
     public Bot(BotConfig config, AdopterDogRepository adopterDogRepository, AdopterCatRepository adopterCatRepository,
@@ -81,6 +79,10 @@ public class Bot extends TelegramLongPollingBot {
     public static final HashSet<Long> REQUEST_GET_REPLY_FROM_USER = new HashSet<>();
 
     Reply reply = new Reply(this);
+
+    public Bot() {
+
+    }
 
     @Override
     public String getBotUsername() {
