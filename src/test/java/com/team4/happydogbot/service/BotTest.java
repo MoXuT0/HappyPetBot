@@ -3,24 +3,40 @@ package com.team4.happydogbot.service;
 import com.team4.happydogbot.config.BotConfig;
 import com.team4.happydogbot.entity.AdopterCat;
 import com.team4.happydogbot.entity.AdopterDog;
-import com.team4.happydogbot.entity.ReportCat;
-import com.team4.happydogbot.entity.ReportDog;
+import com.team4.happydogbot.entity.Status;
 import com.team4.happydogbot.repository.AdopterCatRepository;
 import com.team4.happydogbot.repository.AdopterDogRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.telegram.telegrambots.meta.api.objects.*;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.util.List;
 
+import static com.team4.happydogbot.constants.BotCommands.KEYBOARD_DECISION;
+import static com.team4.happydogbot.constants.BotCommands.TAKE_DECISION;
+import static com.team4.happydogbot.constants.BotReplies.MESSAGE_DECISION_EXTEND_14;
+import static com.team4.happydogbot.entity.Status.ADDITIONAL_PERIOD_14;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
+
+/**
+ * Тест - класс для проверки операций в классе - сервисе Bot
+ *
+ * @see BotConfig
+ * @see AdopterDogService
+ * @see AdopterDogRepository
+ * @see AdopterCatService
+ * @see AdopterCatRepository
+ */
 @ExtendWith(MockitoExtension.class)
 public class BotTest {
     @Mock
@@ -29,87 +45,224 @@ public class BotTest {
     private AdopterCatRepository adopterCatRepository;
     @Mock
     private AdopterDogRepository adopterDogRepository;
+    @Mock
+    private AdopterCatService adopterCatService;
+    @Mock
+    private AdopterDogService adopterDogService;
+
     @Spy
     @InjectMocks
     private Bot bot;
 
+    /**
+     * Тестирование метода <b>sendFinishListForDogVolunteer()</b> в Bot<br>
+     * Mockito: когда вызывается метод <b>AdopterDogRepository::findAll</b>,
+     * возвращается список содержащий 1 усыновителя собаки <b>expected</b>
+     * со статусом PROBATION и датой изменеия статуса 31 день назад от текущей даты.<br>
+     * Кол-во вызовов метода <b>sendMessageWithInlineKeyboard</b> равно 1.
+     */
+
     @Test
-    @DisplayName("Проверка сохранения отчета, если фото отправлено как фото")
-    public void getReportDogTestAsPhoto() {
-        Update update = new Update();
-        update.setMessage(new Message());
-        update.getMessage().setCaption("Рацион: Шарик кушает прекрасно, утром чаппи из пакетика, днем сухой корм, вечером лакомство, налитую водичку за день выпивает полностью; Самочувствие: Шарик очень активно бегает, прыгает, просит с ним поиграть, к новому месту адаптировался быстро, занет где его место; Поведение: Шарик изучил дом, знает где свое место, ночью спит там, перестал лаять на членов семьи");
-        ArrayList<PhotoSize> photoSizes = new ArrayList<>();
-        update.getMessage().setPhoto(photoSizes);
-        PhotoSize photoSize = new PhotoSize();
-        photoSizes.add(photoSize);
-        photoSize.setFileId("TestFileId123");
-        update.getMessage().setChat(new Chat());
-        update.getMessage().getChat().setId(123L);
+    @DisplayName("Проверка отправки по расписанию при наличии собачьих усыновителей с необходимым статусом")
+    public void testSendFinishListForDogVolunteer() throws Exception {
+        AdopterDog expected = new AdopterDog();
 
-        AdopterDog adopterDog = new AdopterDog();
-        when(adopterDogRepository.findAdopterDogByChatId(any(Long.class))).thenReturn(adopterDog);
-        ReportDog expected = new ReportDog();
-        expected.setFileId("TestFileId123");
-        expected.setCaption("Рацион: Шарик кушает прекрасно, утром чаппи из пакетика, днем сухой корм, вечером лакомство, налитую водичку за день выпивает полностью; Самочувствие: Шарик очень активно бегает, прыгает, просит с ним поиграть, к новому месту адаптировался быстро, занет где его место; Поведение: Шарик изучил дом, знает где свое место, ночью спит там, перестал лаять на членов семьи");
-        adopterDog.setReports(new ArrayList<>());
-        adopterDog.getReports().add(expected);
+        expected.setChatId(1234567890L);
+        expected.setFirstName("Ivan");
+        expected.setLastName("Ivanov");
+        expected.setUserName("iiivanov");
+        expected.setAge(33);
+        expected.setAddress("МСК...");
+        expected.setTelephoneNumber("7951...");
+        expected.setStatusDate(LocalDate.now().minusDays(31));
+        expected.setState(Status.PROBATION);
 
-        bot.getReport(update, true);
 
-        ArgumentCaptor<AdopterDog> argumentCaptor = ArgumentCaptor.forClass(AdopterDog.class);
-        verify(adopterDogRepository).save(argumentCaptor.capture());
-        AdopterDog actualAdopter = argumentCaptor.getValue();
-        ReportDog actual = actualAdopter.getReports().get(0);
+        when(adopterDogRepository.findAll()).thenReturn(List.of(expected));
+        bot.sendFinishListForDogVolunteer();
 
-        Assertions.assertThat(actual.getFileId()).isEqualTo(expected.getFileId());
-        Assertions.assertThat(actual.getCaption()).isEqualTo(expected.getCaption());
-        Assertions.assertThat(actual.getExamination()).isEqualTo(expected.getExamination());
-        Assertions.assertThat(actual.getAdopterDog()).isEqualTo(expected.getAdopterDog());
+        Thread.sleep(500);
+
+        Mockito.verify(bot, Mockito.times(1))
+                .sendMessageWithInlineKeyboard(0L,
+                        TAKE_DECISION + expected.getUserName(),
+                        KEYBOARD_DECISION);
     }
 
+    /**
+     * Тестирование метода <b>sendFinishListForDogVolunteer()</b> в Bot<br>
+     * Mockito: когда вызывается метод <b>AdopterDogRepository::findAll</b>,
+     * возвращается список содержащий 1 усыновителя собаки <b>expected</b>
+     * со статусом REGISTRATION и датой изменеия статуса 31 день назад от текущей даты.<br>
+     * Кол-во вызовов метода <b>sendMessageWithInlineKeyboard</b> равно 0.
+     */
     @Test
-    @DisplayName("Проверка сохранения отчета, если фото отправлено как документ")
-    public void getReportCatTestAsDocument() {
-        Update update = new Update();
-        update.setMessage(new Message());
-        update.getMessage().setCaption("Рацион: Шарик кушает прекрасно, утром чаппи из пакетика, днем сухой корм, вечером лакомство, налитую водичку за день выпивает полностью; Самочувствие: Шарик очень активно бегает, прыгает, просит с ним поиграть, к новому месту адаптировался быстро, занет где его место; Поведение: Шарик изучил дом, знает где свое место, ночью спит там, перестал лаять на членов семьи");
-        Document document = new Document();
-        update.getMessage().setDocument(document);
-        document.setFileId("TestFileId123");
-        update.getMessage().setChat(new Chat());
-        update.getMessage().getChat().setId(123L);
+    @DisplayName("Проверка неотправки по расписанию при отсутствии собачьих усыновителей с необходимым статусом")
+    public void testSendFinishListForDogVolunteerWithoutAdopter() throws Exception {
+        AdopterDog expected = new AdopterDog();
 
-        AdopterCat adopterCat = new AdopterCat();
-        when(adopterCatRepository.findAdopterCatByChatId(any(Long.class))).thenReturn(adopterCat);
-        ReportCat expected = new ReportCat();
-        expected.setFileId("TestFileId123");
-        expected.setCaption("Рацион: Шарик кушает прекрасно, утром чаппи из пакетика, днем сухой корм, вечером лакомство, налитую водичку за день выпивает полностью; Самочувствие: Шарик очень активно бегает, прыгает, просит с ним поиграть, к новому месту адаптировался быстро, занет где его место; Поведение: Шарик изучил дом, знает где свое место, ночью спит там, перестал лаять на членов семьи");
-        adopterCat.setReports(new ArrayList<>());
-        adopterCat.getReports().add(expected);
+        expected.setChatId(1234567890L);
+        expected.setFirstName("Ivan");
+        expected.setLastName("Ivanov");
+        expected.setUserName("iiivanov");
+        expected.setAge(33);
+        expected.setAddress("МСК...");
+        expected.setTelephoneNumber("7951...");
+        expected.setStatusDate(LocalDate.now().minusDays(31));
+        expected.setState(Status.REGISTRATION);
 
-        bot.getReport(update, false);
 
-        ArgumentCaptor<AdopterCat> argumentCaptor = ArgumentCaptor.forClass(AdopterCat.class);
-        verify(adopterCatRepository).save(argumentCaptor.capture());
-        AdopterCat actualAdopter = argumentCaptor.getValue();
-        ReportCat actual = actualAdopter.getReports().get(0);
+        when(adopterDogRepository.findAll()).thenReturn(List.of(expected));
+        bot.sendFinishListForDogVolunteer();
 
-        Assertions.assertThat(actual.getFileId()).isEqualTo(expected.getFileId());
-        Assertions.assertThat(actual.getCaption()).isEqualTo(expected.getCaption());
-        Assertions.assertThat(actual.getExamination()).isEqualTo(expected.getExamination());
-        Assertions.assertThat(actual.getAdopterCat()).isEqualTo(expected.getAdopterCat());
+        Thread.sleep(500);
+
+        Mockito.verify(bot, Mockito.times(0))
+                .sendMessageWithInlineKeyboard(0L,
+                        TAKE_DECISION + expected.getUserName(),
+                        KEYBOARD_DECISION);
     }
 
-    @Test
-    @DisplayName("Проверка сохранения отчета, если подпись к фото не прошла валидацию - отчет на сохранен")
-    public void getReportWithIncorrectCaption() {
-        Update update = new Update();
-        update.setMessage(new Message());
-        update.getMessage().setCaption("Рацион: Гуд; Самочувствие: гуд; Поведение: гуд");
-        update.getMessage().setChat(new Chat());
-        update.getMessage().getChat().setId(123L);
+    /**
+     * Тестирование метода <b>sendFinishListForCatVolunteer()</b> в Bot<br>
+     * Mockito: когда вызывается метод <b>AdopterCatRepository::findAll</b>,
+     * возвращается список содержащий 1 усыновителя собаки <b>expected</b>
+     * со статусом PROBATION и датой изменеия статуса 31 день назад от текущей даты.<br>
+     * Кол-во вызовов метода <b>sendMessageWithInlineKeyboard</b> равно 1.
+     */
 
-        bot.getReport(update, true);
+    @Test
+    @DisplayName("Проверка отправки по расписанию при наличии кошачих усыновителей с необходимым статусом")
+    public void testSendFinishListForCatVolunteer() throws Exception {
+        AdopterCat expected = new AdopterCat();
+
+        expected.setChatId(1234567890L);
+        expected.setFirstName("Ivan");
+        expected.setLastName("Ivanov");
+        expected.setUserName("iiivanov");
+        expected.setAge(33);
+        expected.setAddress("МСК...");
+        expected.setTelephoneNumber("7951...");
+        expected.setStatusDate(LocalDate.now().minusDays(31));
+        expected.setState(Status.PROBATION);
+
+        when(adopterCatRepository.findAll()).thenReturn(List.of(expected));
+        bot.sendFinishListForCatVolunteer();
+
+        Thread.sleep(500);
+
+        Mockito.verify(bot, Mockito.times(1))
+                .sendMessageWithInlineKeyboard(0L,
+                        TAKE_DECISION + expected.getUserName(),
+                        KEYBOARD_DECISION);
+    }
+
+    /**
+     * Тестирование метода <b>sendFinishListForCatVolunteer()</b> в Bot<br>
+     * Mockito: когда вызывается метод <b>AdopterCatRepository::findAll</b>,
+     * возвращается список содержащий 1 усыновителя собаки <b>expected</b>
+     * со статусом REGISTRATION и датой изменеия статуса 31 день назад от текущей даты.<br>
+     * Кол-во вызовов метода <b>sendMessageWithInlineKeyboard</b> равно 0.
+     */
+    @Test
+    @DisplayName("Проверка неотправки по расписанию при отсутствии кошачих усыновителей с необходимым статусом")
+    public void testSendFinishListForCatVolunteerWithoutAdopter() throws Exception {
+        AdopterCat expected = new AdopterCat();
+
+        expected.setChatId(1234567890L);
+        expected.setFirstName("Ivan");
+        expected.setLastName("Ivanov");
+        expected.setUserName("iiivanov");
+        expected.setAge(33);
+        expected.setAddress("МСК...");
+        expected.setTelephoneNumber("7951...");
+        expected.setStatusDate(LocalDate.now().minusDays(31));
+        expected.setState(Status.REGISTRATION);
+
+        when(adopterCatRepository.findAll()).thenReturn(List.of(expected));
+        bot.sendFinishListForCatVolunteer();
+
+        Thread.sleep(500);
+
+        Mockito.verify(bot, Mockito.times(0))
+                .sendMessageWithInlineKeyboard(0L,
+                        TAKE_DECISION + expected.getUserName(),
+                        KEYBOARD_DECISION);
+    }
+
+    /**
+     * Тестирование метода <b>changeDogAdopterStatus()</b> в Bot<br>
+     * Mockito: <br>
+     * - когда вызывается метод <b>AdopterDogRepository::findAll</b>;<br>
+     * возвращается список содержащий 1 усыновителя собаки <b>expected</b>
+     * со статусом <b>REGISTRATION</b>;<br>
+     * - когда вызывается метод <b>AdopterDogService::get</b>,
+     * возвращает по id 1 усыновителя собаки <b>expected</b><br>
+     * - проверка <b>assertThat</b> успешного иземенения статуса усыновителя на <b>ADDITIONAL_PERIOD_14</b>;<br>
+     * - кол-во вызовов метода <b>sendMessage</b> равно 2.
+     */
+
+    @Test
+    @DisplayName("Проверка смены статуса собачьего усыновителя")
+    public void testChangeDogAdopterStatus() throws Exception {
+        String messageText = "dfgs: iiivanov";
+        AdopterDog expected = new AdopterDog();
+
+        expected.setChatId(1234567890L);
+        expected.setFirstName("Ivan");
+        expected.setLastName("Ivanov");
+        expected.setUserName("iiivanov");
+        expected.setAge(33);
+        expected.setAddress("МСК...");
+        expected.setTelephoneNumber("7951...");
+        expected.setState(Status.REGISTRATION);
+
+        when(adopterDogRepository.findAll()).thenReturn(List.of(expected));
+
+        when(adopterDogService.get(1234567890L)).thenReturn(expected);
+
+        bot.changeDogAdopterStatus(MESSAGE_DECISION_EXTEND_14, messageText, ADDITIONAL_PERIOD_14);
+
+        Assertions.assertThat(expected.getState().compareTo(ADDITIONAL_PERIOD_14));
+        Mockito.verify(bot, Mockito.times(2))
+                .sendMessage(anyLong(),any());
+    }
+
+    /**
+     * Тестирование метода <b>changeDogAdopterStatus()</b> в Bot<br>
+     * Mockito: <br>
+     * - когда вызывается метод <b>AdopterDogRepository::findAll</b>;<br>
+     * возвращается список содержащий 1 усыновителя собаки <b>expected</b>
+     * со статусом <b>REGISTRATION</b>;<br>
+     * - когда вызывается метод <b>AdopterDogService::get</b>,
+     * возвращает по id 1 усыновителя собаки <b>expected</b><br>
+     * - проверка <b>assertThat</b> успешного иземенения статуса усыновителя на <b>ADDITIONAL_PERIOD_14</b>;<br>
+     * - кол-во вызовов метода <b>sendMessage</b> равно 2.
+     */
+
+    @Test
+    @DisplayName("Проверка смены статуса кошачьего усыновителя")
+    public void testChangeCatAdopterStatus() throws Exception {
+        String messageText = "dfgs: iiivanov";
+        AdopterCat expected = new AdopterCat();
+
+        expected.setChatId(1234567890L);
+        expected.setFirstName("Ivan");
+        expected.setLastName("Ivanov");
+        expected.setUserName("iiivanov");
+        expected.setAge(33);
+        expected.setAddress("МСК...");
+        expected.setTelephoneNumber("7951...");
+        expected.setState(Status.REGISTRATION);
+
+        when(adopterCatRepository.findAll()).thenReturn(List.of(expected));
+
+        when(adopterCatService.get(1234567890L)).thenReturn(expected);
+
+        bot.changeCatAdopterStatus(MESSAGE_DECISION_EXTEND_14, messageText, ADDITIONAL_PERIOD_14);
+
+        Assertions.assertThat(expected.getState().compareTo(ADDITIONAL_PERIOD_14));
+        Mockito.verify(bot, Mockito.times(2))
+                .sendMessage(anyLong(),any());
     }
 }

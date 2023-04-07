@@ -29,7 +29,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.team4.happydogbot.constants.BotCommands.*;
 import static com.team4.happydogbot.constants.BotReplies.*;
@@ -753,7 +752,7 @@ public class Bot extends TelegramLongPollingBot {
 
     //для проверки рабоспособности cron = "30 * * * * *"
     @Scheduled(cron = "30 30 8 * * *")
-    private void sendFinishListForDogVolunteer() {
+    public void sendFinishListForDogVolunteer() {
         List<AdopterDog> adoptersWithFinishProbationPeriod = adopterDogRepository.findAll().stream()
                 .filter(x -> ((x.getState() == PROBATION || x.getState() == ADDITIONAL_PERIOD_30)
                         //для проверки рабоспособности в условии ниже добавить +31 после LocalDate.now().getDayOfYear()
@@ -780,7 +779,7 @@ public class Bot extends TelegramLongPollingBot {
      */
     //для проверки рабоспособности cron = "30 * * * * *"
     @Scheduled(cron = "30 30 8 * * *")
-    private void sendFinishListForCatVolunteer() {
+    void sendFinishListForCatVolunteer() {
         List<AdopterCat> adoptersWithFinishProbationPeriod = adopterCatRepository.findAll().stream()
                 .filter(x -> (x.getState() == PROBATION || x.getState() == ADDITIONAL_PERIOD_30)
                         && (LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear() + 30 > 30)
@@ -788,8 +787,8 @@ public class Bot extends TelegramLongPollingBot {
                         && LocalDate.now().getDayOfYear() - x.getStatusDate().getDayOfYear() + 30 > 14))
                 .toList();
         for (AdopterCat adopter : adoptersWithFinishProbationPeriod) {
-            sendMessageWithInlineKeyboard(config.getVolunteerChatId(), TAKE_DECISION + "у пользователя "
-                    + adopter.getFirstName() + adopter.getLastName(), KEYBOARD_DECISION);
+            sendMessageWithInlineKeyboard(config.getVolunteerChatId(), TAKE_DECISION
+                    + adopter.getUserName(), KEYBOARD_DECISION);
 
         }
     }
@@ -805,7 +804,7 @@ public class Bot extends TelegramLongPollingBot {
      * @see AdopterDog#setState(Status)
      * @see AdopterDog#setStatusDate(LocalDate)
      */
-    private void changeDogAdopterStatus(String botReplies, String messageText, Status status) {
+    public void changeDogAdopterStatus(String botReplies, String messageText, Status status) {
 
         String userName = messageText.split(": ")[1];
         Long chatId = adopterDogRepository.findAll()
@@ -835,7 +834,7 @@ public class Bot extends TelegramLongPollingBot {
      * @see AdopterCat#setState(Status)
      * @see AdopterCat#setStatusDate(LocalDate)
      */
-    private void changeCatAdopterStatus(String botReplies, String messageText, Status status) {
+    void changeCatAdopterStatus(String botReplies, String messageText, Status status) {
 
         String userName = messageText.split(": ")[1];
         Long chatId = adopterCatRepository.findAll()
