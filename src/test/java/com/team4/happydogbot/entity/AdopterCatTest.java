@@ -56,7 +56,7 @@ public class AdopterCatTest {
         String addressAC = adopterCatTest.getAddress();
         String telephoneNumberAC = adopterCatTest.getTelephoneNumber();
         Status stateAC = adopterCatTest.getState();
-        Status statusActual = Status.REGISTRATION;
+        Status statusActual = Status.USER;
 
         Assertions.assertNull(chatIdAC);
         Assertions.assertNull(firstNameAC);

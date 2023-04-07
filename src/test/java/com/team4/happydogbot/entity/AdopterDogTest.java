@@ -46,17 +46,17 @@ public class AdopterDogTest {
     @Test
     @DisplayName("Проверка на отсутствие переданных данных при создании усыновителя собаки")
     public void createAdopterDogNullTest() {
-        AdopterCat adopterCatTest = new AdopterCat();
-        Long chatIdAD = adopterCatTest.getChatId();
-        String firstNameAD = adopterCatTest.getFirstName();
-        String lastNameAD = adopterCatTest.getLastName();
-        String userNameAD = adopterCatTest.getUserName();
-        int ageAD = adopterCatTest.getAge();
+        AdopterDog adopterDogTest = new AdopterDog();
+        Long chatIdAD = adopterDogTest.getChatId();
+        String firstNameAD = adopterDogTest.getFirstName();
+        String lastNameAD = adopterDogTest.getLastName();
+        String userNameAD = adopterDogTest.getUserName();
+        int ageAD = adopterDogTest.getAge();
         int ageActual = 0;
-        String addressAD = adopterCatTest.getAddress();
-        String telephoneNumberAD = adopterCatTest.getTelephoneNumber();
-        Status stateAD = adopterCatTest.getState();
-        Status statusActual = Status.REGISTRATION;
+        String addressAD = adopterDogTest.getAddress();
+        String telephoneNumberAD = adopterDogTest.getTelephoneNumber();
+        Status stateAD = adopterDogTest.getState();
+        Status statusActual = Status.USER;
 
         Assertions.assertNull(chatIdAD);
         Assertions.assertNull(firstNameAD);
