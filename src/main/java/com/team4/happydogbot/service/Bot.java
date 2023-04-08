@@ -646,8 +646,8 @@ public class Bot extends TelegramLongPollingBot {
      * @see Status
      */
     //для проверки рабоспособности cron = "30 * * * * *"
-    @Scheduled(cron = "30 * * * * *")
-    private void sendAttentionForDogVolunteerAndAdopterDog() {
+    @Scheduled(cron = "30 30 8 * * *")
+    protected void sendAttentionForDogVolunteerAndAdopterDog() {
 
         List<AdopterDog> adopters = adopterDogRepository.findAll();
         List<AdopterDog> adoptersWithProbationPeriod = adopters.stream()
@@ -702,7 +702,7 @@ public class Bot extends TelegramLongPollingBot {
      */
     //для проверки рабоспособности cron = "30 * * * * *"
     @Scheduled(cron = "30 30 8 * * *")
-    private void sendAttentionForCatVolunteerAndAdopterCat() {
+    protected void sendAttentionForCatVolunteerAndAdopterCat() {
 
         List<AdopterCat> adoptersWithProbationPeriod = adopterCatRepository.findAll().stream()
                 .filter(x -> (x.getState() == PROBATION)
