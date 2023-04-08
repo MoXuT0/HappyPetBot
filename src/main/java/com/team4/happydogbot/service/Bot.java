@@ -76,6 +76,7 @@ public class Bot extends TelegramLongPollingBot {
         this.adopterCatService = adopterCatService;
     }
 
+
     public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
 
     public static final HashSet<Long> REQUEST_GET_REPLY_FROM_USER = new HashSet<>();
@@ -94,7 +95,6 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
@@ -308,7 +308,7 @@ public class Bot extends TelegramLongPollingBot {
     public void sendDocument(long chatId, String fileUrl) {
         SendDocument sendDocument = new SendDocument();
         sendDocument.setChatId(String.valueOf(chatId));
-        sendDocument.setCaption("Информация по вашему вопросу сожержится в файле");
+        sendDocument.setCaption("Информация по вашему вопросу содержится в файле");
         sendDocument.setDocument(new InputFile(fileUrl));
         try {
             execute(sendDocument);
@@ -578,6 +578,7 @@ public class Bot extends TelegramLongPollingBot {
 
     /**
      * Создает клавиатуру и отсылает сообщение с ней для получения контактных данных пользователя
+     *
      * @param chatId идентификатор чата пользователя
      */
     public void sendMessageWithContactKeyboard(long chatId) {
@@ -605,6 +606,7 @@ public class Bot extends TelegramLongPollingBot {
 
     /**
      * Обрабатывает присланные пользователем контактные данные и записывает их базу данных
+     *
      * @param update принятый контакт пользователя
      */
     private void processContact(Update update) {
@@ -815,4 +817,6 @@ public class Bot extends TelegramLongPollingBot {
         adopterCatService.update(adopterCat);
         sendMessage(config.getVolunteerChatId(), "Для пользователя" + chatId + "выполнено:" + botReplies);
     }
+
+
 }

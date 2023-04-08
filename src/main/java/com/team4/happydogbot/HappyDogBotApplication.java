@@ -10,7 +10,6 @@ public class HappyDogBotApplication {
     public static void main(String[] args) {
 
         SpringApplication.run(HappyDogBotApplication.class, args);
-
     }
 }
 

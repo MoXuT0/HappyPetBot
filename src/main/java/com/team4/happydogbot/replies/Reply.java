@@ -9,7 +9,11 @@ import java.util.function.Consumer;
 import static com.team4.happydogbot.constants.BotCommands.*;
 import static com.team4.happydogbot.constants.BotReplies.*;
 
-
+/**
+ * Класс содержит мапы, в которых командам соответствуют реакции бота на эти команды
+ * @see com.team4.happydogbot.constants.BotCommands
+ * @see com.team4.happydogbot.constants.BotReplies
+ */
 public class Reply {
 
     private Bot bot;
@@ -61,12 +65,10 @@ public class Reply {
         dogReplies.put(SHELTER_CHOOSE, chatId -> bot.sendMessage(chatId, MESSAGE_TEXT_CHOOSE_SHELTER, bot.replyKeyboardShelter()));
         dogReplies.put(SHELTER_CAT, chatId -> {
             bot.sendMessage(chatId, MESSAGE_TEXT_CHOOSE_ACTION, bot.replyKeyboardBottom());
-//            bot.isDog = false;
             bot.changeUserStatusOfShelter(chatId, false);
         });
         dogReplies.put(SHELTER_DOG, chatId -> {
             bot.sendMessage(chatId, MESSAGE_TEXT_CHOOSE_ACTION, bot.replyKeyboardBottom());
-//            bot.isDog = true;
             bot.changeUserStatusOfShelter(chatId, true);
         });
         dogReplies.put(SHELTER_INFO_CMD, chatId -> bot.sendMessageWithInlineKeyboard(chatId, MESSAGE_TEXT_SHELTER_INFO, KEYBOARD_SHELTER_ABOUT));

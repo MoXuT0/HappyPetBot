@@ -12,9 +12,8 @@ import javax.annotation.PostConstruct;
 @Component
 public class BotInitializer {
 
-    private Bot bot;
+    private final Bot bot;
 
-    @Autowired
     public BotInitializer(Bot bot) {
         this.bot = bot;
     }
