@@ -15,11 +15,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.Collection;
 
 /**
  * Класс - контроллер для объекта AdopterDog, содержащий набор API endpoints
  * для обращения к маршрутам отдельными HTTP методами
+ *
  * @see AdopterDog
  * @see AdopterDogService
  * @see AdopterDogController
@@ -28,6 +30,7 @@ import java.util.Collection;
 @RequestMapping("/adopter_dog")
 @Tag(name = "Усыновители", description = "CRUD-операции и другие эндпоинты для работы с усыновителями")
 public class AdopterDogController {
+
     private final AdopterDogService adopterDogService;
 
     public AdopterDogController(AdopterDogService adopterDogService) {
@@ -200,8 +203,6 @@ public class AdopterDogController {
         return this.adopterDogService.getAll();
     }
 
-
-
     @GetMapping("/send_message")
     @Operation(summary = "Отправка сообщения пользователю",
             description = "Отправляет сообщение пользователю приюта через бота")
@@ -216,5 +217,25 @@ public class AdopterDogController {
         }
         return ResponseEntity.notFound().build();
     }
-}
 
+//    @Operation(summary = "Отправка напоминания",
+//            responses = {
+//                    @ApiResponse(
+//                            responseCode = "200",
+//                            description = "Напоминание отправлено",
+//                            content = @Content(
+//                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+//                                    schema = @Schema(implementation = AdopterDog.class)
+//                            )
+//                    )
+//            }
+//    )
+//    @GetMapping("/{chatId}")
+//@MiddleHandler
+//    public ResponseEntity<Void> sendAttention(@PathVariable Long chatId) {
+//        if (adopterDogService.send(chatId)) {
+//            return ResponseEntity.ok().build();
+//        }
+//        return ResponseEntity.notFound().build();
+//    }
+}

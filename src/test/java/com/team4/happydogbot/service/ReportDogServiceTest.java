@@ -1,5 +1,6 @@
 package com.team4.happydogbot.service;
 
+import com.team4.happydogbot.entity.ExaminationStatus;
 import com.team4.happydogbot.entity.ReportDog;
 import com.team4.happydogbot.exception.ReportDogNotFoundException;
 import com.team4.happydogbot.repository.ReportDogRepository;
@@ -47,13 +48,13 @@ public class ReportDogServiceTest {
         expected.setReportDate(LocalDate.of(2023, 3, 24));
         expected.setFileId("Test124578");
         expected.setCaption("Рацион: гуд; Самочувствие: гуд; Поведение: гуд");
-        expected.setExamination(null);
+        expected.setExamination(ExaminationStatus.UNCHECKED);
 
         expected1.setId(2L);
         expected1.setReportDate(LocalDate.of(2023, 3, 24));
         expected1.setFileId("Test986532");
         expected1.setCaption("Рацион: гуд; Самочувствие: гуд; Поведение: гуд");
-        expected1.setExamination(true);
+        expected1.setExamination(ExaminationStatus.ACCEPTED);
     }
 
     /**

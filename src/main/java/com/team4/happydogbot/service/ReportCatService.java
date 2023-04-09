@@ -1,23 +1,17 @@
 package com.team4.happydogbot.service;
 
-import com.team4.happydogbot.config.BotConfig;
 import com.team4.happydogbot.entity.ReportCat;
 import com.team4.happydogbot.exception.ReportCatNotFoundException;
 import com.team4.happydogbot.repository.ReportCatRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONObject;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.objects.File;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.nio.file.Files;
 import java.util.Collection;
 
 /**
@@ -32,11 +26,11 @@ public class ReportCatService {
 
     private final ReportCatRepository reportCatRepository;
 
-    private final BotConfig config;
+    private final Bot bot;
 
-    public ReportCatService(ReportCatRepository reportRepository, BotConfig config) {
+    public ReportCatService(ReportCatRepository reportRepository, Bot bot) {
         this.reportCatRepository = reportRepository;
-        this.config = config;
+        this.bot = bot;
     }
 
     /**
@@ -109,39 +103,21 @@ public class ReportCatService {
     }
 
     /**
-     * Метод находит в базе данных fileId фотографии к отчету, делает запрос Telegram на получение filePath фотографии,
-     * получает фотографию, получает byte фотографии
+     * Метод находит в базе данных fileId фотографии к отчету, делает запрос Telegram на получение файла фотографии,
+     * получает фотографию, читает и возвращает byte фотографии
      * @param id
      * @return byte фотографии
      */
     public byte[] getFile(Long id) {
+        log.info("Was invoked method to get a photo of the report by id={}", id);
+
         String fileId = reportCatRepository.getReferenceById(id).getFileId();
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<String> request = new HttpEntity<>(headers);
-        ResponseEntity<String> response = restTemplate.exchange(
-                config.getFileInfoUri(),
-                HttpMethod.GET,
-                request,
-                String.class,
-                config.getToken(), fileId
-        );
-        JSONObject responseJson = new JSONObject(response.getBody());
-        JSONObject pathJson = responseJson.getJSONObject("result");
-        String filePath = pathJson.getString("file_path");
-        String fullUri = config.getFileStorageUri()
-                .replace("{token}", config.getToken())
-                .replace("{filePath}", filePath);
-        URL urlObj;
         try {
-            urlObj = new URL(fullUri);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-        try (InputStream is = urlObj.openStream()) {
-            return is.readAllBytes();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            File file = bot.execute(GetFile.builder().fileId(fileId).build());
+            java.io.File file1 = bot.downloadFile(file);
+            return Files.readAllBytes(file1.toPath());
+        } catch (TelegramApiException | IOException e) {
+            throw new ReportCatNotFoundException();
         }
     }
 }

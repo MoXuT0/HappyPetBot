@@ -15,8 +15,4 @@ public class BotConfig {
     private String token;
     @Value("${volunteerChatId}")
     private long volunteerChatId;
-    @Value("${service.file_info.uri}")
-    private String fileInfoUri;
-    @Value("${service.file_storage.uri}")
-    private String fileStorageUri;
 }
