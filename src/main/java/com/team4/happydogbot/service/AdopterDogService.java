@@ -9,7 +9,8 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 
 /**
- *Класс - сервис, содержащий набор CRUD операций над объектом AdopterDog
+ * Класс - сервис, содержащий набор CRUD операций над объектом AdopterDog
+ *
  * @see AdopterDog
  * @see AdopterDogRepository
  */
@@ -17,6 +18,7 @@ import java.util.Collection;
 @Service
 public class AdopterDogService {
     private final AdopterDogRepository adopterDogRepository;
+    private Bot bot;
 
     public AdopterDogService(AdopterDogRepository adopterDogRepository) {
         this.adopterDogRepository = adopterDogRepository;
@@ -24,6 +26,7 @@ public class AdopterDogService {
 
     /**
      * Метод создает нового пользователя
+     *
      * @param adopterDog
      * @return {@link AdopterDogRepository#save(Object)}
      * @see AdopterDogService
@@ -36,6 +39,7 @@ public class AdopterDogService {
 
     /**
      * Метод находит и возвращает пользователя по id
+     *
      * @param id
      * @return {@link AdopterDogRepository#findById(Object)}
      * @throws AdopterDogNotFoundException если пользователь с указанным id не найден
@@ -50,6 +54,7 @@ public class AdopterDogService {
 
     /**
      * Метод находит и удаляет пользователя по id
+     *
      * @param id
      * @return true если удаление прошло успешно
      * @throws AdopterDogNotFoundException если пользователь с указанным id не найден
@@ -66,6 +71,7 @@ public class AdopterDogService {
 
     /**
      * Метод обновляет и возвращает пользователя
+     *
      * @param adopterDog
      * @return {@link AdopterDogRepository#save(Object)}
      * @throws AdopterDogNotFoundException если пользователь с указанным id не найден
@@ -90,6 +96,7 @@ public class AdopterDogService {
 
     /**
      * Метод находит всех пользователей
+     *
      * @return {@link AdopterDogRepository#findById(Object)}
      * @see AdopterDogService
      */
@@ -98,4 +105,14 @@ public class AdopterDogService {
 
         return this.adopterDogRepository.findAll();
     }
+
+//    public boolean send(Long chatId) {
+//        log.info("Was invoked method to get all adoptersDod");
+//        if (adopterDogRepository.existsById(chatId)) {
+//            bot.sendMessage(chatId, SEND_ATTENTION);
+//            return true;
+//        }
+//        throw new AdopterDogNotFoundException();
+//    }
 }
+

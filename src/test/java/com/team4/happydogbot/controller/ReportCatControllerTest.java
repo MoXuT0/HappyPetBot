@@ -1,12 +1,10 @@
 package com.team4.happydogbot.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team4.happydogbot.entity.ExaminationStatus;
 import com.team4.happydogbot.entity.ReportCat;
-import com.team4.happydogbot.entity.ReportDog;
 import com.team4.happydogbot.exception.ReportCatNotFoundException;
-import com.team4.happydogbot.exception.ReportDogNotFoundException;
 import com.team4.happydogbot.service.ReportCatService;
-import com.team4.happydogbot.service.ReportDogService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,19 +53,19 @@ public class ReportCatControllerTest {
         expected.setReportDate(LocalDate.of(2023, 3, 24));
         expected.setFileId("Test124578");
         expected.setCaption("Рацион: гуд; Самочувствие: гуд; Поведение: гуд");
-        expected.setExamination(null);
+        expected.setExamination(ExaminationStatus.UNCHECKED);
 
         expected1.setId(2L);
         expected1.setReportDate(LocalDate.of(2023, 3, 24));
         expected1.setFileId("Test986532");
         expected1.setCaption("Рацион: гуд; Самочувствие: гуд; Поведение: гуд");
-        expected1.setExamination(true);
+        expected1.setExamination(ExaminationStatus.ACCEPTED);
 
         actual.setId(1L);
         actual.setReportDate(LocalDate.of(2023, 3, 24));
         actual.setFileId("Test124578");
         actual.setCaption("Рацион: гуд; Самочувствие: гуд; Поведение: бэд");
-        actual.setExamination(false);
+        actual.setExamination(ExaminationStatus.UNCHECKED);
 
         exceptionReportCat.setId(0L);
         exceptionReportCat.setReportDate(LocalDate.of(2000, 1, 1));
@@ -199,7 +197,7 @@ public class ReportCatControllerTest {
                 .andExpect(jsonPath("$.reportDate").value(actual.getReportDate().toString()))
                 .andExpect(jsonPath("$.fileId").value(actual.getFileId()))
                 .andExpect(jsonPath("$.caption").value(actual.getCaption()))
-                .andExpect(jsonPath("$.examination").value(actual.getExamination()));
+                .andExpect(jsonPath("$.examination").value(actual.getExamination().name()));
     }
 
     /**
