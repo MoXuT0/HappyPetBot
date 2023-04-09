@@ -246,26 +246,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     /**
-     * Метод отправляет пользователю фото с подписью
-     *
-     * @param chatId  идентификатор пользователя
-     * @param fileUrl URL фото, фото должно храниться на сервере
-     */
-    public void sendPhotoWithCaption(long chatId, String caption, String fileUrl) {
-        SendPhoto sendPhoto = new SendPhoto();
-        sendPhoto.setChatId(String.valueOf(chatId));
-        sendPhoto.setCaption(caption);
-        sendPhoto.setPhoto(new InputFile(fileUrl));
-        sendPhoto.setParseMode(ParseMode.HTML);
-        try {
-            execute(sendPhoto);
-        } catch (TelegramApiException e) {
-            log.error("Error occurred: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Метод отправляет пользователю фото с подписью
+     * Метод отправляет пользователю фото с подписью и клавиатурой
      *
      * @param chatId   идентификатор пользователя
      * @param fileUrl  URL фото, фото должно храниться на сервере
@@ -485,23 +466,6 @@ public class Bot extends TelegramLongPollingBot {
             log.error("Error occurred: " + e.getMessage());
         }
     }
-
-//    /**
-//     * Изменяет текст существующего сообщения, обычно после нажатия пользователем кнопки InlineKeyboardMaker
-//     * @param chatId идентификатор чата пользователя, в котором произошло действие и происходит изменение текста сообщения
-//     * @param messageId идентификатор сообщения, которое изменяется
-//     */
-//    private void executeEditMessageText(long chatId, long messageId) {
-//        EditMessageText message = new EditMessageText();
-//        message.setChatId(String.valueOf(chatId));
-//        message.setText(TALK_ENDED);
-//        message.setMessageId((int) messageId);
-//        try {
-//            execute(message);
-//        } catch (TelegramApiException e) {
-//            log.error("Error occurred: " + e.getMessage());
-//        }
-//    }
 
     /**
      * Метод описывает состояние разговора с волонтером или отправка дефолтной команды, а именно:<br>

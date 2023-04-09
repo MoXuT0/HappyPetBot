@@ -33,6 +33,9 @@ public class BotTest {
     @InjectMocks
     private Bot bot;
 
+    private final AdopterDog expectedDog = new AdopterDog();
+    private final AdopterCat expectedCat = new AdopterCat();
+
     @Test
     @DisplayName("Проверка сохранения отчета, если фото отправлено как фото")
     public void getReportDogTestAsPhoto() {
@@ -103,7 +106,7 @@ public class BotTest {
 
     @Test
     @DisplayName("Проверка сохранения отчета, если подпись к фото не прошла валидацию - отчет на сохранен")
-    public void getReportWithIncorrectCaption() {
+    public void getReportTestWithIncorrectCaption() {
         Update update = new Update();
         update.setMessage(new Message());
         update.getMessage().setCaption("Рацион: Гуд; Самочувствие: гуд; Поведение: гуд");
@@ -112,4 +115,109 @@ public class BotTest {
 
         bot.getReport(update, true);
     }
+
+    @Test
+    @DisplayName("Проверка изменения статуса пользователя на приют для собак, новый пользователь")
+    public void changeUserStatusOfShelterToDogNewUserTest() {
+        Long chatId = 123L;
+        boolean isDog = true;
+
+        when(adopterDogRepository.findAdopterDogByChatId(any(Long.class))).thenReturn(null);
+        when(adopterCatRepository.findAdopterCatByChatId(any(Long.class))).thenReturn(null);
+        expectedDog.setChatId(chatId);
+        expectedDog.setDog(isDog);
+
+        bot.changeUserStatusOfShelter(chatId, isDog);
+
+        ArgumentCaptor<AdopterDog> argumentCaptor = ArgumentCaptor.forClass(AdopterDog.class);
+        verify(adopterDogRepository).save(argumentCaptor.capture());
+        AdopterDog actualAdopter = argumentCaptor.getValue();
+
+        Assertions.assertThat(actualAdopter.getChatId()).isEqualTo(expectedDog.getChatId());
+        Assertions.assertThat(actualAdopter.isDog()).isEqualTo(expectedDog.isDog());
+    }
+
+    @Test
+    @DisplayName("Проверка изменения статуса пользователя на приют для собак, пользователь уже был в приюте кошек")
+    public void changeUserStatusOfShelterToDogWhenWasCatTest() {
+        Long chatId = 123L;
+        boolean isDog = true;
+
+        AdopterCat adopterCat = new AdopterCat();
+        adopterCat.setChatId(chatId);
+        adopterCat.setDog(false);
+        when(adopterDogRepository.findAdopterDogByChatId(any(Long.class))).thenReturn(null);
+        when(adopterCatRepository.findAdopterCatByChatId(any(Long.class))).thenReturn(adopterCat);
+        expectedDog.setChatId(chatId);
+        expectedCat.setChatId(chatId);
+        expectedDog.setDog(isDog);
+        expectedCat.setDog(isDog);
+
+        bot.changeUserStatusOfShelter(chatId, isDog);
+
+        ArgumentCaptor<AdopterDog> argumentCaptorDog = ArgumentCaptor.forClass(AdopterDog.class);
+        verify(adopterDogRepository).save(argumentCaptorDog.capture());
+        AdopterDog actualAdopterDog = argumentCaptorDog.getValue();
+        ArgumentCaptor<AdopterCat> argumentCaptorCat = ArgumentCaptor.forClass(AdopterCat.class);
+        verify(adopterCatRepository).save(argumentCaptorCat.capture());
+        AdopterCat actualAdopterCat = argumentCaptorCat.getValue();
+
+        Assertions.assertThat(actualAdopterDog.getChatId()).isEqualTo(expectedDog.getChatId());
+        Assertions.assertThat(actualAdopterDog.isDog()).isEqualTo(expectedDog.isDog());
+        Assertions.assertThat(actualAdopterCat.getChatId()).isEqualTo(expectedCat.getChatId());
+        Assertions.assertThat(actualAdopterCat.isDog()).isEqualTo(expectedCat.isDog());
+    }
+
+    @Test
+    @DisplayName("Проверка изменения статуса пользователя на приют для кошек, новый пользователь")
+    public void changeUserStatusOfShelterToCatNewUserTest() {
+        Long chatId = 123L;
+        boolean isDog = false;
+
+        when(adopterDogRepository.findAdopterDogByChatId(any(Long.class))).thenReturn(null);
+        when(adopterCatRepository.findAdopterCatByChatId(any(Long.class))).thenReturn(null);
+        expectedCat.setChatId(chatId);
+        expectedCat.setDog(isDog);
+
+        bot.changeUserStatusOfShelter(chatId, isDog);
+
+        ArgumentCaptor<AdopterCat> argumentCaptor = ArgumentCaptor.forClass(AdopterCat.class);
+        verify(adopterCatRepository).save(argumentCaptor.capture());
+        AdopterCat actualAdopter = argumentCaptor.getValue();
+
+        Assertions.assertThat(actualAdopter.getChatId()).isEqualTo(expectedCat.getChatId());
+        Assertions.assertThat(actualAdopter.isDog()).isEqualTo(expectedCat.isDog());
+    }
+
+    @Test
+    @DisplayName("Проверка изменения статуса пользователя на приют для кошек, пользователь уже был в приюте собак")
+    public void changeUserStatusOfShelterToCatWhenWasDogTest() {
+        Long chatId = 123L;
+        boolean isDog = false;
+
+        AdopterDog adopterDog = new AdopterDog();
+        adopterDog.setChatId(chatId);
+        adopterDog.setDog(true);
+        when(adopterDogRepository.findAdopterDogByChatId(any(Long.class))).thenReturn(adopterDog);
+        when(adopterCatRepository.findAdopterCatByChatId(any(Long.class))).thenReturn(null);
+        expectedDog.setChatId(chatId);
+        expectedCat.setChatId(chatId);
+        expectedDog.setDog(isDog);
+        expectedCat.setDog(isDog);
+
+        bot.changeUserStatusOfShelter(chatId, isDog);
+
+        ArgumentCaptor<AdopterDog> argumentCaptorDog = ArgumentCaptor.forClass(AdopterDog.class);
+        verify(adopterDogRepository).save(argumentCaptorDog.capture());
+        AdopterDog actualAdopterDog = argumentCaptorDog.getValue();
+        ArgumentCaptor<AdopterCat> argumentCaptorCat = ArgumentCaptor.forClass(AdopterCat.class);
+        verify(adopterCatRepository).save(argumentCaptorCat.capture());
+        AdopterCat actualAdopterCat = argumentCaptorCat.getValue();
+
+        Assertions.assertThat(actualAdopterDog.getChatId()).isEqualTo(expectedDog.getChatId());
+        Assertions.assertThat(actualAdopterDog.isDog()).isEqualTo(expectedDog.isDog());
+        Assertions.assertThat(actualAdopterCat.getChatId()).isEqualTo(expectedCat.getChatId());
+        Assertions.assertThat(actualAdopterCat.isDog()).isEqualTo(expectedCat.isDog());
+    }
+
 }
