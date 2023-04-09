@@ -1,5 +1,6 @@
 package com.team4.happydogbot.service;
 
+import com.team4.happydogbot.config.BotConfig;
 import com.team4.happydogbot.entity.ReportDog;
 import com.team4.happydogbot.exception.ReportDogNotFoundException;
 import com.team4.happydogbot.repository.ReportDogRepository;
@@ -8,18 +9,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.objects.File;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -31,18 +34,25 @@ import static org.mockito.Mockito.when;
  */
 @ExtendWith(MockitoExtension.class)
 public class ReportDogServiceTest {
-
+    @Mock
+    private BotConfig botConfig;
     @Mock
     ReportDogRepository reportDogRepository;
-
     @InjectMocks
     ReportDogService reportDogService;
+    @Spy
+    @InjectMocks
+    private Bot bot;
+    @Mock
+    GetFile.GetFileBuilder getFileBuilder;
 
     private final ReportDog expected = new ReportDog();
     private final ReportDog expected1 = new ReportDog();
 
     @BeforeEach
     public void setUp() {
+//        MockitoAnnotations.initMocks(this);
+
         expected.setId(1L);
         expected.setReportDate(LocalDate.of(2023, 3, 24));
         expected.setFileId("Test124578");
@@ -177,5 +187,45 @@ public class ReportDogServiceTest {
         List<ReportDog> reportDogs = new ArrayList<>();
         when(reportDogRepository.findAll()).thenReturn(reportDogs);
         assertThat(reportDogService.getAll()).isEqualTo(reportDogs);
+    }
+
+    /** Тестирование метода <b>getFile()</b> в ReportDogService
+     * <br>
+     * Mockito: когда вызывается метод <b>ReportDogRepository::findById</b>,
+     * возвращается отчет о собаке <b>expected</b>
+     */
+    @Test
+    @DisplayName("Проверка поиска фото отчета о собаке по id и возвращение фото из Telegram")
+    public void getFileByIdTest() throws TelegramApiException, IOException, URISyntaxException {
+
+        String fileId = expected.getFileId();
+        when(reportDogRepository.getReferenceById(any(Long.class))).thenReturn(expected);
+
+        GetFile getFile = new GetFile(fileId);
+        File file = getFile.deserializeResponse("""
+                {"ok":true,"result":{"file_id":"Test124578","file_unique_id":"AQAD4sgxG4IiOEl9","file_size":41338,"file_path":"dog_photo.jpg"}}
+                """
+        );
+        java.io.File downloadedFile = new java.io.File(
+                        ReportDogServiceTest.class.getResource("dog_photo.jpg").toURI()
+        );
+        when(getFileBuilder.build()).thenReturn(getFile);
+        when(bot.execute(getFile)).thenReturn(file);
+        when(bot.downloadFile(any(File.class))).thenReturn(downloadedFile);
+
+        reportDogService.getFile(1L);
+
+        ArgumentCaptor<GetFile> argumentCaptorGetFile = ArgumentCaptor.forClass(GetFile.class);
+        verify(bot).execute(argumentCaptorGetFile.capture());
+        GetFile getFileActual = argumentCaptorGetFile.getValue();
+        ArgumentCaptor<File> argumentCaptorFile = ArgumentCaptor.forClass(File.class);
+        verify(bot).downloadFile(argumentCaptorFile.capture());
+        File fileActual = argumentCaptorFile.getValue();
+
+        assertThat(getFileActual.getFileId()).isEqualTo(fileId);
+        assertThat(fileActual.getFileId()).isEqualTo(fileId);
+        assertThat(fileActual.getFileUniqueId()).isEqualTo(file.getFileUniqueId());
+        assertThat(fileActual.getFileSize()).isEqualTo(file.getFileSize());
+        assertThat(fileActual.getFilePath()).isEqualTo(file.getFilePath());
     }
 }
