@@ -61,7 +61,6 @@ public class Bot extends TelegramLongPollingBot {
     public Bot(BotConfig config, AdopterDogRepository adopterDogRepository, AdopterCatRepository adopterCatRepository,
                ReportDogRepository reportDogRepository, ReportCatRepository reportCatRepository,
                AdopterDogService adopterDogService, AdopterCatService adopterCatService) {
-
         this.config = config;
         this.adopterDogRepository = adopterDogRepository;
         this.adopterCatRepository = adopterCatRepository;
@@ -76,10 +75,6 @@ public class Bot extends TelegramLongPollingBot {
     public static final HashSet<Long> REQUEST_GET_REPLY_FROM_USER = new HashSet<>();
 
     Reply reply = new Reply(this);
-
-    public Bot() {
-
-    }
 
     @Override
     public String getBotUsername() {
