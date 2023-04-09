@@ -27,6 +27,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -38,7 +43,10 @@ import static com.team4.happydogbot.entity.Status.*;
 @Slf4j
 @Service
 public class Bot extends TelegramLongPollingBot {
-    private BotConfig config;
+
+    private final BotConfig config;
+
+    private static final ResourceBundle resource = ResourceBundle.getBundle("application");
 
     private AdopterDogRepository adopterDogRepository;
 
@@ -53,7 +61,6 @@ public class Bot extends TelegramLongPollingBot {
     public Bot(BotConfig config, AdopterDogRepository adopterDogRepository, AdopterCatRepository adopterCatRepository,
                ReportDogRepository reportDogRepository, ReportCatRepository reportCatRepository,
                AdopterDogService adopterDogService, AdopterCatService adopterCatService) {
-
         this.config = config;
         this.adopterDogRepository = adopterDogRepository;
         this.adopterCatRepository = adopterCatRepository;
@@ -63,16 +70,11 @@ public class Bot extends TelegramLongPollingBot {
         this.adopterCatService = adopterCatService;
     }
 
-
     public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
 
     public static final HashSet<Long> REQUEST_GET_REPLY_FROM_USER = new HashSet<>();
 
     Reply reply = new Reply(this);
-
-    public Bot() {
-
-    }
 
     @Override
     public String getBotUsername() {
@@ -686,7 +688,7 @@ public class Bot extends TelegramLongPollingBot {
      * по следующему алгоритму:<br>
      * - получение списка Adopter со статусом PROBATION, ADDITIONAL_PERIOD_14, ADDITIONAL_PERIOD_30;<br>
      * - получение для каждого Adopter из списка его отчетов последний отчет со статусом ACCEPTED или UNCHECKED;<br>
-     * - при отсуствии отчета генерируется отчет (без регистрации в БД) для фиксации StatusDate;<br>
+     * - при отсутствии отчета генерируется отчет (без регистрации в БД) для фиксации StatusDate;<br>
      * - отправка сообщения-уведомления волонтеру по итогу проверки на разницу 2 дня года между
      * текущей датой и дня года даты регистрации отчета со статусом ACCEPTED.<br>
      * - отправка сообщения-напоминания волонтеру по итогу проверки на разницу 1 день года между
@@ -777,7 +779,7 @@ public class Bot extends TelegramLongPollingBot {
      * @see Status
      * @see Scheduled
      */
-    //для проверки рабоспособности cron = "30 * * * * *"
+    //для проверки работоспособности cron = "30 * * * * *"
     @Scheduled(cron = "30 30 8 * * *")
     void sendFinishListForCatVolunteer() {
         List<AdopterCat> adoptersWithFinishProbationPeriod = adopterCatRepository.findAll().stream()
@@ -853,5 +855,25 @@ public class Bot extends TelegramLongPollingBot {
         sendMessage(config.getVolunteerChatId(), "Для пользователя" + chatId + "выполнено:" + botReplies);
     }
 
+    /**
+     * Метод для отправки сообщения пользователю бота с использованием Telegram API
+     * @param chatId идентификатор пользователя
+     * @param textToSend отправляемый текст
+     * @throws IOException
+     */
+    public static void sendToTelegram(Long chatId, String textToSend) {
 
+        String urlString = "https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s";
+        String apiToken = resource.getString("botToken");
+
+        urlString = String.format(urlString, apiToken, chatId, textToSend);
+
+        try {
+            URL url = new URL(urlString);
+            URLConnection urlConnection = url.openConnection();
+            InputStream inputStream = new BufferedInputStream(urlConnection.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
