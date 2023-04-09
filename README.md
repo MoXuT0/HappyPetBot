@@ -1,14 +1,16 @@
-## HappyDogBot ##
+[![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Montserrat&weight=600&size=25&color=010304&background=FFFFFF00&center=%D0%9B%D0%9E%D0%96%D0%AC&vCenter=%D0%9B%D0%9E%D0%96%D0%AC&width=435&lines=HappyDogBot)](https://git.io/typing-svg) 
 
 Телеграмм-бот, который  отвечает на популярные вопросы людей о том, что нужно знать и уметь, чтобы забрать животное из приюта.
 
+
 ## Команда разработчиков: <br>
 [Дмитрий Лунев](https://github.com/dvlunev)<br>
-[Максим Лисицин](https://github.com/Maximfsda)<br>
 [Софья Беседина](https://github.com/sofibesedina444)<br>
+[Тамара Золотовская](https://github.com/TamaraZolotovskaya)<br>
 [Роман Леонтьев](https://github.com/LeoRoA)<br>
 [Денис Фисенко](https://github.com/MoXuT0)<br>
-[Тамара Золотовская](https://github.com/TamaraZolotovskaya)<br>
+[Максим Лисицин](https://github.com/Maximfsda)<br>
+
 
 ## Технологии в проекте ##
 ![IntelliJ IDEA](https://img.shields.io/badge/IntelliJIDEA-000000.svg?style=for-the-badge&logo=intellij-idea&logoColor=white) ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=java&logoColor=white) ![Apache Maven](https://img.shields.io/badge/Apache%20Maven-C71A36?style=for-the-badge&logo=Apache%20Maven&logoColor=white) ![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white) 
