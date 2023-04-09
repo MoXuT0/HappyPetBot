@@ -106,7 +106,7 @@ public class Bot extends TelegramLongPollingBot {
                 // отправляем сообщение пользователю
             } else if (REQUEST_GET_REPLY_FROM_USER.contains(chatId)) {
                 sendMessageWithInlineKeyboard(update.getMessage().getChatId(), MESSAGE_TEXT_NO_REPORT_PHOTO, REPORT_EXAMPLE, SEND_REPORT);
-            } else talkWithVolunteerOrNoSuchCommand(chatId, update);
+            } else talkWithVolunteerOrNoSuchCommand(update);
 
         } else if (update.hasCallbackQuery()) {
             String messageData = update.getCallbackQuery().getData();
@@ -447,7 +447,7 @@ public class Bot extends TelegramLongPollingBot {
      * @param chatId    идентификатор чата пользователя, который позвал волонтера и написал сообщение волонтеру
      * @param messageId идентификатор пересылаемого волонтеру сообщения
      */
-    private void forwardMessageToVolunteer(long chatId, int messageId) {
+    public void forwardMessageToVolunteer(long chatId, int messageId) {
         ForwardMessage forwardMessage = new ForwardMessage(String.valueOf(config.getVolunteerChatId()), String.valueOf(chatId), messageId);
         try {
             execute(forwardMessage);
@@ -466,11 +466,10 @@ public class Bot extends TelegramLongPollingBot {
      * {@link #forwardMessageToVolunteer(long chatId, int messageId)}<br>
      * {@link #sendMessage(long chatId, String textToSend)}
      *
-     * @param chatId идентификатор чата пользователя, который позвал волонтера и написал сообщение волонтеру,
-     *               либо волонтера, которы ответил пользователю
      * @param update принятое текстовое сообщение пользователя<br>
      */
-    private void talkWithVolunteerOrNoSuchCommand(long chatId, Update update) {
+    public void talkWithVolunteerOrNoSuchCommand(Update update) {
+        long chatId = update.getMessage().getChatId();
         if (REQUEST_FROM_USER.containsValue(chatId)) {
             // Если в мапе уже есть chatId того кто написал боту, то есть продолжается общение с волонтером,
             // то удаляем предыдущее сообщение и записываем новое сообщение, отправляем сообщение волонтеру

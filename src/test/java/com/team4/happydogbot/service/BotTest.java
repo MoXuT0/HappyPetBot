@@ -1,9 +1,8 @@
 package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.config.BotConfig;
-
-import com.team4.happydogbot.replies.Reply;
 import com.team4.happydogbot.entity.*;
+import com.team4.happydogbot.replies.Reply;
 import com.team4.happydogbot.repository.AdopterCatRepository;
 import com.team4.happydogbot.repository.AdopterDogRepository;
 import com.team4.happydogbot.repository.ReportCatRepository;
@@ -13,21 +12,23 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.internal.verification.Times;
-
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.team4.happydogbot.constants.BotCommands.*;
 import static com.team4.happydogbot.constants.BotReplies.*;
 import static com.team4.happydogbot.entity.Status.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
@@ -51,7 +52,6 @@ public class BotTest {
     private AdopterCatRepository adopterCatRepository;
     @Mock
     private AdopterDogRepository adopterDogRepository;
-
     @Mock
     private ReportDogRepository reportDogRepository;
     @Mock
@@ -60,7 +60,6 @@ public class BotTest {
     private AdopterDogService adopterDogService;
     @Mock
     private ReportCatRepository reportCatRepository;
-
     @Spy
     @InjectMocks
     private Bot bot;
@@ -87,7 +86,7 @@ public class BotTest {
 
         List<SendMessage> actual = argumentCaptor.getAllValues();
         assertThat(actual.get(0).getChatId()).isEqualTo(update.getMessage().getChatId().toString());
-        assertThat(actual.get(0).getText()).isEqualTo("User"+MESSAGE_TEXT_GREETINGS);
+        assertThat(actual.get(0).getText()).isEqualTo("User" + MESSAGE_TEXT_GREETINGS);
         assertThat(actual.get(1).getText()).isEqualTo(MESSAGE_TEXT_CHOOSE_SHELTER);
     }
 
@@ -166,7 +165,6 @@ public class BotTest {
      * со статусом PROBATION и датой изменеия статуса 31 день назад от текущей даты.<br>
      * Кол-во вызовов метода <b>sendMessageWithInlineKeyboard</b> равно 1.
      */
-
     @Test
     @DisplayName("Проверка отправки по расписанию при наличии кошачих усыновителей с необходимым статусом")
     public void testSendFinishListForCatVolunteer() throws Exception {
@@ -237,7 +235,6 @@ public class BotTest {
      * - проверка <b>assertThat</b> успешного иземенения статуса усыновителя на <b>ADDITIONAL_PERIOD_14</b>;<br>
      * - кол-во вызовов метода <b>sendMessage</b> равно 2.
      */
-
     @Test
     @DisplayName("Проверка смены статуса собачьего усыновителя")
     public void testChangeDogAdopterStatus() throws Exception {
@@ -275,7 +272,6 @@ public class BotTest {
      * - проверка <b>assertThat</b> успешного иземенения статуса усыновителя на <b>ADDITIONAL_PERIOD_14</b>;<br>
      * - кол-во вызовов метода <b>sendMessage</b> равно 2.
      */
-
     @Test
     @DisplayName("Проверка смены статуса кошачьего усыновителя")
     public void testChangeCatAdopterStatus() throws Exception {
@@ -468,6 +464,12 @@ public class BotTest {
                 .sendMessage(anyLong(), eq(MESSAGE_ATTENTION_REPORT));
     }
 
+    /**
+     * Тестирование метода <b>getReport()</b> в Bot, если картинка отправлена как фото<br>
+     * Mockito: когда вызывается метод <b>adopterDogRepository::findAdopterDogByChatId</b>,
+     * возвращается необходимый усыновитель собак <b>adopterDog</b>
+     * - проверка <b>assertThat</b> успешного сохранения отчета по всем полям
+     */
     @Test
     @DisplayName("Проверка сохранения отчета, если фото отправлено как фото")
     public void getReportDogTestAsPhoto() {
@@ -503,6 +505,12 @@ public class BotTest {
         Assertions.assertThat(actual.getAdopterDog()).isEqualTo(expected.getAdopterDog());
     }
 
+    /**
+     * Тестирование метода <b>getReport()</b> в Bot, если картинка отправлена как фото<br>
+     * Mockito: когда вызывается метод <b>adopterDogRepository::findAdopterDogByChatId</b>,
+     * возвращается необходимый усыновитель собак <b>adopterDog</b>
+     * - проверка <b>assertThat</b> успешного сохранения отчета по всем полям
+     */
     @Test
     @DisplayName("Проверка сохранения отчета, если фото отправлено как документ")
     public void getReportCatTestAsDocument() {
@@ -536,6 +544,9 @@ public class BotTest {
         Assertions.assertThat(actual.getAdopterCat()).isEqualTo(expected.getAdopterCat());
     }
 
+    /**
+     * Тестирование метода <b>getReport()</b> в Bot, если подпись к фото не прошла валидацию<br>
+     */
     @Test
     @DisplayName("Проверка сохранения отчета, если подпись к фото не прошла валидацию - отчет на сохранен")
     public void getReportTestWithIncorrectCaption() {
@@ -548,6 +559,12 @@ public class BotTest {
         bot.getReport(update, true);
     }
 
+    /**
+     * Тестирование метода <b>changeUserStatusOfShelter()</b> в Bot, если новый пользователь выбрал приют для собак<br>
+     * Mockito: когда вызывается метод <b>adopterDogRepository::findAdopterDogByChatId</b> возвращается <b>null</b>
+     * , когда вызывается метод <b>adopterCatRepository::findAdopterCatByChatId</b> возвращается <b>null</b>
+     * - проверка <b>assertThat</b> успешного изменения статуса у усыновителя
+     */
     @Test
     @DisplayName("Проверка изменения статуса пользователя на приют для собак, новый пользователь")
     public void changeUserStatusOfShelterToDogNewUserTest() {
@@ -569,6 +586,12 @@ public class BotTest {
         Assertions.assertThat(actualAdopter.isDog()).isEqualTo(expectedDog.isDog());
     }
 
+    /**
+     * Тестирование метода <b>changeUserStatusOfShelter()</b> в Bot, если пользователь был в приюте для кошек и выбрал приют для собак<br>
+     * Mockito: когда вызывается метод <b>adopterDogRepository::findAdopterDogByChatId</b> возвращается <b>null</b>
+     * , когда вызывается метод <b>adopterCatRepository::findAdopterCatByChatId</b> возвращается усыновитель кошек <b>adopterCat</b>
+     * - проверка <b>assertThat</b> успешного изменения статуса у усыновителя
+     */
     @Test
     @DisplayName("Проверка изменения статуса пользователя на приют для собак, пользователь уже был в приюте кошек")
     public void changeUserStatusOfShelterToDogWhenWasCatTest() {
@@ -600,6 +623,12 @@ public class BotTest {
         Assertions.assertThat(actualAdopterCat.isDog()).isEqualTo(expectedCat.isDog());
     }
 
+    /**
+     * Тестирование метода <b>changeUserStatusOfShelter()</b> в Bot, если новый пользователь выбрал приют для кошек<br>
+     * Mockito: когда вызывается метод <b>adopterDogRepository::findAdopterDogByChatId</b> возвращается <b>null</b>
+     * , когда вызывается метод <b>adopterCatRepository::findAdopterCatByChatId</b> возвращается <b>null</b>
+     * - проверка <b>assertThat</b> успешного изменения статуса у усыновителя
+     */
     @Test
     @DisplayName("Проверка изменения статуса пользователя на приют для кошек, новый пользователь")
     public void changeUserStatusOfShelterToCatNewUserTest() {
@@ -621,6 +650,12 @@ public class BotTest {
         Assertions.assertThat(actualAdopter.isDog()).isEqualTo(expectedCat.isDog());
     }
 
+    /**
+     * Тестирование метода <b>changeUserStatusOfShelter()</b> в Bot, если пользователь был в приюте для собак и выбрал приют для кошек<br>
+     * Mockito: когда вызывается метод <b>adopterDogRepository::findAdopterDogByChatId</b> возвращается усыновитель собак <b>adopterDog</b>
+     * , когда вызывается метод <b>adopterCatRepository::findAdopterCatByChatId</b> возвращается <b>null</b>
+     * - проверка <b>assertThat</b> успешного изменения статуса у усыновителя
+     */
     @Test
     @DisplayName("Проверка изменения статуса пользователя на приют для кошек, пользователь уже был в приюте собак")
     public void changeUserStatusOfShelterToCatWhenWasDogTest() {
@@ -652,4 +687,44 @@ public class BotTest {
         Assertions.assertThat(actualAdopterCat.isDog()).isEqualTo(expectedCat.isDog());
     }
 
+    /**
+     * Тестирование метода <b>forwardMessageToVolunteer()</b> в Bot<br>
+     * - проверка <b>assertThat</b> успешного перенаправления сообщения пользователю
+     */
+    @Test
+    @DisplayName("Проверка метода пересылки сообщения волонтеру от пользователя")
+    public void forwardMessageToVolunteerTest() throws TelegramApiException {
+        Long chatId = 123L;
+        int messageId = 456;
+
+        bot.forwardMessageToVolunteer(chatId,messageId);
+
+        ArgumentCaptor<ForwardMessage> argumentCaptor = ArgumentCaptor.forClass(ForwardMessage.class);
+        verify(bot).execute(argumentCaptor.capture());
+        ForwardMessage actual = argumentCaptor.getValue();
+        assertThat(actual.getFromChatId()).isEqualTo(chatId.toString());
+        assertThat(actual.getMessageId()).isEqualTo(messageId);
+    }
+
+    /**
+     * Тестирование метода <b>talkWithVolunteerOrNoSuchCommand()</b> в Bot<br>
+     * - проверка <b>assertThat</b> успешного направления сообщения пользователю что нет такой команды
+     */
+    @Test
+    @DisplayName("Проверка метода разговора с волонтером, нет такой команды")
+    public void talkWithVolunteerOrNoSuchCommandTest() throws TelegramApiException {
+        Update update = new Update();
+        update.setMessage(new Message());
+        update.getMessage().setChat(new Chat());
+        update.getMessage().getChat().setId(123L);
+        update.getMessage().setText("Test message");
+
+        bot.talkWithVolunteerOrNoSuchCommand(update);
+
+        ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(bot).execute(argumentCaptor.capture());
+        SendMessage actual = argumentCaptor.getValue();
+        assertThat(actual.getChatId()).isEqualTo("123");
+        assertThat(actual.getText()).isEqualTo("Нет такой команды");
+    }
 }

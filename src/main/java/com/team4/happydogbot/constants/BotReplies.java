@@ -174,16 +174,14 @@ public class BotReplies {
             "- Ваш отчет не должен быть слишком коротким, но и расписывать подробности до мелочей тоже не нужно, " +
             "длина текста каждого блока должна составлять от 50 до 300 символов.";
 
-    public static final String URL_DOG_REPORT_EXAMPLE_PHOTO = "https://images.app.goo.gl/FZnFVwMjAQVAJfjq9";
-//    public static final String URL_DOG_REPORT_EXAMPLE_PHOTO = "https://github.com/TamaraZolotovskaya/HappyDogBot/raw/dev/src/main/resources/static/Dog_report_example_photo.jpeg";
+    public static final String URL_DOG_REPORT_EXAMPLE_PHOTO = "https://raw.githubusercontent.com/TamaraZolotovskaya/HappyDogBot/dev/src/main/resources/static/Dog_report_example_photo.jpeg";
 
     public static final String MESSAGE_DOG_REPORT_EXAMPLE =
             "Рацион: Шарик кушает прекрасно, утром чаппи из пакетика, днем сухой корм, вечером лакомство, налитую водичку за день выпивает полностью" +
-            ";\nСамочувствие: Шарик очень активно бегает, прыгает, просит с ним поиграть, к новому месту адаптировался быстро, занет где его место" +
-            ";\nПоведение: Шарик изучил дом, знает где свое место, ночью спит там, перестал лаять на членов семьи";
+                    ";\nСамочувствие: Шарик очень активно бегает, прыгает, просит с ним поиграть, к новому месту адаптировался быстро, занет где его место" +
+                    ";\nПоведение: Шарик изучил дом, знает где свое место, ночью спит там, перестал лаять на членов семьи";
 
-    public static final String URL_CAT_REPORT_EXAMPLE_PHOTO = "https://images.app.goo.gl/YJsNy2wAZ5XKKAyH7";
-//    public static final String URL_CAT_REPORT_EXAMPLE_PHOTO = "https://github.com/TamaraZolotovskaya/HappyDogBot/raw/dev/src/main/resources/static/Dog_report_example_photo.jpeg";
+    public static final String URL_CAT_REPORT_EXAMPLE_PHOTO = "https://raw.githubusercontent.com/TamaraZolotovskaya/HappyDogBot/dev/src/main/resources/static/Cat_report_example_photo.jpeg";
 
     public static final String MESSAGE_CAT_REPORT_EXAMPLE =
             "Рацион: <i>Мурзик кушает прекрасно, утром вискас из пакетика, днем сухой корм, вечером лакомство, налитую водичку за день выпивает полностью</i>" +

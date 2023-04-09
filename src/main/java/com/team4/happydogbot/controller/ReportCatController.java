@@ -31,8 +31,6 @@ public class ReportCatController {
 
     private final ReportCatService reportCatService;
 
-    private static final String FILE_TYPE = "image/jpeg";
-
     public ReportCatController(ReportCatService reportCatService) {
         this.reportCatService = reportCatService;
     }
@@ -145,7 +143,7 @@ public class ReportCatController {
     public ResponseEntity<byte[]> getPhoto(@Parameter (description = "report id") @PathVariable Long id) {
         ReportCat reportCat = this.reportCatService.get(id);
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType(FILE_TYPE));
+        headers.setContentType(MediaType.IMAGE_JPEG);
         headers.setContentLength(reportCat.getFileId().length());
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\"ReportPhoto.jpg\"")

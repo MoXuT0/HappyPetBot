@@ -18,7 +18,6 @@ import java.util.Collection;
 @Service
 public class AdopterDogService {
     private final AdopterDogRepository adopterDogRepository;
-    private Bot bot;
 
     public AdopterDogService(AdopterDogRepository adopterDogRepository) {
         this.adopterDogRepository = adopterDogRepository;
@@ -105,14 +104,5 @@ public class AdopterDogService {
 
         return this.adopterDogRepository.findAll();
     }
-
-//    public boolean send(Long chatId) {
-//        log.info("Was invoked method to get all adoptersDod");
-//        if (adopterDogRepository.existsById(chatId)) {
-//            bot.sendMessage(chatId, SEND_ATTENTION);
-//            return true;
-//        }
-//        throw new AdopterDogNotFoundException();
-//    }
 }
 
