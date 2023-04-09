@@ -226,14 +226,14 @@ public class AdopterDogServiceTest {
         expectedTest1.setReportDate(LocalDate.of(2023, 3, 24));
         expectedTest1.setFileId("Test124578");
         expectedTest1.setCaption("Рацион: гуд; Самочувствие: гуд; Поведение: гуд");
-        expectedTest1.setExamination(null);
+        expectedTest1.setExamination(ExaminationStatus.UNCHECKED);
 
         ReportDog expectedTest2 = new ReportDog();
         expectedTest2.setId(2L);
         expectedTest2.setReportDate(LocalDate.of(2023, 3, 24));
         expectedTest2.setFileId("Test986532");
         expectedTest2.setCaption("Рацион: гуд; Самочувствие: гуд; Поведение: гуд");
-        expectedTest2.setExamination(true);
+        expectedTest2.setExamination(ExaminationStatus.ACCEPTED);
 
         List<ReportDog> reportDogs = new ArrayList<>();
         reportDogs.add(expectedTest1);

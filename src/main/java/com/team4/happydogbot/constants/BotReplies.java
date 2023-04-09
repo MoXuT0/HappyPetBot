@@ -1,7 +1,6 @@
 package com.team4.happydogbot.constants;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 public class BotReplies {
 
@@ -180,8 +179,8 @@ public class BotReplies {
 
     public static final String MESSAGE_DOG_REPORT_EXAMPLE =
             "Рацион: Шарик кушает прекрасно, утром чаппи из пакетика, днем сухой корм, вечером лакомство, налитую водичку за день выпивает полностью" +
-            "; Самочувствие: Шарик очень активно бегает, прыгает, просит с ним поиграть, к новому месту адаптировался быстро, занет где его место" +
-            "; Поведение: Шарик изучил дом, знает где свое место, ночью спит там, перестал лаять на членов семьи";
+            ";\nСамочувствие: Шарик очень активно бегает, прыгает, просит с ним поиграть, к новому месту адаптировался быстро, занет где его место" +
+            ";\nПоведение: Шарик изучил дом, знает где свое место, ночью спит там, перестал лаять на членов семьи";
 
     public static final String URL_CAT_REPORT_EXAMPLE_PHOTO = "https://images.app.goo.gl/YJsNy2wAZ5XKKAyH7";
 //    public static final String URL_CAT_REPORT_EXAMPLE_PHOTO = "https://github.com/TamaraZolotovskaya/HappyDogBot/raw/dev/src/main/resources/static/Dog_report_example_photo.jpeg";
@@ -195,6 +194,7 @@ public class BotReplies {
     public static final String MESSAGE_TEXT_NO_REPORT_TEXT = "Вы отправили только фото, необходимо добавить подпись к фото с текстом отчета по шаблону";
 
     public static final String MESSAGE_TEXT_NO_REPORT_PHOTO = "Вы отправили только текст, необходимо добавить фото с подписью - текстом отчета по шаблону";
+    public static final String MESSAGE_ATTENTION_REPORT = "Не забудьте сегодня направить отчет";
 
     public static final String MESSAGE_TEXT_NOT_LIKE_EXAMPLE = "Текст отчета не соответствует шаблону, пожалуйста заполните текст отчета по образцу";
 
