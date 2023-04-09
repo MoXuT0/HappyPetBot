@@ -89,13 +89,13 @@ private Reply reply = new Reply(bot);
         assertThat(actual.get(1).getText()).isEqualTo(MESSAGE_TEXT_CHOOSE_SHELTER);
     }
 
+    /**
      * Тестирование метода <b>sendFinishListForDogVolunteer()</b> в Bot<br>
      * Mockito: когда вызывается метод <b>AdopterDogRepository::findAll</b>,
      * возвращается список содержащий 1 усыновителя собаки <b>expected</b>
      * со статусом PROBATION и датой изменеия статуса 31 день назад от текущей даты.<br>
      * Кол-во вызовов метода <b>sendMessageWithInlineKeyboard</b> равно 1.
      */
-
     @Test
     @DisplayName("Проверка отправки по расписанию при наличии собачьих усыновителей с необходимым статусом")
     public void testSendFinishListForDogVolunteer() throws Exception {
