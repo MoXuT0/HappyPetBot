@@ -217,25 +217,4 @@ public class AdopterDogController {
         }
         return ResponseEntity.notFound().build();
     }
-
-//    @Operation(summary = "Отправка напоминания",
-//            responses = {
-//                    @ApiResponse(
-//                            responseCode = "200",
-//                            description = "Напоминание отправлено",
-//                            content = @Content(
-//                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-//                                    schema = @Schema(implementation = AdopterDog.class)
-//                            )
-//                    )
-//            }
-//    )
-//    @GetMapping("/{chatId}")
-//@MiddleHandler
-//    public ResponseEntity<Void> sendAttention(@PathVariable Long chatId) {
-//        if (adopterDogService.send(chatId)) {
-//            return ResponseEntity.ok().build();
-//        }
-//        return ResponseEntity.notFound().build();
-//    }
 }
