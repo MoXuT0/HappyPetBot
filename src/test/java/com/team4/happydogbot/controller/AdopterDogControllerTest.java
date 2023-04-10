@@ -262,7 +262,7 @@ public class AdopterDogControllerTest {
 
         when(adopterDogService.get(chatId)).thenReturn(expected);
 
-        mockMvc.perform(get("/send_message")
+        mockMvc.perform(get("/adopter_dog/send_message")
                         .param("chatId", String.valueOf(chatId))
                         .param("textToSend", textToSend))
                 .andExpect(status().isOk());
@@ -275,7 +275,7 @@ public class AdopterDogControllerTest {
         String textToSend = "Hello, world!";
         when(adopterDogService.get(chatId)).thenReturn(null);
 
-        mockMvc.perform(get("/send_message")
+        mockMvc.perform(get("/adopter_dog/send_message")
                         .param("chatId", String.valueOf(chatId))
                         .param("textToSend", textToSend))
                 .andExpect(status().isNotFound());

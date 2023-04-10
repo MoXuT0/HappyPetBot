@@ -5,11 +5,9 @@ import com.team4.happydogbot.entity.AdopterCat;
 import com.team4.happydogbot.entity.Status;
 import com.team4.happydogbot.exception.AdopterCatNotFoundException;
 import com.team4.happydogbot.service.AdopterCatService;
-import com.team4.happydogbot.service.Bot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,7 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Arrays;
 
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -264,7 +262,7 @@ public class AdopterCatControllerTest {
 
         when(adopterCatService.get(chatId)).thenReturn(expected);
 
-        mockMvc.perform(get("/send_message")
+        mockMvc.perform(get("/adopter_cat/send_message")
                         .param("chatId", String.valueOf(chatId))
                         .param("textToSend", textToSend))
                 .andExpect(status().isOk());
@@ -277,7 +275,7 @@ public class AdopterCatControllerTest {
         String textToSend = "Hello, world!";
         when(adopterCatService.get(chatId)).thenReturn(null);
 
-        mockMvc.perform(get("/send_message")
+        mockMvc.perform(get("/adopter_cat/send_message")
                         .param("chatId", String.valueOf(chatId))
                         .param("textToSend", textToSend))
                 .andExpect(status().isNotFound());
