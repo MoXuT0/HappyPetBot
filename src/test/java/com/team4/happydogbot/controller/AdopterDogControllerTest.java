@@ -256,7 +256,7 @@ public class AdopterDogControllerTest {
 
     @Test
     @DisplayName("Проверка получения статуса 200 при отправке сообщения пользователю")
-    public void sendToTelegram200() throws Exception {
+    public void sendMessageWithValidChatId() throws Exception {
         Long chatId = expected.getChatId();
         String textToSend = "Hello, world!";
 
@@ -270,7 +270,7 @@ public class AdopterDogControllerTest {
 
     @Test
     @DisplayName("Проверка получения статуса 404 при отправке сообщения пользователю которого не существует")
-    public void testSendMessageWithInvalidChatId() throws Exception {
+    public void sendMessageWithInvalidChatId() throws Exception {
         Long chatId = anyLong();
         String textToSend = "Hello, world!";
         when(adopterDogService.get(chatId)).thenReturn(null);
