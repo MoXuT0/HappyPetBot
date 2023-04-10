@@ -8,6 +8,7 @@ import com.team4.happydogbot.repository.AdopterCatRepository;
 import com.team4.happydogbot.repository.AdopterDogRepository;
 import com.team4.happydogbot.repository.ReportCatRepository;
 import com.team4.happydogbot.repository.ReportDogRepository;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -42,9 +43,10 @@ import static com.team4.happydogbot.entity.Status.*;
 
 @Slf4j
 @Service
+@NoArgsConstructor
 public class Bot extends TelegramLongPollingBot {
 
-    private final BotConfig config;
+    private BotConfig config;
 
     private static final ResourceBundle resource = ResourceBundle.getBundle("application");
 
