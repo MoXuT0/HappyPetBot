@@ -9,8 +9,6 @@
 [Тамара Золотовская](https://github.com/TamaraZolotovskaya)<br>
 [Роман Леонтьев](https://github.com/LeoRoA)<br>
 [Денис Фисенко](https://github.com/MoXuT0)<br>
-[Максим Лисицин](https://github.com/Maximfsda)<br>
-
 
 ## Технологии в проекте ##
 ![IntelliJ IDEA](https://img.shields.io/badge/IntelliJIDEA-000000.svg?style=for-the-badge&logo=intellij-idea&logoColor=white) ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=java&logoColor=white) ![Apache Maven](https://img.shields.io/badge/Apache%20Maven-C71A36?style=for-the-badge&logo=Apache%20Maven&logoColor=white) ![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white) 
