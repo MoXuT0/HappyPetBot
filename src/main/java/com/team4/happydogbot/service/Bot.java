@@ -8,9 +8,7 @@ import com.team4.happydogbot.repository.AdopterCatRepository;
 import com.team4.happydogbot.repository.AdopterDogRepository;
 import com.team4.happydogbot.repository.ReportCatRepository;
 import com.team4.happydogbot.repository.ReportDogRepository;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -43,23 +41,19 @@ import static com.team4.happydogbot.entity.Status.*;
 
 @Slf4j
 @Service
-@NoArgsConstructor
 public class Bot extends TelegramLongPollingBot {
 
-    private BotConfig config;
+    private final BotConfig config;
 
-    private static final ResourceBundle resource = ResourceBundle.getBundle("application");
+    private final AdopterDogRepository adopterDogRepository;
 
-    private AdopterDogRepository adopterDogRepository;
+    private final AdopterCatRepository adopterCatRepository;
 
-    private AdopterCatRepository adopterCatRepository;
+    private final ReportDogRepository reportDogRepository;
+    private final ReportCatRepository reportCatRepository;
+    private final AdopterDogService adopterDogService;
+    private final AdopterCatService adopterCatService;
 
-    private ReportDogRepository reportDogRepository;
-    private ReportCatRepository reportCatRepository;
-    private AdopterDogService adopterDogService;
-    private AdopterCatService adopterCatService;
-
-    @Autowired
     public Bot(BotConfig config, AdopterDogRepository adopterDogRepository, AdopterCatRepository adopterCatRepository,
                ReportDogRepository reportDogRepository, ReportCatRepository reportCatRepository,
                AdopterDogService adopterDogService, AdopterCatService adopterCatService) {
@@ -72,11 +66,13 @@ public class Bot extends TelegramLongPollingBot {
         this.adopterCatService = adopterCatService;
     }
 
-    public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
+    public static final Map<String, Long> REQUEST_FROM_USER = new HashMap<>();
 
-    public static final HashSet<Long> REQUEST_GET_REPLY_FROM_USER = new HashSet<>();
+    public static final Set<Long> REQUEST_GET_REPLY_FROM_USER = new HashSet<>();
 
-    Reply reply = new Reply(this);
+    private final Reply reply = new Reply(this);
+
+    private static final ResourceBundle resource = ResourceBundle.getBundle("application");
 
     @Override
     public String getBotUsername() {
