@@ -2,6 +2,7 @@ package com.team4.happydogbot.controller;
 
 import com.team4.happydogbot.entity.AdopterDog;
 import com.team4.happydogbot.service.AdopterDogService;
+import com.team4.happydogbot.service.Bot;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -202,26 +203,18 @@ public class AdopterDogController {
         return this.adopterDogService.getAll();
     }
 
-//    @Operation(summary = "Отправка напоминания",
-//            responses = {
-//                    @ApiResponse(
-//                            responseCode = "200",
-//                            description = "Напоминание отправлено",
-//                            content = @Content(
-//                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-//                                    schema = @Schema(implementation = AdopterDog.class)
-//                            )
-//                    )
-//            }
-//    )
-//    @GetMapping("/{chatId}")
-//@MiddleHandler
-//    public ResponseEntity<Void> sendAttention(@PathVariable Long chatId) {
-//        if (adopterDogService.send(chatId)) {
-//            return ResponseEntity.ok().build();
-//        }
-//        return ResponseEntity.notFound().build();
-//    }
+    @GetMapping("/send_message")
+    @Operation(summary = "Отправка сообщения пользователю",
+            description = "Отправляет сообщение пользователю приюта через бота")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Сообщение отправлено"),
+            @ApiResponse(responseCode = "404", description = "Пользователь с таким chatId не найден"),
+    })
+    public ResponseEntity<Void> sendMessage(Long chatId, String textToSend) {
+        if (adopterDogService.get(chatId) != null) {
+            Bot.sendToTelegram(chatId, textToSend);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
 }
-
-

@@ -1,7 +1,6 @@
 package com.team4.happydogbot.config;
 
 import com.team4.happydogbot.service.Bot;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;

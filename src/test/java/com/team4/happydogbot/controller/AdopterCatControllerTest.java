@@ -253,4 +253,31 @@ public class AdopterCatControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(Arrays.asList(expected, expected1))));
     }
+
+    @Test
+    @DisplayName("Проверка получения статуса 200 при отправке сообщения пользователю")
+    public void sendMessageWithValidChatId() throws Exception {
+        Long chatId = expected.getChatId();
+        String textToSend = "Hello, world!";
+
+        when(adopterCatService.get(chatId)).thenReturn(expected);
+
+        mockMvc.perform(get("/adopter_cat/send_message")
+                        .param("chatId", String.valueOf(chatId))
+                        .param("textToSend", textToSend))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Проверка получения статуса 404 при отправке сообщения пользователю которого не существует")
+    public void sendMessageWithInvalidChatId() throws Exception {
+        Long chatId = anyLong();
+        String textToSend = "Hello, world!";
+        when(adopterCatService.get(chatId)).thenReturn(null);
+
+        mockMvc.perform(get("/adopter_cat/send_message")
+                        .param("chatId", String.valueOf(chatId))
+                        .param("textToSend", textToSend))
+                .andExpect(status().isNotFound());
+    }
 }

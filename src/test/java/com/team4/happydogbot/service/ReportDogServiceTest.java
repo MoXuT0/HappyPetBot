@@ -1,5 +1,6 @@
 package com.team4.happydogbot.service;
 
+import com.team4.happydogbot.config.BotConfig;
 import com.team4.happydogbot.entity.ExaminationStatus;
 import com.team4.happydogbot.entity.ReportDog;
 import com.team4.happydogbot.exception.ReportDogNotFoundException;
@@ -32,18 +33,22 @@ import static org.mockito.Mockito.when;
  */
 @ExtendWith(MockitoExtension.class)
 public class ReportDogServiceTest {
-
     @Mock
-    ReportDogRepository reportDogRepository;
-
+    private BotConfig botConfig;
+    @Mock
+    private ReportDogRepository reportDogRepository;
     @InjectMocks
-    ReportDogService reportDogService;
+    private ReportDogService reportDogService;
+    @Mock
+    private Bot bot;
 
     private final ReportDog expected = new ReportDog();
     private final ReportDog expected1 = new ReportDog();
 
     @BeforeEach
     public void setUp() {
+//        MockitoAnnotations.initMocks(this);
+
         expected.setId(1L);
         expected.setReportDate(LocalDate.of(2023, 3, 24));
         expected.setFileId("Test124578");

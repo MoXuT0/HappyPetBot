@@ -9,7 +9,6 @@ import com.team4.happydogbot.repository.AdopterDogRepository;
 import com.team4.happydogbot.repository.ReportCatRepository;
 import com.team4.happydogbot.repository.ReportDogRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -27,6 +26,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -38,22 +42,21 @@ import static com.team4.happydogbot.entity.Status.*;
 @Slf4j
 @Service
 public class Bot extends TelegramLongPollingBot {
-    private BotConfig config;
 
-    private AdopterDogRepository adopterDogRepository;
+    private final BotConfig config;
 
-    private AdopterCatRepository adopterCatRepository;
+    private final AdopterDogRepository adopterDogRepository;
 
-    private ReportDogRepository reportDogRepository;
-    private ReportCatRepository reportCatRepository;
-    private AdopterDogService adopterDogService;
-    private AdopterCatService adopterCatService;
+    private final AdopterCatRepository adopterCatRepository;
 
-    @Autowired
+    private final ReportDogRepository reportDogRepository;
+    private final ReportCatRepository reportCatRepository;
+    private final AdopterDogService adopterDogService;
+    private final AdopterCatService adopterCatService;
+
     public Bot(BotConfig config, AdopterDogRepository adopterDogRepository, AdopterCatRepository adopterCatRepository,
                ReportDogRepository reportDogRepository, ReportCatRepository reportCatRepository,
                AdopterDogService adopterDogService, AdopterCatService adopterCatService) {
-
         this.config = config;
         this.adopterDogRepository = adopterDogRepository;
         this.adopterCatRepository = adopterCatRepository;
@@ -63,16 +66,13 @@ public class Bot extends TelegramLongPollingBot {
         this.adopterCatService = adopterCatService;
     }
 
+    public static final Map<String, Long> REQUEST_FROM_USER = new HashMap<>();
 
-    public static final HashMap<String, Long> REQUEST_FROM_USER = new HashMap<>();
+    public static final Set<Long> REQUEST_GET_REPLY_FROM_USER = new HashSet<>();
 
-    public static final HashSet<Long> REQUEST_GET_REPLY_FROM_USER = new HashSet<>();
+    private final Reply reply = new Reply(this);
 
-    Reply reply = new Reply(this);
-
-    public Bot() {
-
-    }
+    private static final ResourceBundle resource = ResourceBundle.getBundle("application");
 
     @Override
     public String getBotUsername() {
@@ -106,7 +106,7 @@ public class Bot extends TelegramLongPollingBot {
                 // отправляем сообщение пользователю
             } else if (REQUEST_GET_REPLY_FROM_USER.contains(chatId)) {
                 sendMessageWithInlineKeyboard(update.getMessage().getChatId(), MESSAGE_TEXT_NO_REPORT_PHOTO, REPORT_EXAMPLE, SEND_REPORT);
-            } else talkWithVolunteerOrNoSuchCommand(chatId, update);
+            } else talkWithVolunteerOrNoSuchCommand(update);
 
         } else if (update.hasCallbackQuery()) {
             String messageData = update.getCallbackQuery().getData();
@@ -235,26 +235,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     /**
-     * Метод отправляет пользователю фото с подписью
-     *
-     * @param chatId  идентификатор пользователя
-     * @param fileUrl URL фото, фото должно храниться на сервере
-     */
-    public void sendPhotoWithCaption(long chatId, String caption, String fileUrl) {
-        SendPhoto sendPhoto = new SendPhoto();
-        sendPhoto.setChatId(String.valueOf(chatId));
-        sendPhoto.setCaption(caption);
-        sendPhoto.setPhoto(new InputFile(fileUrl));
-        sendPhoto.setParseMode(ParseMode.HTML);
-        try {
-            execute(sendPhoto);
-        } catch (TelegramApiException e) {
-            log.error("Error occurred: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Метод отправляет пользователю фото с подписью
+     * Метод отправляет пользователю фото с подписью и клавиатурой
      *
      * @param chatId   идентификатор пользователя
      * @param fileUrl  URL фото, фото должно храниться на сервере
@@ -466,7 +447,7 @@ public class Bot extends TelegramLongPollingBot {
      * @param chatId    идентификатор чата пользователя, который позвал волонтера и написал сообщение волонтеру
      * @param messageId идентификатор пересылаемого волонтеру сообщения
      */
-    private void forwardMessageToVolunteer(long chatId, int messageId) {
+    public void forwardMessageToVolunteer(long chatId, int messageId) {
         ForwardMessage forwardMessage = new ForwardMessage(String.valueOf(config.getVolunteerChatId()), String.valueOf(chatId), messageId);
         try {
             execute(forwardMessage);
@@ -474,23 +455,6 @@ public class Bot extends TelegramLongPollingBot {
             log.error("Error occurred: " + e.getMessage());
         }
     }
-
-//    /**
-//     * Изменяет текст существующего сообщения, обычно после нажатия пользователем кнопки InlineKeyboardMaker
-//     * @param chatId идентификатор чата пользователя, в котором произошло действие и происходит изменение текста сообщения
-//     * @param messageId идентификатор сообщения, которое изменяется
-//     */
-//    private void executeEditMessageText(long chatId, long messageId) {
-//        EditMessageText message = new EditMessageText();
-//        message.setChatId(String.valueOf(chatId));
-//        message.setText(TALK_ENDED);
-//        message.setMessageId((int) messageId);
-//        try {
-//            execute(message);
-//        } catch (TelegramApiException e) {
-//            log.error("Error occurred: " + e.getMessage());
-//        }
-//    }
 
     /**
      * Метод описывает состояние разговора с волонтером или отправка дефолтной команды, а именно:<br>
@@ -502,11 +466,10 @@ public class Bot extends TelegramLongPollingBot {
      * {@link #forwardMessageToVolunteer(long chatId, int messageId)}<br>
      * {@link #sendMessage(long chatId, String textToSend)}
      *
-     * @param chatId идентификатор чата пользователя, который позвал волонтера и написал сообщение волонтеру,
-     *               либо волонтера, которы ответил пользователю
      * @param update принятое текстовое сообщение пользователя<br>
      */
-    private void talkWithVolunteerOrNoSuchCommand(long chatId, Update update) {
+    public void talkWithVolunteerOrNoSuchCommand(Update update) {
+        long chatId = update.getMessage().getChatId();
         if (REQUEST_FROM_USER.containsValue(chatId)) {
             // Если в мапе уже есть chatId того кто написал боту, то есть продолжается общение с волонтером,
             // то удаляем предыдущее сообщение и записываем новое сообщение, отправляем сообщение волонтеру
@@ -688,7 +651,7 @@ public class Bot extends TelegramLongPollingBot {
      * по следующему алгоритму:<br>
      * - получение списка Adopter со статусом PROBATION, ADDITIONAL_PERIOD_14, ADDITIONAL_PERIOD_30;<br>
      * - получение для каждого Adopter из списка его отчетов последний отчет со статусом ACCEPTED или UNCHECKED;<br>
-     * - при отсуствии отчета генерируется отчет (без регистрации в БД) для фиксации StatusDate;<br>
+     * - при отсутствии отчета генерируется отчет (без регистрации в БД) для фиксации StatusDate;<br>
      * - отправка сообщения-уведомления волонтеру по итогу проверки на разницу 2 дня года между
      * текущей датой и дня года даты регистрации отчета со статусом ACCEPTED.<br>
      * - отправка сообщения-напоминания волонтеру по итогу проверки на разницу 1 день года между
@@ -779,8 +742,10 @@ public class Bot extends TelegramLongPollingBot {
      * @see Status
      * @see Scheduled
      */
+
     //для проверки рабоспособности cron = "30 * * * * *"
     @Scheduled(cron = "30 * * * * *")
+
     void sendFinishListForCatVolunteer() {
         List<AdopterCat> adoptersWithFinishProbationPeriod = adopterCatRepository.findAll().stream()
                 .filter(x -> (x.getState() == PROBATION || x.getState() == ADDITIONAL_PERIOD_30)
@@ -811,8 +776,7 @@ public class Bot extends TelegramLongPollingBot {
      */
     public void changeDogAdopterStatus(String botReplies, String messageText, Status status) {
 
-        String userName = messageText.split("chatId: ")[1];
-        Long chatId = Long.valueOf(userName);
+       Long chatId = Long.valueOf(messageText.split("chatId: ")[1]);
         AdopterDog adopterDog = adopterDogService.get(chatId);
         adopterDog.setState(status);
         //для проверки рабоспособности изменения даты использовать параметр LocalDate.now().minusDays(5)
@@ -837,8 +801,8 @@ public class Bot extends TelegramLongPollingBot {
      */
     void changeCatAdopterStatus(String botReplies, String messageText, Status status) {
 
-        String userName = messageText.split("chatId: ")[1];
-        Long chatId = Long.valueOf(userName);
+        
+        Long chatId = Long.valueOf(messageText.split("chatId: ")[1]);
         AdopterCat adopterCat = adopterCatService.get(chatId);
         adopterCat.setState(status);
         //для проверки работоспособности изменения даты использовать параметр LocalDate.now().minusDays(5)
@@ -849,5 +813,25 @@ public class Bot extends TelegramLongPollingBot {
         sendMessage(config.getVolunteerChatId(), "Для пользователя" + chatId + "выполнено:" + botReplies);
     }
 
+    /**
+     * Метод для отправки сообщения пользователю бота с использованием Telegram API
+     * @param chatId идентификатор пользователя
+     * @param textToSend отправляемый текст
+     * @throws IOException
+     */
+    public static void sendToTelegram(Long chatId, String textToSend) {
 
+        String urlString = "https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s";
+        String apiToken = resource.getString("botToken");
+
+        urlString = String.format(urlString, apiToken, chatId, textToSend);
+
+        try {
+            URL url = new URL(urlString);
+            URLConnection urlConnection = url.openConnection();
+            InputStream inputStream = new BufferedInputStream(urlConnection.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

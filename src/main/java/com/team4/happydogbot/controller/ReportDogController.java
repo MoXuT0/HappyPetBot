@@ -32,8 +32,6 @@ public class ReportDogController {
 
     private final ReportDogService reportDogService;
 
-    private static final String FILE_TYPE = "image/jpeg";
-
     public ReportDogController(ReportDogService reportDogService) {
         this.reportDogService = reportDogService;
     }
@@ -144,9 +142,9 @@ public class ReportDogController {
     )
     @GetMapping("/photo/{id}")
     public ResponseEntity<byte[]> getPhoto(@Parameter (description = "report id") @PathVariable Long id) {
-        ReportDog reportDog = this.reportDogService.get(id);
+        ReportDog reportDog = reportDogService.get(id);
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType(FILE_TYPE));
+        headers.setContentType(MediaType.IMAGE_JPEG);
         headers.setContentLength(reportDog.getFileId().length());
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\"ReportPhoto.jpg\"")

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -133,6 +134,35 @@ public class ReportCatControllerTest {
         mockMvc.perform(
                         get("/report_cat/{id}", exceptionReportCat.getId().toString()))
                 .andExpect(status().isNotFound());
+    }
+
+    /**
+     * Тестирование метода <b>getPhoto()</b> в ReportCatController
+     * <br>
+     * Mockito: когда вызывается метод <b>ReportCatService::get</b>,
+     * возвращается статус 200 и отчет о кошке <b>expected</b>
+     * Mockito: когда вызывается метод <b>ReportCatService::getFile</b>,
+     * возвращается статус 200 и байты файла <b>fileContent</b>
+     * @throws Exception
+     */
+    @Test
+    @DisplayName("Проверка получения статуса 200 и возвращения фото отчета о собаке при попытке его поиска по id")
+    public void getPhotoTest200() throws Exception {
+        Long id = expected.getId();
+        byte[] fileContent = "test photo file".getBytes();
+        ReportCat reportCat = new ReportCat();
+        reportCat.setId(id);
+        reportCat.setFileId(Arrays.toString(fileContent));
+
+        when(reportCatService.get(anyLong())).thenReturn(expected);
+        when(reportCatService.getFile(anyLong())).thenReturn(fileContent);
+
+        mockMvc.perform(
+                        get("/report_cat/photo/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"ReportPhoto.jpg\""))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, "application/octet-stream"))
+                .andExpect(content().bytes(fileContent));
     }
 
     /**
