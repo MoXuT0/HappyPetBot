@@ -575,7 +575,7 @@ public class BotTest {
         when(adopterDogRepository.findAdopterDogByChatId(any(Long.class))).thenReturn(null);
         when(adopterCatRepository.findAdopterCatByChatId(any(Long.class))).thenReturn(null);
         expectedDog.setChatId(chatId);
-        expectedDog.setDog(isDog);
+        expectedDog.setIsDog(isDog);
 
         bot.changeUserStatusOfShelter(chatId, isDog);
 
@@ -601,13 +601,13 @@ public class BotTest {
 
         AdopterCat adopterCat = new AdopterCat();
         adopterCat.setChatId(chatId);
-        adopterCat.setDog(false);
+        adopterCat.setIsDog(false);
         when(adopterDogRepository.findAdopterDogByChatId(any(Long.class))).thenReturn(null);
         when(adopterCatRepository.findAdopterCatByChatId(any(Long.class))).thenReturn(adopterCat);
         expectedDog.setChatId(chatId);
         expectedCat.setChatId(chatId);
-        expectedDog.setDog(isDog);
-        expectedCat.setDog(isDog);
+        expectedDog.setIsDog(isDog);
+        expectedCat.setIsDog(isDog);
 
         bot.changeUserStatusOfShelter(chatId, isDog);
 
@@ -639,7 +639,7 @@ public class BotTest {
         when(adopterDogRepository.findAdopterDogByChatId(any(Long.class))).thenReturn(null);
         when(adopterCatRepository.findAdopterCatByChatId(any(Long.class))).thenReturn(null);
         expectedCat.setChatId(chatId);
-        expectedCat.setDog(isDog);
+        expectedCat.setIsDog(isDog);
 
         bot.changeUserStatusOfShelter(chatId, isDog);
 
@@ -665,13 +665,13 @@ public class BotTest {
 
         AdopterDog adopterDog = new AdopterDog();
         adopterDog.setChatId(chatId);
-        adopterDog.setDog(true);
+        adopterDog.setIsDog(true);
         when(adopterDogRepository.findAdopterDogByChatId(any(Long.class))).thenReturn(adopterDog);
         when(adopterCatRepository.findAdopterCatByChatId(any(Long.class))).thenReturn(null);
         expectedDog.setChatId(chatId);
         expectedCat.setChatId(chatId);
-        expectedDog.setDog(isDog);
-        expectedCat.setDog(isDog);
+        expectedDog.setIsDog(isDog);
+        expectedCat.setIsDog(isDog);
 
         bot.changeUserStatusOfShelter(chatId, isDog);
 

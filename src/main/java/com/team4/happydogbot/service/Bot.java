@@ -510,10 +510,10 @@ public class Bot extends TelegramLongPollingBot {
                 adopterDog = new AdopterDog();
                 adopterDog.setChatId(chatId);
             }
-            adopterDog.setDog(true);
+            adopterDog.setIsDog(true);
             adopterDogRepository.save(adopterDog);
             if (adopterCat != null) {
-                adopterCat.setDog(true);
+                adopterCat.setIsDog(true);
                 adopterCatRepository.save(adopterCat);
             }
         } else {
@@ -521,10 +521,10 @@ public class Bot extends TelegramLongPollingBot {
                 adopterCat = new AdopterCat();
                 adopterCat.setChatId(chatId);
             }
-            adopterCat.setDog(false);
+            adopterCat.setIsDog(false);
             adopterCatRepository.save(adopterCat);
             if (adopterDog != null) {
-                adopterDog.setDog(false);
+                adopterDog.setIsDog(false);
                 adopterDogRepository.save(adopterDog);
             }
         }

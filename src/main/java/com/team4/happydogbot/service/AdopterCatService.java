@@ -2,8 +2,8 @@ package com.team4.happydogbot.service;
 
 import com.team4.happydogbot.entity.AdopterCat;
 import com.team4.happydogbot.exception.AdopterCatNotFoundException;
-import com.team4.happydogbot.exception.CatNotFoundException;
 import com.team4.happydogbot.repository.AdopterCatRepository;
+import com.team4.happydogbot.repository.CatRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -20,8 +20,11 @@ public class AdopterCatService {
 
     private final AdopterCatRepository adopterCatRepository;
 
-    public AdopterCatService(AdopterCatRepository adopterCatRepository) {
+    private final CatRepository catRepository;
+
+    public AdopterCatService(AdopterCatRepository adopterCatRepository, CatRepository catRepository) {
         this.adopterCatRepository = adopterCatRepository;
+        this.catRepository = catRepository;
     }
 
     /**
@@ -81,6 +84,7 @@ public class AdopterCatService {
             findAdopterCat.setAddress(adopterCat.getAddress());
             findAdopterCat.setTelephoneNumber(adopterCat.getTelephoneNumber());
             findAdopterCat.setState(adopterCat.getState());
+            findAdopterCat.setCat(catRepository.findById(adopterCat.getCat().getId()).get());
             return this.adopterCatRepository.save(findAdopterCat);
         }
         throw new AdopterCatNotFoundException();

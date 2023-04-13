@@ -3,6 +3,7 @@ package com.team4.happydogbot.service;
 import com.team4.happydogbot.entity.AdopterDog;
 import com.team4.happydogbot.exception.AdopterDogNotFoundException;
 import com.team4.happydogbot.repository.AdopterDogRepository;
+import com.team4.happydogbot.repository.DogRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +20,11 @@ import java.util.Collection;
 public class AdopterDogService {
     private final AdopterDogRepository adopterDogRepository;
 
-    public AdopterDogService(AdopterDogRepository adopterDogRepository) {
+    private final DogRepository dogRepository;
+
+    public AdopterDogService(AdopterDogRepository adopterDogRepository, DogRepository dogRepository) {
         this.adopterDogRepository = adopterDogRepository;
+        this.dogRepository = dogRepository;
     }
 
     /**
@@ -88,6 +92,7 @@ public class AdopterDogService {
             findAdopterDog.setAddress(adopterDog.getAddress());
             findAdopterDog.setTelephoneNumber(adopterDog.getTelephoneNumber());
             findAdopterDog.setState(adopterDog.getState());
+            findAdopterDog.setDog(dogRepository.findById(adopterDog.getDog().getId()).get());
             return this.adopterDogRepository.save(findAdopterDog);
         }
         throw new AdopterDogNotFoundException();

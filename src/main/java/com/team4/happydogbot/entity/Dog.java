@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.Objects;
 
 /**
  * Класс, описывающий обитателя собачьего приюта
@@ -31,8 +30,7 @@ public class Dog {
     private int yearOfBirth;
     @Column(name = "description")
     private String description;
-
-    @OneToOne(mappedBy = "dog")
+    @OneToOne(mappedBy = "dog", fetch = FetchType.EAGER)
     @JsonBackReference
     private AdopterDog adopterDog;
 
@@ -42,18 +40,5 @@ public class Dog {
         this.breed = breed;
         this.yearOfBirth = yearOfBirth;
         this.description = description;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Dog dog = (Dog) o;
-        return yearOfBirth == dog.yearOfBirth && Objects.equals(id, dog.id) && Objects.equals(name, dog.name) && Objects.equals(breed, dog.breed) && Objects.equals(description, dog.description) && Objects.equals(adopterDog, dog.adopterDog);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, breed, yearOfBirth, description, adopterDog);
     }
 }

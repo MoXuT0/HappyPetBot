@@ -74,7 +74,7 @@ public class AdopterDog {
         return isDog;
     }
 
-    public void setDog(boolean dog) {
+    public void setIsDog(boolean dog) {
         isDog = dog;
     }
 

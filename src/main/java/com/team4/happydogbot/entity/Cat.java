@@ -31,7 +31,7 @@ public class Cat {
     @Column(name = "description")
     private String description;
 
-    @OneToOne(mappedBy = "cat")
+    @OneToOne(mappedBy = "cat", fetch = FetchType.EAGER)
     @JsonBackReference
     private AdopterCat adopterCat;
 
