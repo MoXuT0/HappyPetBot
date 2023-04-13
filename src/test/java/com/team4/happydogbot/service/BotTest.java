@@ -90,6 +90,7 @@ public class BotTest {
         assertThat(actual.get(1).getText()).isEqualTo(MESSAGE_TEXT_CHOOSE_SHELTER);
     }
 
+
     /**
      * Тестирование метода <b>sendFinishListForDogVolunteer()</b> в Bot<br>
      * Mockito: когда вызывается метод <b>AdopterDogRepository::findAll</b>,
