@@ -75,6 +75,7 @@ public class AdopterCatService {
      */
     public AdopterCat update(AdopterCat adopterCat) {
         log.info("Was invoked method to update a adopterCat");
+
         if (adopterCat.getChatId() != null && get(adopterCat.getChatId()) != null) {
             AdopterCat findAdopterCat = get(adopterCat.getChatId());
             findAdopterCat.setFirstName(adopterCat.getFirstName());
@@ -84,6 +85,7 @@ public class AdopterCatService {
             findAdopterCat.setAddress(adopterCat.getAddress());
             findAdopterCat.setTelephoneNumber(adopterCat.getTelephoneNumber());
             findAdopterCat.setState(adopterCat.getState());
+            findAdopterCat.setStatusDate(adopterCat.getStatusDate());
             findAdopterCat.setCat(catRepository.findById(adopterCat.getCat().getId()).get());
             return this.adopterCatRepository.save(findAdopterCat);
         }

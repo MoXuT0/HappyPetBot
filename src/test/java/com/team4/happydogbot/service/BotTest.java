@@ -121,7 +121,7 @@ public class BotTest {
 
         Mockito.verify(bot, Mockito.times(1))
                 .sendMessageWithInlineKeyboard(0L,
-                        TAKE_DECISION + expected.getUserName(),
+                        TAKE_DECISION + expected.getUserName() + ", chatId: " + expected.getChatId(),
                         KEYBOARD_DECISION);
     }
 
@@ -188,7 +188,7 @@ public class BotTest {
 
         Mockito.verify(bot, Mockito.times(1))
                 .sendMessageWithInlineKeyboard(0L,
-                        TAKE_DECISION + expected.getUserName(),
+                        TAKE_DECISION + expected.getUserName() + ", chatId: " + expected.getChatId(),
                         KEYBOARD_DECISION);
     }
 

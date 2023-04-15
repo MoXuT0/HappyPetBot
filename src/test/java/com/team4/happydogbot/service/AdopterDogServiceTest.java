@@ -3,6 +3,7 @@ package com.team4.happydogbot.service;
 import com.team4.happydogbot.entity.*;
 import com.team4.happydogbot.exception.AdopterDogNotFoundException;
 import com.team4.happydogbot.repository.AdopterDogRepository;
+import com.team4.happydogbot.repository.DogRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,6 +36,9 @@ public class AdopterDogServiceTest {
     @Mock
     AdopterDogRepository adopterDogRepository;
 
+    @Mock
+    DogRepository dogRepository;
+
     @InjectMocks
     AdopterDogService adopterDogService;
 
@@ -51,6 +55,7 @@ public class AdopterDogServiceTest {
         expected.setAddress("МСК...");
         expected.setTelephoneNumber("7951...");
         expected.setState(Status.REGISTRATION);
+        expected.setDog(new Dog(1L,"Шарик", "Лабрадор", 2021, "Черно-белый"));
 
         expected1.setChatId(9876543210L);
         expected1.setFirstName("Petr");
@@ -132,6 +137,7 @@ public class AdopterDogServiceTest {
     public void updateAdopterDogTest() {
         when(adopterDogRepository.findById(any(Long.class))).thenReturn(Optional.of(expected));
         when(adopterDogRepository.save(any(AdopterDog.class))).thenReturn(expected);
+        when(dogRepository.findById(any(Long.class))).thenReturn(Optional.of(expected.getDog()));
 
         AdopterDog actual = adopterDogService.update(expected);
 
@@ -203,9 +209,9 @@ public class AdopterDogServiceTest {
     @Test
     @DisplayName("Проверка добавления собаки в качестве поля объекта усыновитель")
     public void updateFieldDogIdByAdopterCat() {
-        expected.setDog(new Dog(2L, "Sharik", "Buldog", 2018, "Test2"));
         when(adopterDogRepository.findById(any(Long.class))).thenReturn(Optional.of(expected));
         when(adopterDogRepository.save(any(AdopterDog.class))).thenReturn(expected);
+        when(dogRepository.findById(any(Long.class))).thenReturn(Optional.of(expected.getDog()));
 
         AdopterDog actual = adopterDogService.update(expected);
 
@@ -243,6 +249,7 @@ public class AdopterDogServiceTest {
 
         when(adopterDogRepository.findById(any(Long.class))).thenReturn(Optional.of(expected));
         when(adopterDogRepository.save(any(AdopterDog.class))).thenReturn(expected);
+        when(dogRepository.findById(any(Long.class))).thenReturn(Optional.of(expected.getDog()));
 
         AdopterDog actual = adopterDogService.update(expected);
 

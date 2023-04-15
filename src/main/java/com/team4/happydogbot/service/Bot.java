@@ -800,9 +800,7 @@ public class Bot extends TelegramLongPollingBot {
      * @see AdopterCat#setStatusDate(LocalDate)
      */
     void changeCatAdopterStatus(String botReplies, String messageText, Status status) {
-
-        
-        Long chatId = Long.valueOf(messageText.split("chatId: ")[1]);
+        Long chatId = Long.valueOf(messageText.split("сhatId: ")[1]);
         AdopterCat adopterCat = adopterCatService.get(chatId);
         adopterCat.setState(status);
         //для проверки работоспособности изменения даты использовать параметр LocalDate.now().minusDays(5)

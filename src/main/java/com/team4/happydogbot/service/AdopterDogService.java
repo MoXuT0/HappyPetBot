@@ -92,6 +92,7 @@ public class AdopterDogService {
             findAdopterDog.setAddress(adopterDog.getAddress());
             findAdopterDog.setTelephoneNumber(adopterDog.getTelephoneNumber());
             findAdopterDog.setState(adopterDog.getState());
+            findAdopterDog.setStatusDate(adopterDog.getStatusDate());
             findAdopterDog.setDog(dogRepository.findById(adopterDog.getDog().getId()).get());
             return this.adopterDogRepository.save(findAdopterDog);
         }

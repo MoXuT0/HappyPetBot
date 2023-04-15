@@ -3,6 +3,7 @@ package com.team4.happydogbot.service;
 import com.team4.happydogbot.entity.*;
 import com.team4.happydogbot.exception.AdopterCatNotFoundException;
 import com.team4.happydogbot.repository.AdopterCatRepository;
+import com.team4.happydogbot.repository.CatRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,6 +36,9 @@ public class AdopterCatServiceTest {
     @Mock
     AdopterCatRepository adopterCatRepository;
 
+    @Mock
+    CatRepository catRepository;
+
     @InjectMocks
     AdopterCatService adopterCatService;
 
@@ -51,6 +55,7 @@ public class AdopterCatServiceTest {
         expected.setAddress("МСК...");
         expected.setTelephoneNumber("7951...");
         expected.setState(Status.REGISTRATION);
+        expected.setCat(new Cat(1L,"Мурзик", "Сиамская", 2021, "Черно-белый"));
 
         expected1.setChatId(9876543210L);
         expected1.setFirstName("Petr");
@@ -132,6 +137,7 @@ public class AdopterCatServiceTest {
     public void updateAdopterCatTest() {
         when(adopterCatRepository.findById(any(Long.class))).thenReturn(Optional.of(expected));
         when(adopterCatRepository.save(any(AdopterCat.class))).thenReturn(expected);
+        when(catRepository.findById(any(Long.class))).thenReturn(Optional.of(expected.getCat()));
 
         AdopterCat actual = adopterCatService.update(expected);
 
@@ -206,6 +212,7 @@ public class AdopterCatServiceTest {
         expected.setCat(new Cat(1L, "Ponchik", "Bolinez", 2020, "Test1"));
         when(adopterCatRepository.findById(any(Long.class))).thenReturn(Optional.of(expected));
         when(adopterCatRepository.save(any(AdopterCat.class))).thenReturn(expected);
+        when(catRepository.findById(any(Long.class))).thenReturn(Optional.of(expected.getCat()));
 
         AdopterCat actual = adopterCatService.update(expected);
 
@@ -244,6 +251,7 @@ public class AdopterCatServiceTest {
 
         when(adopterCatRepository.findById(any(Long.class))).thenReturn(Optional.of(expected));
         when(adopterCatRepository.save(any(AdopterCat.class))).thenReturn(expected);
+        when(catRepository.findById(any(Long.class))).thenReturn(Optional.of(expected.getCat()));
 
         AdopterCat actual = adopterCatService.update(expected);
 
