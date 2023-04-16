@@ -694,7 +694,8 @@ public class Bot extends TelegramLongPollingBot {
                             + adopter.getFirstName() + " " + adopter.getLastName() + " chatID: " + adopter.getChatId());
                 } else if (LocalDate.now().getDayOfYear() - report.getReportDate().getDayOfYear() > 2) {
                     sendMessage(config.getVolunteerChatId(), "Внимание! Усыновитель " + adopter.getFirstName()
-                            + " " + adopter.getLastName() + " уже больше 2 дней не присылает отчеты!");
+                            + " " + adopter.getLastName() + ", username: " + adopter.getUserName()
+                            + ", chatId: " + adopter.getChatId() + " уже больше 2 дней не присылает отчеты!");
                 }
                 sendMessage(adopter.getChatId(), MESSAGE_ATTENTION_REPORT);
             }
@@ -799,8 +800,8 @@ public class Bot extends TelegramLongPollingBot {
      * @see AdopterCat#setState(Status)
      * @see AdopterCat#setStatusDate(LocalDate)
      */
-    void changeCatAdopterStatus(String botReplies, String messageText, Status status) {
-        Long chatId = Long.valueOf(messageText.split("сhatId: ")[1]);
+    public void changeCatAdopterStatus(String botReplies, String messageText, Status status) {
+        Long chatId = Long.valueOf(messageText.split("chatId: ")[1]);
         AdopterCat adopterCat = adopterCatService.get(chatId);
         adopterCat.setState(status);
         //для проверки работоспособности изменения даты использовать параметр LocalDate.now().minusDays(5)
