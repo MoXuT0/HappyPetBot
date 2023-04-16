@@ -179,7 +179,7 @@ public class ReportDogServiceTest {
      */
     @Test
     @DisplayName("Проверка поиска всех отчетов о собаках и возвращения из базы данных пустого списка")
-    public void getAllReportCatsTestReturnsEmpty() {
+    public void getAllReportDogsTestReturnsEmpty() {
         List<ReportDog> reportDogs = new ArrayList<>();
         when(reportDogRepository.findAll()).thenReturn(reportDogs);
         assertThat(reportDogService.getAll()).isEqualTo(reportDogs);

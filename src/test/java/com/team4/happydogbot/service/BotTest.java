@@ -239,7 +239,7 @@ public class BotTest {
     @Test
     @DisplayName("Проверка смены статуса собачьего усыновителя")
     public void testChangeDogAdopterStatus() throws Exception {
-        String messageText = "text: iiivanov";
+        String messageText = "chatId: 1";
         AdopterDog expected = new AdopterDog();
 
         expected.setChatId(1L);
@@ -250,8 +250,6 @@ public class BotTest {
         expected.setAddress("МСК...");
         expected.setTelephoneNumber("7951...");
         expected.setState(Status.REGISTRATION);
-
-        when(adopterDogRepository.findAll()).thenReturn(List.of(expected));
 
         when(adopterDogService.get(1L)).thenReturn(expected);
 
@@ -276,7 +274,7 @@ public class BotTest {
     @Test
     @DisplayName("Проверка смены статуса кошачьего усыновителя")
     public void testChangeCatAdopterStatus() throws Exception {
-        String messageText = "text: iiivanov";
+        String messageText = " chatId: 1";
         AdopterCat expected = new AdopterCat();
 
         expected.setChatId(1L);
@@ -287,8 +285,6 @@ public class BotTest {
         expected.setAddress("МСК...");
         expected.setTelephoneNumber("7951...");
         expected.setState(Status.REGISTRATION);
-
-        when(adopterCatRepository.findAll()).thenReturn(List.of(expected));
 
         when(adopterCatService.get(1L)).thenReturn(expected);
 
@@ -356,7 +352,7 @@ public class BotTest {
         report2.setCaption("Рацион: гуд; Самочувствие: гуд; Поведение: гуд");
         report2.setExamination(ExaminationStatus.ACCEPTED);
 
-        report3.setId(2L);
+        report3.setId(3L);
         report3.setAdopterDog(expected3);
         report3.setReportDate(LocalDate.now().minusDays(3));
         report3.setFileId("Test986532");
@@ -375,10 +371,12 @@ public class BotTest {
                         "Внимание! Необходимо проверить отчет у "
                                 + expected1.getFirstName() + " " + expected1.getLastName() + " chatID: " + expected1.getChatId());
 
-        Mockito.verify(bot, Mockito.times(1))
+        verify(bot, Mockito.times(1))
                 .sendMessage(0L, "Внимание! Усыновитель " + expected3.getFirstName()
-                        + " " + expected3.getLastName() + " уже больше 2 дней не присылает отчеты!");
-        Mockito.verify(bot, Mockito.times(3))
+                        + " " + expected3.getLastName() + ", username: " + expected3.getUserName()
+                        + ", chatId: " + expected3.getChatId() + " уже больше 2 дней не присылает отчеты!");
+
+        verify(bot, Mockito.times(3))
                 .sendMessage(anyLong(), eq(MESSAGE_ATTENTION_REPORT));
     }
 
@@ -453,14 +451,15 @@ public class BotTest {
 
         Thread.sleep(500);
 
-        Mockito.verify(bot, Mockito.times(1))
+        verify(bot, Mockito.times(1))
                 .sendMessage(0L,
                         "Внимание! Необходимо проверить отчет у "
                                 + expected1.getFirstName() + " " + expected1.getLastName() + " chatID: " + expected1.getChatId());
 
-        Mockito.verify(bot, Mockito.times(1))
+        verify(bot, Mockito.times(1))
                 .sendMessage(0L, "Внимание! Усыновитель " + expected3.getFirstName()
-                        + " " + expected3.getLastName() + " уже больше 2 дней не присылает отчеты!");
+                                + " " + expected3.getLastName() + ", username: " + expected3.getUserName()
+                                + ", chatId: " + expected3.getChatId() + " уже больше 2 дней не присылает отчеты!");
         Mockito.verify(bot, Mockito.times(3))
                 .sendMessage(anyLong(), eq(MESSAGE_ATTENTION_REPORT));
     }

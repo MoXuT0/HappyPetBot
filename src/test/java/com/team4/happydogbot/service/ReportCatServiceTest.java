@@ -50,7 +50,7 @@ public class ReportCatServiceTest {
         expected.setCaption("Рацион: гуд; Самочувствие: гуд; Поведение: гуд");
         expected.setExamination(ExaminationStatus.UNCHECKED);
 
-        expected1.setId(2L);
+        expected1.setId(1L);
         expected1.setReportDate(LocalDate.of(2023, 3, 24));
         expected1.setFileId("Test986532");
         expected1.setCaption("Рацион: гуд; Самочувствие: гуд; Поведение: гуд");
