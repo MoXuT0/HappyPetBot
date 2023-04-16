@@ -1,4 +1,4 @@
-[![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Montserrat&weight=600&size=25&color=010304&background=FFFFFF00&center=%D0%9B%D0%9E%D0%96%D0%AC&vCenter=%D0%9B%D0%9E%D0%96%D0%AC&width=435&lines=HappyDogBot)](https://git.io/typing-svg) 
+[![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Montserrat&weight=600&size=25&color=010304&background=FFFFFF00&center=%D0%9B%D0%9E%D0%96%D0%AC&vCenter=%D0%9B%D0%9E%D0%96%D0%AC&width=435&lines=HappyPetBot)](https://git.io/typing-svg) 
 
 Телеграмм-бот, который  отвечает на популярные вопросы людей о том, что нужно знать и уметь, чтобы забрать животное из приюта.
 
@@ -111,3 +111,4 @@ SQL:
 </details>
 
 ## Демонстрация работы Telegram бота ##
+Демострацию работы приложения можно найти [тут](https://github.com/TamaraZolotovskaya/HappyDogBot/blob/master/FourTeam_HappyPetBot.mp4)
